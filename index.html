@@ -1,116 +1,185 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HabitWise</title>
+<html>
+  <head>
+    <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+    <link href="https://unpkg.com/nes.css/css/nes.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+  </head>
+  <body>
 
-  <link
-    href="https://fonts.googleapis.com/css?family=Press+Start+2P"
-    rel="stylesheet"
-  />
-  <link
-    href="https://unpkg.com/nes.css/css/nes.min.css"
-    rel="stylesheet"
-  />
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <header class="topbar">
-    <div class="brand">HabitWise</div>
-    <nav class="nav-links">
-      <a href="#about">About</a>
-      <a href="#features">Features</a>
-      <a href="#challenges">Challenges</a>
-      <a href="#cta">Start</a>
-    </nav>
-  </header>
+    <!-- Transition Overlay -->
+    <div id="transition-overlay"></div>
 
-  <main class="page">
-    <section class="hero">
-      <div class="hero-left nes-container with-title">
-        <p class="title">Welcome</p>
-        <h1>Landing Page Title</h1>
-        <p>Hero text goes here.</p>
-        <div class="hero-buttons">
-          <a href="#" class="nes-btn is-success">Sign Up</a>
-          <a href="#" class="nes-btn is-primary">Log In</a>
-        </div>
+    <!-- Background Layer -->
+    <div id="bgLayer"></div>
+    
+
+    <!-- Title -->
+    <div id="screen-title"></div>
+
+    <!-- SCREEN 1: Signup -->
+    <div id="screen-signup">
+      <div class="nes-container with-title is-centered">
+        <p class="title">HabitWise</p>
+        <h2>Create Account</h2>
+
+        <label>Username</label>
+        <input class="nes-input" type="text" id="signup-username" placeholder="Enter Username">
+
+        <label>Email</label>
+        <input class="nes-input" type="text" id="signup-email" placeholder="Enter Email">
+
+        <label>Password</label>
+        <input class="nes-input" type="password" id="signup-password" placeholder="Enter Password">
+
+        <br><br>
+        <button class="nes-btn is-primary" onclick="handleSignUp()">Make The Oath</button>
+        <p>Already have an account? <a onclick="showScreen('screen-login')">Log in</a></p>
       </div>
+    </div>
 
-      <div class="hero-right nes-container is-dark with-title">
-        <p class="title">Preview</p>
-        <div class="character-box">
-          <p>Character / visual placeholder</p>
-        </div>
+    <!-- SCREEN 2: Login -->
+    <div id="screen-login" style="display:none;">
+      <div class="nes-container with-title is-centered">
+        <p class="title">HabitWise</p>
+        <h2>Welcome Back</h2>
+
+        <label>Username</label>
+        <input class="nes-input" type="text" id="login-username" placeholder="Enter Username">
+
+        <label>Password</label>
+        <input class="nes-input" type="password" id="login-password" placeholder="Enter Password">
+
+        <br><br>
+        <button class="nes-btn is-success" onclick="handleLogin()">Enter</button>
+        <p>No account yet? <a onclick="showScreen('screen-signup')">Sign up</a></p>
       </div>
-    </section>
+    </div>
 
-    <section id="about" class="info-section">
-      <div class="nes-container with-title">
-        <p class="title">About</p>
-        <p>About section placeholder</p>
+    <!-- SCREEN 3: Dialogue -->
+    <div id="screen-dialogue" style="display:none;">
+      <div id="dialogue-box" class="nes-container with-title is-centered" onclick="nextDialogue()">
+        <p class="title" id="dialogue-speaker"></p>
+        <p id="dialogue-text"></p>
+        <p style="text-align:right; font-size:0.6em;">▼</p>
       </div>
-    </section>
+    </div>
 
-    <section id="features" class="cards-section">
-      <h2 class="section-heading">Features</h2>
-      <div class="card-grid">
-        <div class="nes-container feature-card">
-          <h3>Feature 1</h3>
-          <p>Feature description placeholder</p>
-        </div>
-
-        <div class="nes-container feature-card">
-          <h3>Feature 2</h3>
-          <p>Feature description placeholder</p>
-        </div>
-
-        <div class="nes-container feature-card">
-          <h3>Feature 3</h3>
-          <p>Feature description placeholder</p>
-        </div>
-
-        <div class="nes-container feature-card">
-          <h3>Feature 4</h3>
-          <p>Feature description placeholder</p>
-        </div>
+    <!-- SCREEN 4: Intro Combat Screen -->
+    <div id="screen-combat" style="display:none;">
+      <div id="combat-container" class="nes-container with-title is-centered is-rounded">
+        <p class="title">Combat</p>
+        <div id="bat-sprite"></div> 
+        <p>Combat screen placeholder</p>
       </div>
-    </section>
-
-    <section id="challenges" class="cards-section">
-      <h2 class="section-heading">Challenges</h2>
-      <div class="card-grid">
-        <div class="nes-container challenge-card">
-          <h3>Challenge 1</h3>
-          <p>Challenge placeholder</p>
+      <div id="combat-menu">
+        <div class="nes-container">
+            <div id="combat-options">
+                <button class="nes-btn is-error"   onclick="selectAction('attack')">Attack</button>
+                <button class="nes-btn is-warning" onclick="selectAction('analyse')">Analyse</button>
+                <button class="nes-btn is-primary" onclick="selectAction('defend')">Defend</button>
+                <button class="nes-btn is-success" onclick="selectAction('help')">Help</button>
+            </div>
         </div>
+    </div>
 
-        <div class="nes-container challenge-card">
-          <h3>Challenge 2</h3>
-          <p>Challenge placeholder</p>
-        </div>
+    </div>
 
-        <div class="nes-container challenge-card">
-          <h3>Challenge 3</h3>
-          <p>Challenge placeholder</p>
-        </div>
-      </div>
-    </section>
+    <!-- SCREEN 5: Dashboard -->
+    <div id="screen-dashboard" style="display:none;">
+      <header class="topbar">
+        <div class="brand">HabitWise</div>
+        <nav class="nav-links">
+          <a href="#about">About</a>
+          <a href="#features">Features</a>
+          <a href="#challenges">Challenges</a>
+          <a href="#cta">Start</a>
+        </nav>
+      </header>
 
-    <section id="cta" class="cta-section">
-      <div class="nes-container is-dark with-title">
-        <p class="title">Start</p>
-        <p>Call-to-action placeholder</p>
-        <div class="cta-buttons">
-          <a href="#" class="nes-btn is-warning">Get Started</a>
-        </div>
-      </div>
-    </section>
-  </main>
+      <main class="page">
+        <section class="hero">
+          <div class="hero-left nes-container with-title">
+            <p class="title">Welcome</p>
+            <h1>Landing Page Title</h1>
+            <p>Hero text goes here.</p>
+            <div class="hero-buttons">
+              <a href="#" class="nes-btn is-success">Sign Up</a>
+              <a href="#" class="nes-btn is-primary">Log In</a>
+            </div>
+          </div>
 
-  <footer class="footer">
-    <p>HabitWise © 2026</p>
-  </footer>
-</body>
+          <div class="hero-right nes-container is-dark with-title">
+            <p class="title">Preview</p>
+            <div class="character-box">
+              <p>Character / visual placeholder</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="about" class="info-section">
+          <div class="nes-container with-title">
+            <p class="title">About</p>
+            <p>About section placeholder</p>
+          </div>
+        </section>
+
+        <section id="features" class="cards-section">
+          <h2 class="section-heading">Features</h2>
+          <div class="card-grid">
+            <div class="nes-container feature-card">
+              <h3>Feature 1</h3>
+              <p>Feature description placeholder</p>
+            </div>
+            <div class="nes-container feature-card">
+              <h3>Feature 2</h3>
+              <p>Feature description placeholder</p>
+            </div>
+            <div class="nes-container feature-card">
+              <h3>Feature 3</h3>
+              <p>Feature description placeholder</p>
+            </div>
+            <div class="nes-container feature-card">
+              <h3>Feature 4</h3>
+              <p>Feature description placeholder</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="challenges" class="cards-section">
+          <h2 class="section-heading">Challenges</h2>
+          <div class="card-grid">
+            <div class="nes-container challenge-card">
+              <h3>Challenge 1</h3>
+              <p>Challenge placeholder</p>
+            </div>
+            <div class="nes-container challenge-card">
+              <h3>Challenge 2</h3>
+              <p>Challenge placeholder</p>
+            </div>
+            <div class="nes-container challenge-card">
+              <h3>Challenge 3</h3>
+              <p>Challenge placeholder</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="cta" class="cta-section">
+          <div class="nes-container is-dark with-title">
+            <p class="title">Start</p>
+            <p>Call-to-action placeholder</p>
+            <div class="cta-buttons">
+              <a href="#" class="nes-btn is-warning">Get Started</a>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <p>HabitWise © 2026</p>
+      </footer>
+    </div>
+
+  </body>
 </html>

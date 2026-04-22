@@ -1,90 +1,278 @@
-* {
+body {
+  font-family: 'Press Start 2P', cursive;
+  margin: 0;
+  padding: 0;
+}
+
+#bgLayer {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-size: cover;
+  background-position: center;
+}
+
+#screen-title {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  z-index: 10;
+  opacity: 0;
+  animation: titleFade 4s ease-in-out forwards;
+}
+
+@keyframes titleFade {
+  0%   { opacity: 0; }
+  25%  { opacity: 1; }   /* fade in done at 1s */
+  75%  { opacity: 1; }   /* hold until 3s */
+  100% { opacity: 0; }   /* fade out done at 4s */
+}
+
+#screen-signup {
+  width: 82%;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  margin-top: 120px !important;
+  background-color: rgba(255, 255, 255, 0.65);
+  animation: signupFade 1s ease-in-out 4s both;
+}
+@keyframes signupFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+#screen-login {
+  width: 82%;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  margin-top: 120px !important;
+  background-color: rgba(255, 255, 255, 0.65);
+}
+
+/* White overlay that covers everything during transition */
+#transition-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background-color: white;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1s ease-in-out;
+}
+
+#transition-overlay.visible {
+  opacity: 1;
+}
+
+
+#screen-dialogue {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+}
+
+#screen-dialogue.dark-bg {
+  bottom: 0;
+  left: 0;
+  transform: none;
+  width: 100%;
+  height: 100vh;
+  background-color: black;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 20px;
   box-sizing: border-box;
 }
 
-body {
-  margin: 0;
-  font-family: "Press Start 2P", cursive;
-  background: #111827;
-  color: #f8fafc;
+#dialogue-box {
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
 }
 
-.topbar {
+#dialogue-box.visible {
+  opacity: 1;
+  background-color: white;
+}
+
+
+#screen-combat {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+#combat-container {
+  z-index: 1;
+  flex: 1;
+  position: relative;
+  background-image: url('img/orig.png');
+  background-size: cover;
+  image-rendering: pixelated;
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 600px;
+    animation: fadeIn 1.5s ease forwards;
+}
+/* background fades in */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+#bat-sprite {
+  position: absolute;
+  top: 30%;
+  left: 35%;
+  width: 64px;
+  height: 64px;
+  background-image: url('img/Bat-IdleFly.png');
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  animation: bat-fly 0.8s steps(9) infinite;
+  transform: scale(5);
+  transform-origin: top left;
+    animation: 
+    bat-fly 0.8s steps(9) infinite,
+    slideInRight 1s ease forwards;
+  animation-delay: 0s, 0.8s;    /* bat-fly starts immediately, slide starts after 0.8s */
+  opacity: 0;
+}
+/* enemy slides in from the right */
+@keyframes slideInRight {
+  from { transform: scale(5) translateX(300px); opacity: 0; }
+  to   { transform: scale(5) translateX(0);     opacity: 1; }
+}
+@keyframes bat-fly {
+  from { background-position: 0px 0px; }
+  to   { background-position: -576px 0px; }
+}
+
+#combat-menu {
+  position: relative;
+  z-index: 2;
+  width: 82%;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  margin-top: -40px !important;
+  background-color: #ffffff;
+  padding: 10px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+#combat-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 50px;
+  width: 100%;
+}
+
+/* ---------- DASHBOARD ---------- */
+#screen-dashboard {
+  background: #111827;
+  color: #f8fafc;
+  min-height: 100vh;
+}
+
+#screen-dashboard .topbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 20px 40px;
 }
 
-.nav-links {
+#screen-dashboard .nav-links {
   display: flex;
   gap: 16px;
 }
 
-.nav-links a {
+#screen-dashboard .nav-links a {
   color: white;
   text-decoration: none;
   font-size: 0.7rem;
 }
 
-.page {
+#screen-dashboard .page {
   max-width: 1200px;
   margin: 0 auto;
   padding: 30px 20px 60px;
 }
 
-.hero {
+#screen-dashboard .hero {
   display: grid;
   grid-template-columns: 1.4fr 1fr;
   gap: 20px;
   margin-bottom: 40px;
 }
 
-.hero-buttons,
-.cta-buttons {
+#screen-dashboard .hero-buttons,
+#screen-dashboard .cta-buttons {
   display: flex;
   gap: 12px;
   margin-top: 20px;
 }
 
-.character-box {
+#screen-dashboard .character-box {
   min-height: 200px;
   display: grid;
   place-items: center;
   border: 2px dashed rgba(255, 255, 255, 0.3);
 }
 
-.info-section,
-.cards-section,
-.cta-section {
+#screen-dashboard .info-section,
+#screen-dashboard .cards-section,
+#screen-dashboard .cta-section {
   margin: 40px 0;
 }
 
-.section-heading {
+#screen-dashboard .section-heading {
   margin-bottom: 20px;
 }
 
-.card-grid {
+#screen-dashboard .card-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
 }
 
-.footer {
+#screen-dashboard .footer {
   text-align: center;
   padding: 20px;
   font-size: 0.6rem;
 }
 
 @media (max-width: 900px) {
-  .hero,
-  .card-grid {
+  #screen-dashboard .hero,
+  #screen-dashboard .card-grid {
     grid-template-columns: 1fr;
   }
 
-  .topbar {
+  #screen-dashboard .topbar {
     flex-direction: column;
     align-items: flex-start;
     gap: 15px;
   }
 }
+
+
+
+
+
