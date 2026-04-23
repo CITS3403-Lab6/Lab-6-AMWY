@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HabitWise | Challenge Setup</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="challenge.css">
+  <script src="challenge.js" defer></script>
+</head>
+<body>
+  <div class="page-bg"></div>
+
+  <main class="setup-page">
+    <section class="setup-header">
+      <p class="eyebrow">HABITWISE SETUP</p>
+      <h1>Choose your path</h1>
+      <p class="header-text">
+        Select a challenge and difficulty before entering the dashboard.
+      </p>
+    </section>
+
+    <section class="setup-grid">
+      <div class="panel">
+        <div class="panel-top">
+          <h2>1. Select Challenge</h2>
+          <p>Choose the area you want to improve.</p>
+        </div>
+
+        <div class="card-grid">
+          <button class="select-card challenge-card" data-type="challenge" data-value="Study">
+            <span class="card-tag">01</span>
+            <h3>Study</h3>
+            <p>Build stronger focus, consistency, and academic discipline.</p>
+          </button>
+
+          <button class="select-card challenge-card" data-type="challenge" data-value="Exercise">
+            <span class="card-tag">02</span>
+            <h3>Exercise</h3>
+            <p>Develop a structured routine for fitness and physical progress.</p>
+          </button>
+
+          <button class="select-card challenge-card" data-type="challenge" data-value="Self-Control">
+            <span class="card-tag">03</span>
+            <h3>Self-Control</h3>
+            <p>Reduce unhealthy habits through discipline and daily accountability.</p>
+          </button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-top">
+          <h2>2. Select Difficulty</h2>
+          <p>Choose how intense you want the journey to be.</p>
+        </div>
+
+        <div class="card-grid">
+          <button class="select-card mode-card" data-type="mode" data-value="Sage">
+            <span class="card-tag sage">S</span>
+            <h3>Sage</h3>
+            <p>Balanced, realistic, and sustainable progress.</p>
+          </button>
+
+          <button class="select-card mode-card" data-type="mode" data-value="Warrior">
+            <span class="card-tag warrior">W</span>
+            <h3>Warrior</h3>
+            <p>Disciplined and driven, with stronger daily intensity.</p>
+          </button>
+
+          <button class="select-card mode-card" data-type="mode" data-value="Demon">
+            <span class="card-tag demon">D</span>
+            <h3>Demon</h3>
+            <p>Hardest mode, high pressure, and maximum intensity.</p>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="summary-panel">
+      <div class="summary-box">
+        <p class="summary-label">Selected Challenge</p>
+        <h3 id="selected-challenge">Not selected</h3>
+      </div>
+
+      <div class="summary-box">
+        <p class="summary-label">Selected Difficulty</p>
+        <h3 id="selected-mode">Not selected</h3>
+      </div>
+
+      <div class="summary-actions">
+        <button id="start-btn" class="start-btn" disabled>Start Challenge</button>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
