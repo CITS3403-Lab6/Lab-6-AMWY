@@ -1,0 +1,189 @@
+body {
+  margin: 0;
+  font-family: 'Press Start 2P', cursive;
+  background: #f6f1e8;
+  color: #1f2937;
+}
+
+.topbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 24px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 5;
+}
+
+.brand {
+  font-size: 1rem;
+  color: #ffffff;
+  text-shadow: 2px 2px 0 #000;
+}
+
+.nav-links {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #ffffff;
+  font-size: 0.65rem;
+  text-shadow: 2px 2px 0 #000;
+}
+
+.hero {
+  min-height: 100vh;
+  background-image:
+    linear-gradient(rgba(8, 15, 35, 0.45), rgba(8, 15, 35, 0.6)),
+    url("img/backgrounds/origbig2.png");
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  padding: 120px 40px 80px;
+  box-sizing: border-box;
+}
+
+.hero-overlay {
+  max-width: 760px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 4px solid #ffffff;
+  padding: 36px;
+  backdrop-filter: blur(3px);
+}
+
+.hero-tag {
+  font-size: 0.55rem;
+  color: #fde68a;
+  margin-bottom: 18px;
+}
+
+.hero h1 {
+  font-size: 1.7rem;
+  line-height: 1.5;
+  margin: 0 0 22px;
+  color: #ffffff;
+  text-shadow: 3px 3px 0 #000;
+}
+
+.hero-text {
+  font-size: 0.68rem;
+  line-height: 2;
+  color: #f9fafb;
+  max-width: 620px;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 26px;
+}
+
+.content-section {
+  padding: 70px 40px;
+}
+
+.alt-bg {
+  background: #e8ddd0;
+}
+
+.section-intro {
+  max-width: 760px;
+  margin-bottom: 28px;
+}
+
+.section-intro h2,
+.cta-box h2 {
+  font-size: 1rem;
+  margin: 0 0 18px;
+}
+
+.section-intro p,
+.info-card p,
+.cta-box p {
+  font-size: 0.62rem;
+  line-height: 2;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+
+.info-card {
+  background: #fffaf3;
+  border: 4px solid #1f2937;
+  padding: 24px;
+}
+
+.info-card h3 {
+  font-size: 0.72rem;
+  margin: 0 0 14px;
+}
+
+.cta-section {
+  background: #111827;
+}
+
+.cta-box {
+  max-width: 760px;
+  margin: 0 auto;
+  text-align: center;
+  color: #f9fafb;
+}
+
+@media (max-width: 900px) {
+  .topbar {
+    position: static;
+    background: #111827;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .hero {
+    min-height: auto;
+    padding: 50px 20px;
+  }
+
+  .content-section {
+    padding: 50px 20px;
+  }
+
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero h1 {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .brand,
+  .section-intro h2,
+  .cta-box h2 {
+    font-size: 0.8rem;
+  }
+
+  .nav-links a,
+  .hero-tag,
+  .hero-text,
+  .section-intro p,
+  .info-card p,
+  .cta-box p {
+    font-size: 0.5rem;
+  }
+
+  .hero h1 {
+    font-size: 0.9rem;
+  }
+}

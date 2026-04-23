@@ -1,0 +1,1 @@
+// Landing page script placeholder for future interactions
