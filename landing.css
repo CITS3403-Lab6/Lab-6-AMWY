@@ -3,6 +3,7 @@ body {
   font-family: 'Press Start 2P', cursive;
   background: #f6f1e8;
   color: #1f2937;
+  overflow-x: hidden;
 }
 
 .topbar {
@@ -15,7 +16,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  z-index: 5;
+  z-index: 20;
 }
 
 .brand {
@@ -39,111 +40,310 @@ body {
 
 .hero {
   min-height: 100vh;
-  background-image:
-    linear-gradient(rgba(8, 15, 35, 0.45), rgba(8, 15, 35, 0.6)),
+  padding: 130px 40px 70px;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 34px;
+  align-items: center;
+  background:
+    linear-gradient(135deg, rgba(22, 36, 76, 0.75), rgba(16, 74, 120, 0.55)),
+    radial-gradient(circle at top right, rgba(255, 157, 102, 0.28), transparent 35%),
     url("img/backgrounds/origbig2.png");
   background-size: cover;
   background-position: center;
-  display: flex;
-  align-items: center;
-  padding: 120px 40px 80px;
-  box-sizing: border-box;
 }
 
-.hero-overlay {
-  max-width: 760px;
-  background: rgba(255, 255, 255, 0.12);
-  border: 4px solid #ffffff;
-  padding: 36px;
-  backdrop-filter: blur(3px);
+.hero-left {
+  color: #ffffff;
 }
 
-.hero-tag {
+.hero-kicker {
+  margin: 0 0 18px;
   font-size: 0.55rem;
   color: #fde68a;
-  margin-bottom: 18px;
 }
 
-.hero h1 {
-  font-size: 1.7rem;
-  line-height: 1.5;
-  margin: 0 0 22px;
-  color: #ffffff;
+.hero-left h1 {
+  font-size: 1.75rem;
+  line-height: 1.45;
+  margin: 0 0 24px;
   text-shadow: 3px 3px 0 #000;
 }
 
 .hero-text {
-  font-size: 0.68rem;
+  max-width: 640px;
+  font-size: 0.65rem;
   line-height: 2;
+  margin: 0 0 14px;
   color: #f9fafb;
-  max-width: 620px;
 }
 
-.hero-buttons {
+.hero-buttons,
+.cta-buttons {
   display: flex;
   gap: 14px;
   flex-wrap: wrap;
-  margin-top: 26px;
+  margin-top: 24px;
+}
+
+.hero-pills {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 28px;
+}
+
+.hero-pills span {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.22);
+  padding: 10px 12px;
+  font-size: 0.5rem;
+  backdrop-filter: blur(2px);
+}
+
+.hero-right {
+  display: flex;
+  justify-content: center;
+}
+
+.hero-card {
+  width: 100%;
+  max-width: 540px;
+  background: linear-gradient(180deg, #fff1db 0%, #ffd6ae 100%);
+  border: 4px solid #172033;
+  box-shadow: 10px 10px 0 rgba(23, 32, 51, 0.22);
+  overflow: hidden;
+}
+
+.hero-card-top {
+  display: flex;
+  gap: 8px;
+  padding: 14px 16px;
+  background: #172033;
+}
+
+.pixel-dot {
+  width: 12px;
+  height: 12px;
+  background: #ff9d66;
+  border: 2px solid #fff1db;
+  display: inline-block;
+}
+
+.hero-art-wrap {
+  background: linear-gradient(180deg, #77c9f4 0%, #8fe1ff 100%);
+  padding: 26px 22px 20px;
+  border-top: 4px solid #172033;
+  border-bottom: 4px solid #172033;
+}
+
+.hero-art {
+  display: block;
+  width: 100%;
+  max-width: 340px;
+  margin: 0 auto;
+  image-rendering: pixelated;
+  border: 4px solid #172033;
+  background: #9bd7ff;
+}
+
+.hero-card-bottom {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  background: #ffe8cc;
+}
+
+.mini-stat {
+  padding: 16px 12px;
+  border-right: 3px solid #172033;
+  text-align: center;
+}
+
+.mini-stat:last-child {
+  border-right: 0;
+}
+
+.mini-stat strong {
+  display: block;
+  font-size: 0.52rem;
+  margin-bottom: 8px;
+  color: #172033;
+}
+
+.mini-stat span {
+  display: block;
+  font-size: 0.45rem;
+  line-height: 1.6;
+  color: #5b6475;
 }
 
 .content-section {
-  padding: 70px 40px;
+  padding: 62px 40px;
 }
 
-.alt-bg {
-  background: #e8ddd0;
+.about-section {
+  background: #fff7eb;
 }
 
-.section-intro {
-  max-width: 760px;
-  margin-bottom: 28px;
+.features-section {
+  background: linear-gradient(180deg, #fff6ef 0%, #ffe8d2 100%);
 }
 
-.section-intro h2,
+.challenges-section {
+  background: linear-gradient(180deg, #dff6f2 0%, #bfe9e4 100%);
+}
+
+.cta-section {
+  background: linear-gradient(180deg, #172033 0%, #233257 100%);
+}
+
+.section-heading-wrap {
+  margin-bottom: 20px;
+}
+
+.section-label {
+  margin: 0 0 10px;
+  font-size: 0.52rem;
+  color: #ff7f50;
+}
+
+.light-label {
+  color: #ffd166;
+}
+
+.section-heading-wrap h2,
 .cta-box h2 {
+  margin: 0;
   font-size: 1rem;
-  margin: 0 0 18px;
+  line-height: 1.5;
 }
 
-.section-intro p,
+.section-subtext,
+.about-main p,
 .info-card p,
+.challenge-card p,
 .cta-box p {
-  font-size: 0.62rem;
+  font-size: 0.6rem;
   line-height: 2;
 }
 
-.card-grid {
+.about-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.about-main {
+  background: #fffdf8;
+  border: 4px solid #1f2937;
+  padding: 24px;
+  box-shadow: 8px 8px 0 rgba(31, 41, 55, 0.12);
+}
+
+.about-side {
+  display: grid;
+  gap: 14px;
+}
+
+.about-chip {
+  background: #ffcf99;
+  border: 4px solid #1f2937;
+  padding: 18px;
+  font-size: 0.56rem;
+  line-height: 1.8;
+  box-shadow: 6px 6px 0 rgba(31, 41, 55, 0.12);
+}
+
+.card-grid,
+.challenge-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 22px;
 }
 
-.info-card {
-  background: #fffaf3;
-  border: 4px solid #1f2937;
+.info-card,
+.challenge-card {
   padding: 24px;
+  border: 4px solid #1f2937;
+  box-shadow: 8px 8px 0 rgba(31, 41, 55, 0.12);
 }
 
-.info-card h3 {
+.card-orange {
+  background: #ffe2c2;
+}
+
+.card-blue {
+  background: #d8efff;
+}
+
+.card-green {
+  background: #daf6d8;
+}
+
+.info-card h3,
+.challenge-card h3 {
+  margin: 0 0 16px;
   font-size: 0.72rem;
-  margin: 0 0 14px;
+  line-height: 1.6;
 }
 
-.cta-section {
-  background: #111827;
+.flow-strip {
+  margin-top: 28px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.flow-box {
+  background: #172033;
+  color: #ffffff;
+  border: 3px solid #172033;
+  padding: 14px 18px;
+  font-size: 0.52rem;
+}
+
+.flow-arrow {
+  font-size: 0.78rem;
+  color: #172033;
+}
+
+.challenge-card {
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.challenge-tag {
+  display: inline-block;
+  margin-bottom: 14px;
+  background: #172033;
+  color: #ffd166;
+  padding: 8px 10px;
+  font-size: 0.5rem;
 }
 
 .cta-box {
-  max-width: 760px;
+  max-width: 860px;
   margin: 0 auto;
   text-align: center;
-  color: #f9fafb;
+  color: #ffffff;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 960px) {
+  .hero,
+  .about-grid,
+  .card-grid,
+  .challenge-grid {
+    grid-template-columns: 1fr;
+  }
+
   .topbar {
     position: static;
-    background: #111827;
+    background: #172033;
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
@@ -151,39 +351,59 @@ body {
 
   .hero {
     min-height: auto;
-    padding: 50px 20px;
+    padding: 56px 20px;
   }
 
   .content-section {
-    padding: 50px 20px;
+    padding: 46px 20px;
   }
 
-  .card-grid {
+  .hero-left h1 {
+    font-size: 1.1rem;
+  }
+
+  .hero-card-bottom {
     grid-template-columns: 1fr;
   }
 
-  .hero h1 {
-    font-size: 1.1rem;
+  .mini-stat {
+    border-right: 0;
+    border-bottom: 3px solid #172033;
+  }
+
+  .mini-stat:last-child {
+    border-bottom: 0;
   }
 }
 
 @media (max-width: 600px) {
   .brand,
-  .section-intro h2,
+  .section-heading-wrap h2,
   .cta-box h2 {
     font-size: 0.8rem;
   }
 
   .nav-links a,
-  .hero-tag,
+  .hero-kicker,
   .hero-text,
-  .section-intro p,
+  .hero-pills span,
+  .section-subtext,
+  .about-main p,
+  .about-chip,
   .info-card p,
-  .cta-box p {
-    font-size: 0.5rem;
+  .challenge-card p,
+  .cta-box p,
+  .flow-box,
+  .mini-stat strong,
+  .mini-stat span {
+    font-size: 0.48rem;
   }
 
-  .hero h1 {
+  .hero-left h1 {
     font-size: 0.9rem;
+  }
+
+  .flow-arrow {
+    font-size: 0.6rem;
   }
 }
