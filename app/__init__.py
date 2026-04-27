@@ -32,8 +32,7 @@ def create_app(config_name="development"):
         from app.models import User
         return User.query.get(int(user_id))
     
-    # Create tables
-    with app.app_context():
-        db.create_all()
+    # Database schema initialization should be handled explicitly
+    # via a dedicated setup or migration step, not on app startup.
     
     return app
