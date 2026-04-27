@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Community - HabitWise{% endblock %}
+
+{% block content %}
+<section class="card">
+    <h1>Community Progress</h1>
+    <p>See how other HabitWise users are progressing on their challenges.</p>
+</section>
+
+{% if public_users %}
+    <div class="community-grid">
+        {% for user in public_users %}
+            <div class="card community-user-card">
+                <h3>{{ user.username }}</h3>
+                
+                {% if user.progress %}
+                    <div class="user-stats">
+                        <p><strong>Level:</strong> {{ user.progress.level }}</p>
+                        <p><strong>Total XP:</strong> {{ user.progress.xp }}</p>
+                        <p><strong>Streak:</strong> {{ user.progress.streak }}</p>
+                    </div>
+                {% else %}
+                    <p>Just joined!</p>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <section class="card">
+        <p>No public users to display yet.</p>
+    </section>
+{% endif %}
+{% endblock %}

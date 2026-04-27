@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - HabitWise{% endblock %}
+
+{% block content %}
+<section class="card">
+    <h1>Your Dashboard</h1>
+
+    <div class="progress-summary">
+        <div class="stat">
+            <span class="label">Level</span>
+            <span class="value">{{ progress.level }}</span>
+        </div>
+        <div class="stat">
+            <span class="label">XP</span>
+            <span class="value">{{ progress.xp }}</span>
+        </div>
+        <div class="stat">
+            <span class="label">Streak</span>
+            <span class="value">{{ progress.streak }}</span>
+        </div>
+    </div>
+
+    <h3>Your Stats</h3>
+    <div class="stats-grid">
+        <div class="stat-item">STR: {{ progress.strength_xp }}</div>
+        <div class="stat-item">INT: {{ progress.intelligence_xp }}</div>
+        <div class="stat-item">SPI: {{ progress.spirituality_xp }}</div>
+        <div class="stat-item">VIT: {{ progress.vitality_xp }}</div>
+        <div class="stat-item">CHA: {{ progress.charisma_xp }}</div>
+    </div>
+</section>
+
+<section class="card">
+    <h2>Current Challenge</h2>
+
+    {% if challenge %}
+        <div class="challenge-info">
+            <p><strong>Type:</strong> {{ challenge.challenge_type.title() }}</p>
+            <p><strong>Difficulty:</strong> {{ challenge.difficulty.title() }}</p>
+            <p><strong>Mindset:</strong> {{ challenge.mindset_type }}</p>
+        </div>
+    {% else %}
+        <p>No challenge selected yet. Create one below!</p>
+    {% endif %}
+
+    <form method="POST">
+        {{ challenge_form.hidden_tag() }}
+
+        <div class="form-group">
+            {{ challenge_form.challenge_type.label }}
+            {{ challenge_form.challenge_type(class="form-control") }}
+        </div>
+
+        <div class="form-group">
+            {{ challenge_form.difficulty.label }}
+            {{ challenge_form.difficulty(class="form-control") }}
+        </div>
+
+        <div class="form-group">
+            {{ challenge_form.mindset_type.label }}
+            {{ challenge_form.mindset_type(class="form-control") }}
+        </div>
+
+        <div class="form-group checkbox">
+            {{ challenge_form.is_public() }}
+            {{ challenge_form.is_public.label }}
+        </div>
+
+        <button class="button button-primary" type="submit" name="save_challenge">Save Challenge</button>
+    </form>
+</section>
+
+<section class="card">
+    <h2>Add Daily Task</h2>
+
+    <form method="POST" action="{{ url_for('main.add_task') }}">
+        <div class="form-group">
+            <label>Task Title</label>
+            <input type="text" name="title" class="form-control" placeholder="e.g., Study for 30 minutes" required>
+        </div>
+
+        <div class="form-group">
+            <label>Stat Category</label>
+            <select name="stat_category" class="form-control" required>
+                <option value="">Select a category</option>
+                <option value="STR">Strength</option>
+                <option value="INT">Intelligence</option>
+                <option value="SPI">Spirituality</option>
+                <option value="VIT">Vitality</option>
+                <option value="CHA">Charisma</option>
+            </select>
+        </div>
+
+        <button class="button button-primary" type="submit">Add Task</button>
+    </form>
+</section>
+
+<section class="card">
+    <h2>Your Tasks</h2>
+
+    {% if tasks %}
+        <div class="tasks-list">
+            {% for task in tasks %}
+                <div class="task-item">
+                    <div class="task-info">
+                        <p class="task-title">{{ task.title }}</p>
+                        <p class="task-category">{{ task.stat_category }}</p>
+                    </div>
+                    
+                    {% if task.completed %}
+                        <span class="badge badge-completed">Completed</span>
+                    {% else %}
+                        <form method="POST" action="{{ url_for('main.complete_task', task_id=task.id) }}" style="display: inline;">
+                            <button class="button button-small" type="submit">Complete</button>
+                        </form>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No tasks added yet. Create one above!</p>
+    {% endif %}
+</section>
+
+<section class="card">
+    <h2>Daily Reflection</h2>
+
+    <form method="POST" action="{{ url_for('main.reflection') }}">
+        {{ reflection_form.hidden_tag() }}
+
+        <div class="form-group">
+            {{ reflection_form.mood.label }}
+            {{ reflection_form.mood(class="form-control") }}
+        </div>
+
+        <div class="form-group">
+            {{ reflection_form.note.label }}
+            {{ reflection_form.note(class="form-control") }}
+        </div>
+
+        {{ reflection_form.submit(class="button button-primary") }}
+    </form>
+</section>
+{% endblock %}

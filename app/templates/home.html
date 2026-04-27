@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Home - HabitWise{% endblock %}
+
+{% block content %}
+<section class="card hero">
+    <h1>HabitWise</h1>
+    <p>A challenge-based self-discipline platform that helps you build habits without burning out.</p>
+    
+    <div class="button-group">
+        {% if current_user.is_authenticated %}
+            <a class="button button-primary" href="{{ url_for('main.dashboard') }}">Go to Dashboard</a>
+        {% else %}
+            <a class="button button-primary" href="{{ url_for('main.signup') }}">Start Your Challenge</a>
+            <a class="button button-secondary" href="{{ url_for('main.login') }}">Login</a>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
