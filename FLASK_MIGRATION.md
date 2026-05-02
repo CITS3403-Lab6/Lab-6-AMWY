@@ -98,17 +98,11 @@ HabitWise/
 - ✅ Form submission feedback
 - ✅ Console greeting with HabitWise branding
 
-## Image Files - TODO
+## Image Files
 
-The background and title images need to be moved from `/img/` to `/static/img/`:
+The background and title images are already stored under `/static/img/` in the current repository structure.
 
-```bash
-# Move background images
-cp img/backgrounds/* static/img/backgrounds/
-cp img/titles/* static/img/titles/
-```
-
-Current image structure in `/img/`:
+Current image structure in `/static/img/`:
 - backgrounds/: origbig.png, origbig2.png, origbig3.png, origbig4.png
 - titles/: habitwise_01_lava.png, habitwise_02_water.png, etc.
 - Other: Bat-IdleFly.png, orig.png
