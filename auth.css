@@ -153,7 +153,7 @@ body {
   z-index: 1;
   flex: 1;
   position: relative;
-  background-image: url('img/orig.png');
+  background-image: url('static/img/orig.png');
   background-size: cover;
   image-rendering: pixelated;
   margin: 0 !important;
@@ -177,7 +177,7 @@ body {
   left: 35%;
   width: 64px;
   height: 64px;
-  background-image: url('img/Bat-IdleFly.png');
+  background-image: url('static/img/Bat-IdleFly.png');
   background-repeat: no-repeat;
   image-rendering: pixelated;
   animation: bat-fly 0.8s steps(9) infinite;

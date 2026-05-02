@@ -4,16 +4,78 @@
 
 {% block content %}
 <section class="card hero">
-    <h1>HabitWise</h1>
-    <p>A challenge-based self-discipline platform that helps you build habits without burning out.</p>
+    <h1>🎮 HabitWise 🎮</h1>
+    <p>A Challenge-Based Self-Discipline Platform</p>
+    <p style="font-size: 0.9rem; line-height: 2;">
+        Make the oath. Face the monsters.<br>
+        Build unbreakable habits without burning out.<br>
+        Turn your mindset into superpowers.
+    </p>
     
-    <div class="button-group">
+    <div class="button-group" style="margin-top: 40px;">
         {% if current_user.is_authenticated %}
-            <a class="button button-primary" href="{{ url_for('main.dashboard') }}">Go to Dashboard</a>
+            <a class="button button-primary" href="{{ url_for('main.dashboard') }}">→ Enter Your Dashboard</a>
         {% else %}
-            <a class="button button-primary" href="{{ url_for('main.signup') }}">Start Your Challenge</a>
-            <a class="button button-secondary" href="{{ url_for('main.login') }}">Login</a>
+            <a class="button button-primary" href="{{ url_for('main.signup') }}">⚔ Make The Oath</a>
+            <a class="button button-secondary" href="{{ url_for('main.login') }}">→ Welcome Back</a>
         {% endif %}
     </div>
+</section>
+
+<section class="card" style="text-align: center;">
+    <h2>✨ How It Works ✨</h2>
+    <div class="card-grid">
+        <div class="nes-container">
+            <h3>1. Create Challenge</h3>
+            <p>Choose your challenge type, difficulty, and mindset.</p>
+        </div>
+        <div class="nes-container">
+            <h3>2. Set Mindset</h3>
+            <p>Pick Sage (Think), Warrior (Act), or Demon (Chaos).</p>
+        </div>
+        <div class="nes-container">
+            <h3>3. Complete Tasks</h3>
+            <p>Earn XP in Strength, Intelligence, Spirituality, Vitality, Charisma.</p>
+        </div>
+        <div class="nes-container">
+            <h3>4. Level Up</h3>
+            <p>Track your progress and climb the ranks.</p>
+        </div>
+    </div>
+</section>
+
+<section class="card" style="text-align: center;">
+    <h2>⚔ The Stat System ⚔</h2>
+    <div class="card-grid">
+        <div class="nes-container">
+            <p><strong>STR</strong> - Strength<br>Physical & Discipline Tasks</p>
+        </div>
+        <div class="nes-container">
+            <p><strong>INT</strong> - Intelligence<br>Learning & Mental Tasks</p>
+        </div>
+        <div class="nes-container">
+            <p><strong>SPI</strong> - Spirituality<br>Meditation & Reflection</p>
+        </div>
+        <div class="nes-container">
+            <p><strong>VIT</strong> - Vitality<br>Health & Energy Tasks</p>
+        </div>
+        <div class="nes-container">
+            <p><strong>CHA</strong> - Charisma<br>Social & Communication</p>
+        </div>
+    </div>
+</section>
+
+<section class="card" style="background: linear-gradient(135deg, #1f2937 0%, #111827 100%); border: 2px solid #22c55e; text-align: center;">
+    <h2>🏆 Ready to Level Up? 🏆</h2>
+    <p style="font-size: 1rem; margin: 20px 0;">
+        Your journey to becoming the person you're proud of starts here.
+    </p>
+    {% if not current_user.is_authenticated %}
+        <div class="button-group">
+            <a class="button button-primary" href="{{ url_for('main.signup') }}">→ Start Now</a>
+        </div>
+    {% else %}
+        <p style="font-size: 0.9rem;">You're logged in! <a href="{{ url_for('main.dashboard') }}" style="color: #22c55e; text-decoration: underline;">Go to your dashboard</a></p>
+    {% endif %}
 </section>
 {% endblock %}

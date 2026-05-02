@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Challenge Setup - HabitWise{% endblock %}
+
+{% block content %}
+<section class="card" style="text-align: center;">
+    <h1>⚔️ Challenge Intro ⚔️</h1>
+    <p style="margin: 20px 0; font-size: 1rem; line-height: 2;">
+        You've made the oath. Now it's time to face your first challenge.<br>
+        Choose wisely. Your mindset will guide your actions.
+    </p>
+</section>
+
+<section class="card">
+    <h2>🎯 Challenge Type</h2>
+    <div class="card-grid">
+        <div class="nes-container" style="padding: 20px; text-align: center; border: 2px solid #22c55e; cursor: pointer; transition: all 0.3s;">
+            <h3 style="color: #22c55e;">💪 Fitness</h3>
+            <p>Build strength through physical challenges.</p>
+        </div>
+        <div class="nes-container" style="padding: 20px; text-align: center; border: 2px solid #22c55e; cursor: pointer; transition: all 0.3s;">
+            <h3 style="color: #22c55e;">📚 Study</h3>
+            <p>Sharpen your mind through learning.</p>
+        </div>
+        <div class="nes-container" style="padding: 20px; text-align: center; border: 2px solid #22c55e; cursor: pointer; transition: all 0.3s;">
+            <h3 style="color: #22c55e;">🧘 Meditation</h3>
+            <p>Find inner peace and clarity.</p>
+        </div>
+        <div class="nes-container" style="padding: 20px; text-align: center; border: 2px solid #22c55e; cursor: pointer; transition: all 0.3s;">
+            <h3 style="color: #22c55e;">🎨 Creativity</h3>
+            <p>Express yourself through creation.</p>
+        </div>
+        <div class="nes-container" style="padding: 20px; text-align: center; border: 2px solid #22c55e; cursor: pointer; transition: all 0.3s;">
+            <h3 style="color: #22c55e;">🥗 Nutrition</h3>
+            <p>Fuel your body properly.</p>
+        </div>
+    </div>
+</section>
+
+<section class="card">
+    <h2>⚡ Difficulty Level</h2>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+        <div class="nes-container" style="padding: 20px; text-align: center; border: 2px solid #22c55e; cursor: pointer;">
+            <h3 style="color: #22c55e;">🟢 Easy</h3>
+            <p>Perfect for beginners</p>
+        </div>
+        <div class="nes-container" style="padding: 20px; text-align: center; border: 2px solid #fbbf24; cursor: pointer;">
+            <h3 style="color: #fbbf24;">🟡 Medium</h3>
+            <p>A solid challenge</p>
+        </div>
+        <div class="nes-container" style="padding: 20px; text-align: center; border: 2px solid #ef4444; cursor: pointer;">
+            <h3 style="color: #ef4444;">🔴 Hard</h3>
+            <p>For the brave</p>
+        </div>
+    </div>
+</section>
+
+<section class="card">
+    <h2>🧠 Choose Your Mindset</h2>
+    <div class="card-grid">
+        <div class="nes-container" style="padding: 20px; border: 2px solid #22c55e;">
+            <h3 style="color: #22c55e;">🧘 Sage</h3>
+            <p><strong>Think & Reflect</strong></p>
+            <p style="font-size: 0.9rem; margin-top: 10px;">Approach challenges with wisdom and introspection. Focus on understanding and growth.</p>
+        </div>
+        <div class="nes-container" style="padding: 20px; border: 2px solid #22c55e;">
+            <h3 style="color: #22c55e;">⚔️ Warrior</h3>
+            <p><strong>Act & Execute</strong></p>
+            <p style="font-size: 0.9rem; margin-top: 10px;">Charge forward with determination and discipline. Focus on action and results.</p>
+        </div>
+        <div class="nes-container" style="padding: 20px; border: 2px solid #22c55e;">
+            <h3 style="color: #22c55e;">👹 Demon</h3>
+            <p><strong>Embrace Chaos</strong></p>
+            <p style="font-size: 0.9rem; margin-top: 10px;">Challenge norms and push boundaries. Focus on breaking patterns and innovation.</p>
+        </div>
+    </div>
+</section>
+
+<section class="card" style="background: linear-gradient(135deg, #1f2937 0%, #111827 100%); border: 2px solid #22c55e; text-align: center;">
+    <h2>Ready to Begin?</h2>
+    <p style="margin: 20px 0;">Go to your dashboard to create your first challenge and start your journey.</p>
+    <a class="button button-primary" href="{{ url_for('main.dashboard') }}" style="margin: 20px;">→ Go to Dashboard</a>
+</section>
+{% endblock %}

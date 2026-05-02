@@ -5,21 +5,69 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: 'Press Start 2P', cursive;
     background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
     color: #f9fafb;
     line-height: 1.6;
     min-height: 100vh;
 }
 
+/* Background Layer for RPG theme */
+#bgLayer {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background-size: cover;
+    background-position: center;
+}
+
+/* Title intro animation */
+#screen-title {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    image-rendering: pixelated;
+    z-index: 10;
+    opacity: 0;
+    animation: titleFade 4s ease-in-out forwards;
+}
+
+@keyframes titleFade {
+    0%   { opacity: 0; }
+    25%  { opacity: 1; }
+    75%  { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+/* Transition overlay */
+#transition-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background-color: white;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 1s ease-in-out;
+}
+
+#transition-overlay.visible {
+    opacity: 1;
+}
+
 /* Navigation */
 nav {
     background: #020617;
-    border-bottom: 1px solid #374151;
+    border-bottom: 3px solid #22c55e;
     padding: 0;
     position: sticky;
     top: 0;
     z-index: 100;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 .nav-container {
@@ -36,6 +84,8 @@ nav {
     font-size: 1.5rem;
     color: #22c55e;
     text-decoration: none;
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
+    letter-spacing: 2px;
 }
 
 .nav-links {
@@ -52,6 +102,7 @@ nav a {
 
 nav a:hover {
     color: #22c55e;
+    text-shadow: 0 0 10px #22c55e;
 }
 
 /* Main Content */
@@ -64,29 +115,70 @@ main {
 /* Cards */
 .card {
     background: #1f2937;
-    border: 1px solid #374151;
-    border-radius: 12px;
+    border: 2px solid #374151;
+    border-radius: 4px;
     padding: 24px;
     margin-bottom: 24px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    position: relative;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: -1;
+    border-radius: 4px;
+}
+
+.card:hover::before {
+    opacity: 0.1;
 }
 
 .hero {
     text-align: center;
     background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
     padding: 60px 24px;
+    border: 2px solid #22c55e;
+    position: relative;
+}
+
+.hero::after {
+    content: '▲ ▼ ▲ ▼';
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #22c55e;
+    font-size: 0.8rem;
+    opacity: 0.5;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
 }
 
 .hero h1 {
     font-size: 2.5rem;
     margin-bottom: 16px;
     color: #22c55e;
+    text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.5);
+    letter-spacing: 3px;
 }
 
 .hero p {
-    font-size: 1.1rem;
+    font-size: 1rem;
     color: #d1d5db;
     margin-bottom: 32px;
+    line-height: 1.8;
 }
 
 /* Buttons */
@@ -94,19 +186,28 @@ main {
     background: #22c55e;
     color: #020617;
     padding: 12px 24px;
-    border-radius: 8px;
-    border: none;
+    border-radius: 0;
+    border: 2px solid #22c55e;
     text-decoration: none;
     font-weight: 600;
     cursor: pointer;
     display: inline-block;
     transition: all 0.3s;
     font-size: 1rem;
+    font-family: 'Press Start 2P', cursive;
+    text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
+    box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.3);
 }
 
 .button:hover {
     background: #16a34a;
-    transform: translateY(-2px);
+    transform: translate(-1px, -1px);
+    box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.3);
+}
+
+.button:active {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
 }
 
 .button-primary {
@@ -123,11 +224,12 @@ main {
 .button-secondary:hover {
     background: #22c55e;
     color: #020617;
+    box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.3);
 }
 
 .button-small {
     padding: 8px 16px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
 }
 
 .button-group {
@@ -141,6 +243,8 @@ main {
 .form-card {
     max-width: 500px;
     margin: 40px auto 24px;
+    border: 2px solid #22c55e;
+    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
 }
 
 .form-group {
@@ -151,17 +255,21 @@ main {
     display: block;
     font-weight: 600;
     margin-bottom: 8px;
-    color: #e5e7eb;
+    color: #22c55e;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .form-control {
     width: 100%;
     padding: 12px;
     background: #111827;
-    border: 1px solid #374151;
-    border-radius: 8px;
+    border: 2px solid #374151;
+    border-radius: 0;
     color: #f9fafb;
     font-size: 1rem;
+    font-family: monospace;
     transition: border-color 0.2s;
 }
 
@@ -177,19 +285,22 @@ main {
 
 .error-message {
     color: #fca5a5;
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     margin-top: 6px;
+    font-family: monospace;
 }
 
 .form-footer {
     text-align: center;
     margin-top: 16px;
     color: #9ca3af;
+    font-size: 0.85rem;
 }
 
 .form-footer a {
     color: #22c55e;
     text-decoration: none;
+    text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
 }
 
 .form-footer a:hover {
@@ -205,24 +316,30 @@ main {
 
 .message {
     padding: 16px;
-    border-radius: 8px;
+    border-radius: 0;
     margin-bottom: 12px;
-    font-weight: 500;
+    font-weight: 600;
+    border: 2px solid;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.85rem;
 }
 
 .message-success {
     background: #10b981;
     color: #020617;
+    border-color: #059669;
 }
 
 .message-error {
     background: #ef4444;
     color: #fff;
+    border-color: #dc2626;
 }
 
 .message-info {
     background: #3b82f6;
     color: #fff;
+    border-color: #1d4ed8;
 }
 
 /* Progress Summary */
@@ -235,24 +352,28 @@ main {
 
 .stat {
     background: #111827;
-    border: 1px solid #374151;
-    border-radius: 8px;
+    border: 2px solid #22c55e;
+    border-radius: 0;
     padding: 16px;
     text-align: center;
+    box-shadow: 2px 2px 0px rgba(34, 197, 94, 0.2);
 }
 
 .stat .label {
     display: block;
     color: #9ca3af;
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .stat .value {
     display: block;
-    font-size: 2rem;
+    font-size: 2.5rem;
     font-weight: bold;
     color: #22c55e;
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
 }
 
 /* Stats Grid */
@@ -265,20 +386,22 @@ main {
 
 .stat-item {
     background: #111827;
-    border: 1px solid #374151;
-    border-radius: 8px;
+    border: 2px solid #22c55e;
+    border-radius: 0;
     padding: 12px;
     text-align: center;
     font-weight: 500;
+    font-size: 0.9rem;
 }
 
 /* Challenge Info */
 .challenge-info {
     background: #111827;
-    border: 1px solid #374151;
-    border-radius: 8px;
+    border: 2px solid #22c55e;
+    border-radius: 0;
     padding: 16px;
     margin-bottom: 20px;
+    font-family: monospace;
 }
 
 .challenge-info p {
@@ -293,17 +416,18 @@ main {
 
 .task-item {
     background: #111827;
-    border: 1px solid #374151;
-    border-radius: 8px;
+    border: 2px solid #374151;
+    border-radius: 0;
     padding: 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .task-item:hover {
     border-color: #22c55e;
+    box-shadow: 2px 2px 0px rgba(34, 197, 94, 0.2);
 }
 
 .task-info {
@@ -313,25 +437,31 @@ main {
 .task-title {
     font-weight: 600;
     margin-bottom: 4px;
+    color: #f9fafb;
 }
 
 .task-category {
-    font-size: 0.875rem;
+    font-size: 0.8rem;
     color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 /* Badges */
 .badge {
     display: inline-block;
     padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 0.875rem;
+    border-radius: 0;
+    font-size: 0.8rem;
     font-weight: 600;
+    border: 1px solid;
+    font-family: 'Press Start 2P', cursive;
 }
 
 .badge-completed {
     background: #10b981;
     color: #020617;
+    border-color: #059669;
 }
 
 /* Community Grid */
@@ -343,17 +473,20 @@ main {
 }
 
 .community-user-card {
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    border: 2px solid #374151;
 }
 
 .community-user-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0px rgba(34, 197, 94, 0.2);
+    border-color: #22c55e;
 }
 
 .community-user-card h3 {
     color: #22c55e;
     margin-bottom: 16px;
+    text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
 }
 
 .user-stats p {
@@ -361,6 +494,8 @@ main {
     justify-content: space-between;
     padding: 8px 0;
     border-bottom: 1px solid #374151;
+    font-family: monospace;
+    font-size: 0.9rem;
 }
 
 .user-stats p:last-child {
@@ -376,6 +511,9 @@ main {
 
 .checkbox input {
     width: auto;
+    border: 2px solid #22c55e;
+    background: #111827;
+    cursor: pointer;
 }
 
 /* Responsive */
@@ -423,4 +561,40 @@ main {
     .community-grid {
         grid-template-columns: 1fr;
     }
+}
+
+/* Heading styles */
+h1, h2, h3, h4, h5, h6 {
+    color: #22c55e;
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
+    letter-spacing: 1px;
+}
+
+h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
+h2 {
+    font-size: 1.5rem;
+    margin-bottom: 16px;
+}
+
+h3 {
+    font-size: 1.2rem;
+    margin-bottom: 12px;
+}
+
+/* Section heading */
+.section-heading {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #22c55e;
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
+}
+
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
 }

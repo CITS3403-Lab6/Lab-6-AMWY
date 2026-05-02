@@ -4,18 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}HabitWise{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/vendor/press-start-2p.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/vendor/nes.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
+    <!-- Background Layer -->
+    <div id="bgLayer"></div>
+
     <nav>
         <div class="nav-container">
-            <a class="nav-brand" href="{{ url_for('main.home') }}">HabitWise</a>
+            <a class="nav-brand" href="{{ url_for('main.home') }}">⚔ HABITWISE ⚔</a>
             <div class="nav-links">
                 {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('main.home') }}">Home</a>
                     <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
                     <a href="{{ url_for('main.community') }}">Community</a>
-                    <a href="{{ url_for('main.logout') }}">Logout</a>
+                    <span style="color: #9ca3af;">{{ current_user.username }}</span>
+                    <a href="{{ url_for('main.logout') }}" style="color: #ef4444;">Logout</a>
                 {% else %}
+                    <a href="{{ url_for('main.home') }}">Home</a>
                     <a href="{{ url_for('main.signup') }}">Sign Up</a>
                     <a href="{{ url_for('main.login') }}">Login</a>
                 {% endif %}
@@ -38,5 +46,7 @@
     <main>
         {% block content %}{% endblock %}
     </main>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
 </body>
 </html>

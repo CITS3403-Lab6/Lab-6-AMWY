@@ -4,7 +4,7 @@
 
 {% block content %}
 <section class="card">
-    <h1>Your Dashboard</h1>
+    <h1>⚔ Your Dashboard ⚔</h1>
 
     <div class="progress-summary">
         <div class="stat">
@@ -12,7 +12,7 @@
             <span class="value">{{ progress.level }}</span>
         </div>
         <div class="stat">
-            <span class="label">XP</span>
+            <span class="label">Total XP</span>
             <span class="value">{{ progress.xp }}</span>
         </div>
         <div class="stat">
@@ -21,27 +21,28 @@
         </div>
     </div>
 
-    <h3>Your Stats</h3>
+    <h2>📊 Your Stats</h2>
     <div class="stats-grid">
-        <div class="stat-item">STR: {{ progress.strength_xp }}</div>
-        <div class="stat-item">INT: {{ progress.intelligence_xp }}</div>
-        <div class="stat-item">SPI: {{ progress.spirituality_xp }}</div>
-        <div class="stat-item">VIT: {{ progress.vitality_xp }}</div>
-        <div class="stat-item">CHA: {{ progress.charisma_xp }}</div>
+        <div class="stat-item"><strong>STR</strong><br>{{ progress.strength_xp }}</div>
+        <div class="stat-item"><strong>INT</strong><br>{{ progress.intelligence_xp }}</div>
+        <div class="stat-item"><strong>SPI</strong><br>{{ progress.spirituality_xp }}</div>
+        <div class="stat-item"><strong>VIT</strong><br>{{ progress.vitality_xp }}</div>
+        <div class="stat-item"><strong>CHA</strong><br>{{ progress.charisma_xp }}</div>
     </div>
 </section>
 
 <section class="card">
-    <h2>Current Challenge</h2>
+    <h2>⚡ Current Challenge</h2>
 
     {% if challenge %}
         <div class="challenge-info">
             <p><strong>Type:</strong> {{ challenge.challenge_type.title() }}</p>
             <p><strong>Difficulty:</strong> {{ challenge.difficulty.title() }}</p>
             <p><strong>Mindset:</strong> {{ challenge.mindset_type }}</p>
+            <p><strong>Created:</strong> {{ challenge.created_at.strftime('%Y-%m-%d') }}</p>
         </div>
     {% else %}
-        <p>No challenge selected yet. Create one below!</p>
+        <p>No challenge selected yet. Create one below to get started!</p>
     {% endif %}
 
     <form method="POST">
@@ -67,12 +68,12 @@
             {{ challenge_form.is_public.label }}
         </div>
 
-        <button class="button button-primary" type="submit" name="save_challenge">Save Challenge</button>
+        <button class="button button-primary" type="submit" name="save_challenge" style="width: 100%;">⚔ Save Challenge</button>
     </form>
 </section>
 
 <section class="card">
-    <h2>Add Daily Task</h2>
+    <h2>➕ Add Daily Task</h2>
 
     <form method="POST" action="{{ url_for('main.add_task') }}">
         <div class="form-group">
@@ -84,20 +85,20 @@
             <label>Stat Category</label>
             <select name="stat_category" class="form-control" required>
                 <option value="">Select a category</option>
-                <option value="STR">Strength</option>
-                <option value="INT">Intelligence</option>
-                <option value="SPI">Spirituality</option>
-                <option value="VIT">Vitality</option>
-                <option value="CHA">Charisma</option>
+                <option value="STR">⚔ Strength</option>
+                <option value="INT">🧠 Intelligence</option>
+                <option value="SPI">✨ Spirituality</option>
+                <option value="VIT">❤️ Vitality</option>
+                <option value="CHA">💬 Charisma</option>
             </select>
         </div>
 
-        <button class="button button-primary" type="submit">Add Task</button>
+        <button class="button button-primary" type="submit" style="width: 100%;">➕ Add Task</button>
     </form>
 </section>
 
 <section class="card">
-    <h2>Your Tasks</h2>
+    <h2>✅ Your Tasks</h2>
 
     {% if tasks %}
         <div class="tasks-list">
@@ -105,26 +106,33 @@
                 <div class="task-item">
                     <div class="task-info">
                         <p class="task-title">{{ task.title }}</p>
-                        <p class="task-category">{{ task.stat_category }}</p>
+                        <p class="task-category">
+                            {% if task.stat_category == 'STR' %}⚔ Strength
+                            {% elif task.stat_category == 'INT' %}🧠 Intelligence
+                            {% elif task.stat_category == 'SPI' %}✨ Spirituality
+                            {% elif task.stat_category == 'VIT' %}❤️ Vitality
+                            {% elif task.stat_category == 'CHA' %}💬 Charisma
+                            {% endif %}
+                        </p>
                     </div>
                     
                     {% if task.completed %}
-                        <span class="badge badge-completed">Completed</span>
+                        <span class="badge badge-completed">✓ Done</span>
                     {% else %}
                         <form method="POST" action="{{ url_for('main.complete_task', task_id=task.id) }}" style="display: inline;">
-                            <button class="button button-small" type="submit">Complete</button>
+                            <button class="button button-primary button-small" type="submit">Complete</button>
                         </form>
                     {% endif %}
                 </div>
             {% endfor %}
         </div>
     {% else %}
-        <p>No tasks added yet. Create one above!</p>
+        <p>No tasks added yet. Create one above to get started!</p>
     {% endif %}
 </section>
 
 <section class="card">
-    <h2>Daily Reflection</h2>
+    <h2>🧘 Daily Reflection</h2>
 
     <form method="POST" action="{{ url_for('main.reflection') }}">
         {{ reflection_form.hidden_tag() }}
@@ -136,10 +144,10 @@
 
         <div class="form-group">
             {{ reflection_form.note.label }}
-            {{ reflection_form.note(class="form-control") }}
+            {{ reflection_form.note(class="form-control", rows="4") }}
         </div>
 
-        {{ reflection_form.submit(class="button button-primary") }}
+        {{ reflection_form.submit(class="button button-primary", style="width: 100%;") }}
     </form>
 </section>
 {% endblock %}

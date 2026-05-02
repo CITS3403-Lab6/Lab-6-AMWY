@@ -49,7 +49,7 @@ body {
   background:
     linear-gradient(135deg, rgba(22, 36, 76, 0.75), rgba(16, 74, 120, 0.55)),
     radial-gradient(circle at top right, rgba(255, 157, 102, 0.28), transparent 35%),
-    url("img/backgrounds/origbig2.png");
+    url("static/img/backgrounds/origbig2.png");
   background-size: cover;
   background-position: center;
 }

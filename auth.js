@@ -17,10 +17,10 @@ function showScreen(screenId) {
 
 // ---------- BACKGROUND ----------
 const backgroundImages = [
-  'img/backgrounds/origbig.png',
-  'img/backgrounds/origbig2.png',
-  'img/backgrounds/origbig3.png',
-  'img/backgrounds/origbig4.png',
+  'static/img/backgrounds/origbig.png',
+  'static/img/backgrounds/origbig2.png',
+  'static/img/backgrounds/origbig3.png',
+  'static/img/backgrounds/origbig4.png',
 ];
 
 const backGround = document.getElementById('bgLayer');
@@ -31,11 +31,11 @@ if (backGround) {
 
 // ---------- TITLE INTRO ----------
 const titleImages = [
-  'img/titles/habitwise_01_lava.png',
-  'img/titles/habitwise_02_water.png',
-  'img/titles/habitwise_03_crystal.png',
-  'img/titles/habitwise_04_dirt.png',
-  'img/titles/habitwise_05_cracked.png',
+  'static/img/titles/habitwise_01_lava.png',
+  'static/img/titles/habitwise_02_water.png',
+  'static/img/titles/habitwise_03_crystal.png',
+  'static/img/titles/habitwise_04_dirt.png',
+  'static/img/titles/habitwise_05_cracked.png',
 ];
 
 const titleScreen = document.getElementById('screen-title');

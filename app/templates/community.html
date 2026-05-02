@@ -4,31 +4,38 @@
 
 {% block content %}
 <section class="card">
-    <h1>Community Progress</h1>
-    <p>See how other HabitWise users are progressing on their challenges.</p>
+    <h1>🌍 Community Progress 🌍</h1>
+    <p>See how other HabitWise warriors are progressing on their challenges.</p>
 </section>
 
 {% if public_users %}
     <div class="community-grid">
         {% for user in public_users %}
             <div class="card community-user-card">
-                <h3>{{ user.username }}</h3>
+                <h3>⚔ {{ user.username }} ⚔</h3>
                 
                 {% if user.progress %}
                     <div class="user-stats">
-                        <p><strong>Level:</strong> {{ user.progress.level }}</p>
-                        <p><strong>Total XP:</strong> {{ user.progress.xp }}</p>
-                        <p><strong>Streak:</strong> {{ user.progress.streak }}</p>
+                        <p><strong>Level</strong> <span>{{ user.progress.level }}</span></p>
+                        <p><strong>Total XP</strong> <span>{{ user.progress.xp }}</span></p>
+                        <p><strong>Streak</strong> <span>{{ user.progress.streak }}</span></p>
+                        <p style="border-bottom: none; margin-top: 15px; font-size: 0.85rem;">
+                            <strong>STR:</strong> {{ user.progress.strength_xp }} | 
+                            <strong>INT:</strong> {{ user.progress.intelligence_xp }} | 
+                            <strong>SPI:</strong> {{ user.progress.spirituality_xp }}<br>
+                            <strong>VIT:</strong> {{ user.progress.vitality_xp }} | 
+                            <strong>CHA:</strong> {{ user.progress.charisma_xp }}
+                        </p>
                     </div>
                 {% else %}
-                    <p>Just joined!</p>
+                    <p style="color: #9ca3af; font-size: 0.9rem;">Just joined the quest!</p>
                 {% endif %}
             </div>
         {% endfor %}
     </div>
 {% else %}
     <section class="card">
-        <p>No public users to display yet.</p>
+        <p>🏜️ The public leaderboard is empty. Be the first to share your progress!</p>
     </section>
 {% endif %}
 {% endblock %}
