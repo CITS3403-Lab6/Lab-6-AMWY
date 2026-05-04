@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HabitWise | Begin</title>
+
+    <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+    <link href="https://unpkg.com/nes.css/css/nes.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="auth.css">
+    <script src="auth.js" defer></script>
+  </head>
+  <body>
+
+    <div id="transition-overlay"></div>
+    <div id="bgLayer"></div>
+    <div id="screen-title"></div>
+
+    <!-- SCREEN 1: Signup -->
+    <div id="screen-signup">
+      <div class="nes-container with-title is-centered auth-box">
+        <p class="title">HabitWise</p>
+        <h2>Create Account</h2>
+        <p class="screen-subtitle">Begin the path with discipline and intention.</p>
+
+        <label for="signup-username">Username</label>
+        <input class="nes-input" type="text" id="signup-username" placeholder="Enter Username">
+
+        <label for="signup-email">Email</label>
+        <input class="nes-input" type="text" id="signup-email" placeholder="Enter Email">
+
+        <label for="signup-password">Password</label>
+        <input class="nes-input" type="password" id="signup-password" placeholder="Enter Password">
+
+        <br><br>
+        <button class="nes-btn is-primary" onclick="handleSignUp()">Make The Oath</button>
+        <p class="switch-text">
+          Already have an account?
+          <a href="#" onclick="showScreen('screen-login'); return false;">Log in</a>
+        </p>
+      </div>
+    </div>
+
+    <!-- SCREEN 2: Login -->
+    <div id="screen-login" style="display:none;">
+      <div class="nes-container with-title is-centered auth-box">
+        <p class="title">HabitWise</p>
+        <h2>Welcome Back</h2>
+        <p class="screen-subtitle">Continue the journey you started.</p>
+
+        <label for="login-username">Username</label>
+        <input class="nes-input" type="text" id="login-username" placeholder="Enter Username">
+
+        <label for="login-password">Password</label>
+        <input class="nes-input" type="password" id="login-password" placeholder="Enter Password">
+
+        <br><br>
+        <button class="nes-btn is-success" onclick="handleLogin()">Enter</button>
+        <p class="switch-text">
+          No account yet?
+          <a href="#" onclick="showScreen('screen-signup'); return false;">Sign up</a>
+        </p>
+      </div>
+    </div>
+
+    <!-- SCREEN 3: Dialogue -->
+    <div id="screen-dialogue" style="display:none;">
+      <div id="dialogue-box" class="nes-container with-title is-centered" onclick="nextDialogue()">
+        <p class="title" id="dialogue-speaker"></p>
+        <p id="dialogue-text"></p>
+        <p class="dialogue-next">▼</p>
+      </div>
+    </div>
+
+    <!-- SCREEN 4: Intro Combat Screen -->
+    <div id="screen-combat" style="display:none;">
+      <div id="combat-container" class="nes-container with-title is-centered is-rounded">
+        <p class="title">Combat</p>
+        <div id="bat-sprite"></div>
+        <p class="combat-text">Every oath begins with resistance.</p>
+      </div>
+
+      <div id="combat-menu">
+        <div class="nes-container">
+          <div id="combat-options">
+            <button class="nes-btn is-error" onclick="selectAction('attack')">Attack</button>
+            <button class="nes-btn is-warning" onclick="selectAction('analyse')">Analyse</button>
+            <button class="nes-btn is-primary" onclick="selectAction('defend')">Defend</button>
+            <button class="nes-btn is-success" onclick="selectAction('help')">Help</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </body>
+</html>

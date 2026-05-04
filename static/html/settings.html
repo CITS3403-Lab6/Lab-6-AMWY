@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HabitWise | Settings</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="settings.css">
+  <script src="settings.js" defer></script>
+</head>
+<body>
+  <div class="page-bg"></div>
+
+  <div class="settings-shell">
+    <aside class="sidebar">
+      <div class="brand-box">
+        <div class="brand-icon">◌</div>
+        <div>
+          <h1 class="brand-title">HabitWise</h1>
+          <p class="brand-subtitle">Settings</p>
+        </div>
+      </div>
+
+      <nav class="side-nav">
+        <a class="nav-item" href="dashboard.html">Dashboard</a>
+        <a class="nav-item" href="challenge.html">Challenge Setup</a>
+        <a class="nav-item" href="community.html">Community</a>
+        <a class="nav-item active" href="settings.html">Settings</a>
+      </nav>
+
+      <div class="sidebar-note">
+        <p class="note-title">Keep it simple</p>
+        <p class="note-text">Adjust your preferences without clutter.</p>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <section class="welcome-card">
+        <div>
+          <p class="eyebrow">PREFERENCES</p>
+          <h2 id="welcome-name">Account settings</h2>
+          <p>Manage your account, notifications, privacy, appearance, and challenge preferences.</p>
+        </div>
+      </section>
+
+      <section class="content-grid">
+        <div class="column">
+          <article class="panel">
+            <p class="panel-kicker">ACCOUNT</p>
+            <h3 class="panel-heading">Profile details</h3>
+
+            <div class="info-grid">
+              <div class="info-box">
+                <p class="info-label">Username</p>
+                <p id="settings-username" class="info-value">Adventurer</p>
+              </div>
+
+              <div class="info-box">
+                <p class="info-label">Email</p>
+                <p id="settings-email" class="info-value">Not set</p>
+              </div>
+
+              <div class="info-box">
+                <p class="info-label">Current Challenge</p>
+                <p id="settings-challenge" class="info-value">Not selected</p>
+              </div>
+
+              <div class="info-box">
+                <p class="info-label">Current Mode</p>
+                <p id="settings-mode" class="info-value">Not selected</p>
+              </div>
+            </div>
+
+            <div class="button-row">
+              <button class="action-btn purple">Change Password</button>
+              <button id="logout-btn" class="action-btn red">Log Out</button>
+            </div>
+          </article>
+
+          <article class="panel">
+            <p class="panel-kicker">NOTIFICATIONS</p>
+            <h3 class="panel-heading">Reminder settings</h3>
+
+            <div class="toggle-list">
+              <label class="toggle-row">
+                <div>
+                  <p class="toggle-title">Daily reminder</p>
+                  <p class="toggle-sub">Receive a reminder to complete your tasks.</p>
+                </div>
+                <input id="notify-daily" class="toggle-input" type="checkbox">
+              </label>
+
+              <label class="toggle-row">
+                <div>
+                  <p class="toggle-title">Streak reminder</p>
+                  <p class="toggle-sub">Get reminded before your streak is at risk.</p>
+                </div>
+                <input id="notify-streak" class="toggle-input" type="checkbox">
+              </label>
+
+              <label class="toggle-row">
+                <div>
+                  <p class="toggle-title">Community updates</p>
+                  <p class="toggle-sub">Receive simple accountability partner updates.</p>
+                </div>
+                <input id="notify-community" class="toggle-input" type="checkbox">
+              </label>
+            </div>
+          </article>
+        </div>
+
+        <div class="column">
+          <article class="panel">
+            <p class="panel-kicker">PRIVACY</p>
+            <h3 class="panel-heading">Visibility controls</h3>
+
+            <div class="toggle-list">
+              <label class="toggle-row">
+                <div>
+                  <p class="toggle-title">Share progress with partners</p>
+                  <p class="toggle-sub">Allow your accountability circle to view your progress.</p>
+                </div>
+                <input id="privacy-share" class="toggle-input" type="checkbox">
+              </label>
+
+              <label class="toggle-row">
+                <div>
+                  <p class="toggle-title">Show activity status</p>
+                  <p class="toggle-sub">Let others see whether you completed today's tasks.</p>
+                </div>
+                <input id="privacy-status" class="toggle-input" type="checkbox">
+              </label>
+            </div>
+          </article>
+
+          <article class="panel">
+            <p class="panel-kicker">APPEARANCE</p>
+            <h3 class="panel-heading">Theme preferences</h3>
+
+            <div class="select-group">
+              <label class="input-label" for="theme-select">Theme</label>
+              <select id="theme-select" class="select-input">
+                <option value="dark">Dark</option>
+                <option value="light">Light</option>
+              </select>
+            </div>
+
+            <div class="preview-card">
+              <p class="preview-label">Theme preview</p>
+              <div class="preview-box">
+                <div class="preview-panel preview-primary"></div>
+                <div class="preview-panel preview-secondary"></div>
+                <div class="preview-panel preview-accent"></div>
+              </div>
+            </div>
+          </article>
+
+          <article class="panel">
+            <p class="panel-kicker">CHALLENGE</p>
+            <h3 class="panel-heading">Challenge preferences</h3>
+
+            <div class="challenge-summary">
+              <p><strong>Selected challenge:</strong> <span id="challenge-summary-name">Not selected</span></p>
+              <p><strong>Selected mode:</strong> <span id="challenge-summary-mode">Not selected</span></p>
+            </div>
+
+            <div class="button-row">
+              <button id="change-challenge-btn" class="action-btn blue">Change Challenge</button>
+              <button id="save-settings-btn" class="action-btn green">Save Settings</button>
+            </div>
+
+            <p id="save-message" class="save-message"></p>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

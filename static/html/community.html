@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HabitWise | Community</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="community.css">
+  <script src="community.js" defer></script>
+</head>
+<body>
+  <div class="page-bg"></div>
+
+  <div class="community-shell">
+    <aside class="sidebar">
+      <div class="brand-box">
+        <div class="brand-icon">◌</div>
+        <div>
+          <h1 class="brand-title">HabitWise</h1>
+          <p class="brand-subtitle">Community</p>
+        </div>
+      </div>
+
+      <nav class="side-nav">
+        <a class="nav-item" href="dashboard.html">Dashboard</a>
+        <a class="nav-item" href="challenge.html">Challenge Setup</a>
+        <a class="nav-item active" href="community.html">Community</a>
+        <a class="nav-item" href="settings.html">Settings</a>
+      </nav>
+
+      <div class="sidebar-note">
+        <p class="note-title">Accountability matters</p>
+        <p class="note-text">Stay consistent with people who can see your progress.</p>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <section class="welcome-card">
+        <div>
+          <p class="eyebrow">ACCOUNTABILITY CIRCLE</p>
+          <h2 id="welcome-name">Your community</h2>
+          <p>
+            Share progress, stay encouraged, and keep each other moving forward.
+          </p>
+        </div>
+      </section>
+
+      <section class="summary-grid">
+        <article class="summary-card card-purple">
+          <p class="summary-label">Active Partners</p>
+          <h3>3</h3>
+          <span>People currently in your circle</span>
+        </article>
+
+        <article class="summary-card card-green">
+          <p class="summary-label">Completed Today</p>
+          <h3>2</h3>
+          <span>Partners who finished their tasks</span>
+        </article>
+
+        <article class="summary-card card-orange">
+          <p class="summary-label">Need Support</p>
+          <h3>1</h3>
+          <span>Partners who may need a nudge</span>
+        </article>
+
+        <article class="summary-card card-blue">
+          <p class="summary-label">Your Circle Score</p>
+          <h3>81%</h3>
+          <span>Average completion this week</span>
+        </article>
+      </section>
+
+      <section class="toolbar">
+        <div class="filter-group">
+          <button class="filter-btn active" data-filter="all">All</button>
+          <button class="filter-btn" data-filter="complete">Completed</button>
+          <button class="filter-btn" data-filter="support">Needs Support</button>
+        </div>
+
+        <div class="toolbar-note" id="toolbar-note">
+          Showing all accountability partners
+        </div>
+      </section>
+
+      <section class="content-grid">
+        <div class="left-column">
+          <article class="panel">
+            <div class="panel-heading-row">
+              <div>
+                <p class="panel-kicker">PARTNERS</p>
+                <h3 class="panel-heading">Your accountability circle</h3>
+              </div>
+            </div>
+
+            <div class="partner-list">
+              <div class="partner-card" data-status="complete">
+                <div class="partner-main">
+                  <div class="avatar avatar-purple">A</div>
+
+                  <div class="partner-info">
+                    <div class="name-row">
+                      <h4>Alex</h4>
+                      <span class="status-badge complete">Completed</span>
+                    </div>
+
+                    <p class="partner-meta">Streak: 9 days • Completion: 82%</p>
+                    <p class="partner-text">
+                      Finished today's study block and journal check-in.
+                    </p>
+                  </div>
+                </div>
+
+                <div class="partner-actions">
+                  <button class="action-btn green" data-action="support" data-name="Alex">Support</button>
+                  <button class="action-btn blue" data-action="view" data-name="Alex">View</button>
+                </div>
+              </div>
+
+              <div class="partner-card" data-status="support">
+                <div class="partner-main">
+                  <div class="avatar avatar-orange">M</div>
+
+                  <div class="partner-info">
+                    <div class="name-row">
+                      <h4>Mia</h4>
+                      <span class="status-badge support">Needs Support</span>
+                    </div>
+
+                    <p class="partner-meta">Streak: 4 days • Completion: 62%</p>
+                    <p class="partner-text">
+                      Missed one task today and may need encouragement.
+                    </p>
+                  </div>
+                </div>
+
+                <div class="partner-actions">
+                  <button class="action-btn yellow" data-action="nudge" data-name="Mia">Nudge</button>
+                  <button class="action-btn blue" data-action="view" data-name="Mia">View</button>
+                </div>
+              </div>
+
+              <div class="partner-card" data-status="complete">
+                <div class="partner-main">
+                  <div class="avatar avatar-green">R</div>
+
+                  <div class="partner-info">
+                    <div class="name-row">
+                      <h4>Ryan</h4>
+                      <span class="status-badge complete">Completed</span>
+                    </div>
+
+                    <p class="partner-meta">Streak: 12 days • Completion: 91%</p>
+                    <p class="partner-text">
+                      Stayed consistent with exercise and reflection tasks.
+                    </p>
+                  </div>
+                </div>
+
+                <div class="partner-actions">
+                  <button class="action-btn green" data-action="support" data-name="Ryan">Support</button>
+                  <button class="action-btn blue" data-action="view" data-name="Ryan">View</button>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <div class="right-column">
+          <article class="panel">
+            <p class="panel-kicker">ACTIVITY</p>
+            <h3 class="panel-heading">Recent updates</h3>
+
+            <div class="activity-list">
+              <div class="activity-item">
+                <span class="activity-dot purple"></span>
+                <div>
+                  <p class="activity-title">Alex completed today's tasks</p>
+                  <p class="activity-time">10 mins ago</p>
+                </div>
+              </div>
+
+              <div class="activity-item">
+                <span class="activity-dot orange"></span>
+                <div>
+                  <p class="activity-title">Mia missed one planned task</p>
+                  <p class="activity-time">34 mins ago</p>
+                </div>
+              </div>
+
+              <div class="activity-item">
+                <span class="activity-dot green"></span>
+                <div>
+                  <p class="activity-title">Ryan saved a reflection note</p>
+                  <p class="activity-time">1 hour ago</p>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="panel">
+            <p class="panel-kicker">ACTION FEED</p>
+            <h3 class="panel-heading">Interaction log</h3>
+            <div id="action-log" class="action-log">
+              <p class="empty-log">No actions yet.</p>
+            </div>
+          </article>
+
+          <article class="panel invite-panel">
+            <p class="panel-kicker">INVITE</p>
+            <h3 class="panel-heading">Add accountability partner</h3>
+
+            <label class="input-label" for="partner-name">Partner name</label>
+            <input id="partner-name" class="text-input" type="text" placeholder="Enter name">
+
+            <label class="input-label" for="partner-code">Partner ID / Username</label>
+            <input id="partner-code" class="text-input" type="text" placeholder="Enter ID">
+
+            <button id="invite-btn" class="primary-btn">Send Invite</button>
+            <p id="invite-status" class="invite-status"></p>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

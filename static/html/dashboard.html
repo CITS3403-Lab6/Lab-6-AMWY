@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HabitWise | Dashboard</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="dashboard.css">
+  <script src="dashboard.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand-box">
+        <div class="brand-icon">◌</div>
+        <div>
+          <h1 class="brand-title">HabitWise</h1>
+          <p class="brand-subtitle">Stay disciplined.</p>
+        </div>
+      </div>
+
+      <nav class="side-nav">
+        <a class="nav-item active" href="#overview">Dashboard</a>
+        <a class="nav-item" href="#challenge">Challenges</a>
+        <a class="nav-item" href="#journal">Journal</a>
+        <a class="nav-item" href="#progress">Insights</a>
+        <a class="nav-item" href="#community">Partners</a>
+        <a class="nav-item" href="#settings">Settings</a>
+      </nav>
+
+      <div class="sidebar-note">
+        <p class="note-title">Keep going!</p>
+        <p class="note-text">Consistency today, strength tomorrow.</p>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <section class="welcome-card" id="overview">
+        <div>
+          <h2 id="welcome-name">Welcome back, Adventurer!</h2>
+          <p>Stay disciplined, finish your daily tasks, and keep your streak alive.</p>
+        </div>
+      </section>
+
+      <section class="hero-grid">
+        <article class="panel challenge-panel" id="challenge">
+          <div class="panel-icon purple">▣</div>
+          <div class="panel-content">
+            <h3>Study Challenge</h3>
+            <p>Build habits, level up your focus, and become your best self.</p>
+
+            <div class="tag-row">
+              <span class="tag tag-orange">Warrior Mode</span>
+              <span class="tag tag-blue">Day 12</span>
+              <span class="tag tag-green">75% Completion</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel goal-panel">
+          <p class="mini-label">Today's Goal</p>
+          <h3><span id="goal-count">3 / 4</span> tasks completed</h3>
+
+          <div class="progress-bar">
+            <div id="main-progress" class="progress-fill"></div>
+          </div>
+
+          <p id="main-progress-text" class="mini-text">75% complete</p>
+        </article>
+
+        <article class="panel character-panel">
+          <p class="mini-label">Current Character</p>
+
+          <div class="character-box">
+<pre>
+    /\
+   /__\
+   |[]|
+  /|__|\
+    ||
+   /  \
+  /_/\_\
+</pre>
+          </div>
+
+          <p class="mini-text">Your progress brings the character to life.</p>
+        </article>
+      </section>
+
+      <section class="metric-grid">
+        <article class="metric-card metric-orange">
+          <p class="metric-label">Current Streak</p>
+          <h3>12 Days</h3>
+          <span>Keep it up!</span>
+        </article>
+
+        <article class="metric-card metric-blue">
+          <p class="metric-label">Difficulty</p>
+          <h3>Warrior</h3>
+          <span>Stay strong!</span>
+        </article>
+
+        <article class="metric-card metric-green">
+          <p class="metric-label">Weekly Score</p>
+          <h3>84 / 100</h3>
+          <span>Great progress!</span>
+        </article>
+
+        <article class="metric-card metric-purple">
+          <p class="metric-label">Partners</p>
+          <h3>3 Active</h3>
+          <span>You’re not alone.</span>
+        </article>
+      </section>
+
+      <section class="content-grid">
+        <div class="column">
+          <article class="panel task-panel">
+            <h3 class="panel-heading">Today's Tasks</h3>
+
+            <div class="task-list">
+              <label class="task-item">
+                <input type="checkbox" class="task-check" checked>
+                <span>Review lecture notes</span>
+              </label>
+
+              <label class="task-item">
+                <input type="checkbox" class="task-check" checked>
+                <span>Complete coding practice</span>
+              </label>
+
+              <label class="task-item">
+                <input type="checkbox" class="task-check" checked>
+                <span>Update journal entry</span>
+              </label>
+
+              <label class="task-item">
+                <input type="checkbox" class="task-check">
+                <span>Plan tomorrow's session</span>
+              </label>
+            </div>
+
+            <p id="task-summary" class="task-summary">3 of 4 tasks complete</p>
+            <button class="btn btn-purple">Save Progress</button>
+          </article>
+
+          <article class="panel journal-panel" id="journal">
+            <h3 class="panel-heading">Quick Reflection</h3>
+            <textarea class="journal-box" placeholder="How did today go?"></textarea>
+            <button class="btn btn-purple small-btn">Save Note</button>
+          </article>
+        </div>
+
+        <div class="column">
+          <article class="panel progress-panel" id="progress">
+            <h3 class="panel-heading">Weekly Progress</h3>
+
+            <div class="week-list">
+              <div class="week-row"><span>Mon</span><div class="week-track"><div class="week-fill w80"></div></div><span>80%</span></div>
+              <div class="week-row"><span>Tue</span><div class="week-track"><div class="week-fill w60"></div></div><span>60%</span></div>
+              <div class="week-row"><span>Wed</span><div class="week-track"><div class="week-fill w70"></div></div><span>70%</span></div>
+              <div class="week-row"><span>Thu</span><div class="week-track"><div class="week-fill w50"></div></div><span>50%</span></div>
+              <div class="week-row"><span>Fri</span><div class="week-track"><div class="week-fill w80"></div></div><span>80%</span></div>
+              <div class="week-row"><span>Sat</span><div class="week-track"><div class="week-fill w90"></div></div><span>90%</span></div>
+              <div class="week-row"><span>Sun</span><div class="week-track"><div class="week-fill w40"></div></div><span>40%</span></div>
+            </div>
+          </article>
+
+          <article class="panel mode-panel">
+            <h3 class="panel-heading">Mode Details</h3>
+            <p class="mode-name">Warrior</p>
+            <p class="mode-text">
+              Driven and intense, but still controlled enough to avoid burnout.
+            </p>
+          </article>
+        </div>
+
+        <div class="column">
+          <article class="panel partners-panel" id="community">
+            <h3 class="panel-heading">Accountability Circle</h3>
+
+            <div class="partner-card">
+              <div>
+                <p class="partner-name">Alex</p>
+                <p class="partner-info">Streak: 9 days</p>
+              </div>
+              <button class="btn btn-green small-btn">Support</button>
+            </div>
+
+            <div class="partner-card">
+              <div>
+                <p class="partner-name">Mia</p>
+                <p class="partner-info">Completion: 62%</p>
+              </div>
+              <button class="btn btn-yellow small-btn">Nudge</button>
+            </div>
+
+            <div class="partner-card">
+              <div>
+                <p class="partner-name">Ryan</p>
+                <p class="partner-info">Today: Complete</p>
+              </div>
+              <button class="btn btn-blue small-btn">View</button>
+            </div>
+          </article>
+
+          <article class="panel quick-panel" id="settings">
+            <h3 class="panel-heading">Quick Actions</h3>
+
+            <div class="quick-grid">
+              <button class="quick-btn quick-purple">Edit Challenge</button>
+              <button class="quick-btn quick-green">Open Journal</button>
+              <button class="quick-btn quick-yellow">View Insights</button>
+              <button class="quick-btn quick-gray">Settings</button>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
