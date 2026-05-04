@@ -33,43 +33,46 @@
 
 <section class="card">
     <h2>⚡ Current Challenge</h2>
-
+    
     {% if challenge %}
         <div class="challenge-info">
-            <p><strong>Type:</strong> {{ challenge.challenge_type.title() }}</p>
-            <p><strong>Difficulty:</strong> {{ challenge.difficulty.title() }}</p>
-            <p><strong>Mindset:</strong> {{ challenge.mindset_type }}</p>
-            <p><strong>Created:</strong> {{ challenge.created_at.strftime('%Y-%m-%d') }}</p>
+            <p><strong>Type:</strong> <span style="color: #22c55e;">{{ challenge.challenge_type.title() }}</span></p>
+            <p><strong>Difficulty:</strong> <span style="color: #fbbf24;">{{ challenge.difficulty.title() }}</span></p>
+            <p><strong>Mindset:</strong> <span style="color: #a78bfa;">{{ challenge.mindset_type }}</span></p>
+            <p><strong>Created:</strong> <span style="color: #94a3b8;">{{ challenge.created_at.strftime('%Y-%m-%d') }}</span></p>
         </div>
     {% else %}
-        <p>No challenge selected yet. Create one below to get started!</p>
+        <p style="color: #9ca3af; font-style: italic;">🎯 No challenge selected yet. Create one below to start your quest!</p>
     {% endif %}
 
-    <form method="POST">
-        {{ challenge_form.hidden_tag() }}
+    <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #374151;">
+        <h3 style="border-bottom: none; margin-bottom: 16px;">Create New Challenge</h3>
+        <form method="POST" action="{{ url_for('main.dashboard') }}">
+            {{ challenge_form.hidden_tag() }}
 
-        <div class="form-group">
-            {{ challenge_form.challenge_type.label }}
-            {{ challenge_form.challenge_type(class="form-control") }}
-        </div>
+            <div class="form-group">
+                {{ challenge_form.challenge_type.label }}
+                {{ challenge_form.challenge_type(class="form-control") }}
+            </div>
 
-        <div class="form-group">
-            {{ challenge_form.difficulty.label }}
-            {{ challenge_form.difficulty(class="form-control") }}
-        </div>
+            <div class="form-group">
+                {{ challenge_form.difficulty.label }}
+                {{ challenge_form.difficulty(class="form-control") }}
+            </div>
 
-        <div class="form-group">
-            {{ challenge_form.mindset_type.label }}
-            {{ challenge_form.mindset_type(class="form-control") }}
-        </div>
+            <div class="form-group">
+                {{ challenge_form.mindset_type.label }}
+                {{ challenge_form.mindset_type(class="form-control") }}
+            </div>
 
-        <div class="form-group checkbox">
-            {{ challenge_form.is_public() }}
-            {{ challenge_form.is_public.label }}
-        </div>
+            <div class="form-group checkbox">
+                {{ challenge_form.is_public() }}
+                {{ challenge_form.is_public.label }}
+            </div>
 
-        <button class="button button-primary" type="submit" name="save_challenge" style="width: 100%;">⚔ Save Challenge</button>
-    </form>
+            <button class="button button-primary" type="submit" name="save_challenge" value="save_challenge" style="width: 100%;">⚔ Save Challenge</button>
+        </form>
+    </div>
 </section>
 
 <section class="card">

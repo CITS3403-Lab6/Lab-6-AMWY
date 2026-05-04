@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
@@ -9,7 +11,10 @@ login_manager = LoginManager()
 
 def create_app(config_name="development"):
     """Application factory"""
-    app = Flask(__name__)
+    package_dir = os.path.abspath(os.path.dirname(__file__))
+    static_dir = os.path.abspath(os.path.join(package_dir, "..", "static"))
+
+    app = Flask(__name__, static_folder=static_dir, static_url_path="/static")
     app.config.from_object(config[config_name])
     
     # Initialize extensions
@@ -19,7 +24,6 @@ def create_app(config_name="development"):
     login_manager.login_message = "Please log in to access this page."
     
     # Create instance folder
-    import os
     os.makedirs(app.instance_path, exist_ok=True)
     
     # Register blueprints

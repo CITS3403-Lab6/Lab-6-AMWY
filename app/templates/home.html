@@ -4,9 +4,9 @@
 
 {% block content %}
 <section class="card hero">
-    <h1>🎮 HabitWise 🎮</h1>
-    <p>A Challenge-Based Self-Discipline Platform</p>
-    <p style="font-size: 0.9rem; line-height: 2;">
+    <h1 style="font-size: 3rem; margin-bottom: 12px;">🎮 HABITWISE 🎮</h1>
+    <p style="font-size: 1.1rem; margin-bottom: 16px; letter-spacing: 2px;">A Challenge-Based Self-Discipline Platform</p>
+    <p style="font-size: 0.9rem; line-height: 2; color: #d1d5db;">
         Make the oath. Face the monsters.<br>
         Build unbreakable habits without burning out.<br>
         Turn your mindset into superpowers.
@@ -14,68 +14,68 @@
     
     <div class="button-group" style="margin-top: 40px;">
         {% if current_user.is_authenticated %}
-            <a class="button button-primary" href="{{ url_for('main.dashboard') }}">→ Enter Your Dashboard</a>
+            <a class="button button-primary" href="{{ url_for('main.dashboard') }}">→ ENTER DASHBOARD ⚔</a>
         {% else %}
-            <a class="button button-primary" href="{{ url_for('main.signup') }}">⚔ Make The Oath</a>
-            <a class="button button-secondary" href="{{ url_for('main.login') }}">→ Welcome Back</a>
+            <a class="button button-primary" href="{{ url_for('main.signup') }}">⚔ MAKE THE OATH</a>
+            <a class="button button-secondary" href="{{ url_for('main.login') }}">→ WELCOME BACK</a>
         {% endif %}
     </div>
 </section>
 
-<section class="card" style="text-align: center;">
-    <h2>✨ How It Works ✨</h2>
+<section class="card" style="text-align: center; border: 2px solid #22c55e; background: linear-gradient(135deg, #1f2937 0%, #111827 100%);">
+    <h2 style="color: #22c55e; text-shadow: 2px 2px 0px rgba(0,0,0,0.5);">✨ HOW IT WORKS ✨</h2>
     <div class="card-grid">
-        <div class="nes-container">
-            <h3>1. Create Challenge</h3>
+        <div class="card" style="background: #0f172a; margin-bottom: 0; border: 2px solid #fbbf24;">
+            <h3 style="color: #fbbf24; border-bottom: none; margin-bottom: 8px;">⭐ 1. CREATE CHALLENGE</h3>
             <p>Choose your challenge type, difficulty, and mindset.</p>
         </div>
-        <div class="nes-container">
-            <h3>2. Set Mindset</h3>
+        <div class="card" style="background: #0f172a; margin-bottom: 0; border: 2px solid #a78bfa;">
+            <h3 style="color: #a78bfa; border-bottom: none; margin-bottom: 8px;">✨ 2. SET MINDSET</h3>
             <p>Pick Sage (Think), Warrior (Act), or Demon (Chaos).</p>
         </div>
-        <div class="nes-container">
-            <h3>3. Complete Tasks</h3>
+        <div class="card" style="background: #0f172a; margin-bottom: 0; border: 2px solid #06b6d4;">
+            <h3 style="color: #06b6d4; border-bottom: none; margin-bottom: 8px;">⚡ 3. COMPLETE TASKS</h3>
             <p>Earn XP in Strength, Intelligence, Spirituality, Vitality, Charisma.</p>
         </div>
-        <div class="nes-container">
-            <h3>4. Level Up</h3>
+        <div class="card" style="background: #0f172a; margin-bottom: 0; border: 2px solid #ec4899;">
+            <h3 style="color: #ec4899; border-bottom: none; margin-bottom: 8px;">🏆 4. LEVEL UP</h3>
             <p>Track your progress and climb the ranks.</p>
         </div>
     </div>
 </section>
 
-<section class="card" style="text-align: center;">
-    <h2>⚔ The Stat System ⚔</h2>
+<section class="card" style="text-align: center; border: 2px solid #22c55e; background: linear-gradient(135deg, #1f2937 0%, #111827 100%);">
+    <h2 style="color: #22c55e; text-shadow: 2px 2px 0px rgba(0,0,0,0.5);">⚔ THE STAT SYSTEM ⚔</h2>
     <div class="card-grid">
-        <div class="nes-container">
-            <p><strong>STR</strong> - Strength<br>Physical & Discipline Tasks</p>
+        <div class="card" style="background: #0f172a; margin-bottom: 0; border: 2px solid #ef4444;">
+            <p><strong style="color: #ef4444;">⚔ STR</strong><br><span style="color: #f87171;">Strength</span><br><span style="font-size: 0.85rem; color: #9ca3af;">Physical & Discipline</span></p>
         </div>
-        <div class="nes-container">
-            <p><strong>INT</strong> - Intelligence<br>Learning & Mental Tasks</p>
+        <div class="card" style="background: #0f172a; margin-bottom: 0; border: 2px solid #3b82f6;">
+            <p><strong style="color: #3b82f6;">🧠 INT</strong><br><span style="color: #60a5fa;">Intelligence</span><br><span style="font-size: 0.85rem; color: #9ca3af;">Learning & Mental</span></p>
         </div>
-        <div class="nes-container">
-            <p><strong>SPI</strong> - Spirituality<br>Meditation & Reflection</p>
+        <div class="card" style="background: #0f172a; margin-bottom: 0; border: 2px solid #a78bfa;">
+            <p><strong style="color: #a78bfa;">✨ SPI</strong><br><span style="color: #c4b5fd;">Spirituality</span><br><span style="font-size: 0.85rem; color: #9ca3af;">Meditation & Reflection</span></p>
         </div>
-        <div class="nes-container">
-            <p><strong>VIT</strong> - Vitality<br>Health & Energy Tasks</p>
+        <div class="card" style="background: #0f172a; margin-bottom: 0; border: 2px solid #f59e0b;">
+            <p><strong style="color: #f59e0b;">❤️ VIT</strong><br><span style="color: #fbbf24;">Vitality</span><br><span style="font-size: 0.85rem; color: #9ca3af;">Health & Energy</span></p>
         </div>
-        <div class="nes-container">
-            <p><strong>CHA</strong> - Charisma<br>Social & Communication</p>
+        <div class="card" style="background: #0f172a; margin-bottom: 0; border: 2px solid #ec4899;">
+            <p><strong style="color: #ec4899;">💬 CHA</strong><br><span style="color: #f472b6;">Charisma</span><br><span style="font-size: 0.85rem; color: #9ca3af;">Social & Communication</span></p>
         </div>
     </div>
 </section>
 
-<section class="card" style="background: linear-gradient(135deg, #1f2937 0%, #111827 100%); border: 2px solid #22c55e; text-align: center;">
-    <h2>🏆 Ready to Level Up? 🏆</h2>
-    <p style="font-size: 1rem; margin: 20px 0;">
+<section class="card" style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); border: 3px solid #10b981; text-align: center; color: #020617;">
+    <h2 style="color: #020617; text-shadow: 2px 2px 0px rgba(0,0,0,0.2); border-bottom: 3px solid #020617;">🏆 READY TO LEVEL UP? 🏆</h2>
+    <p style="font-size: 1rem; margin: 20px 0; color: #020617;">
         Your journey to becoming the person you're proud of starts here.
     </p>
     {% if not current_user.is_authenticated %}
         <div class="button-group">
-            <a class="button button-primary" href="{{ url_for('main.signup') }}">→ Start Now</a>
+            <a class="button" style="background: #020617; color: #22c55e; border: 2px solid #020617; box-shadow: 4px 4px 0px rgba(0,0,0,0.3);" href="{{ url_for('main.signup') }}">→ START YOUR QUEST ⚔</a>
         </div>
     {% else %}
-        <p style="font-size: 0.9rem;">You're logged in! <a href="{{ url_for('main.dashboard') }}" style="color: #22c55e; text-decoration: underline;">Go to your dashboard</a></p>
+        <p style="font-size: 0.9rem; color: #020617;">You're logged in! <a href="{{ url_for('main.dashboard') }}" style="color: #020617; text-decoration: underline; font-weight: 700;">GO TO DASHBOARD →</a></p>
     {% endif %}
 </section>
 {% endblock %}
