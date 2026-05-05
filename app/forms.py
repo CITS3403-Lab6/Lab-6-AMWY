@@ -1,102 +1,127 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, SelectField, TextAreaField, BooleanField
-from wtforms.validators import DataRequired, Email, Length, EqualTo, ValidationError, Optional
+from wtforms import (
+    BooleanField,
+    PasswordField,
+    SelectField,
+    StringField,
+    SubmitField,
+    TextAreaField,
+)
+from wtforms.validators import (
+    DataRequired,
+    Email,
+    EqualTo,
+    Length,
+    Optional,
+    ValidationError,
+)
+
+from app.constants import (
+    MAX_EMAIL_LENGTH,
+    MAX_PASSWORD_MIN_LENGTH,
+    MAX_REFLECTION_LENGTH,
+    MAX_USERNAME_LENGTH,
+    VALID_CHALLENGE_TYPES,
+    VALID_DIFFICULTIES,
+    VALID_MINDSET_TYPES,
+)
 from app.models import User
 
 
 class SignupForm(FlaskForm):
-    """User registration form"""
+    """User registration form."""
+
     username = StringField(
         "Username",
         validators=[
             DataRequired(),
-            Length(min=3, max=80, message="Username must be 3-80 characters")
-        ]
+            Length(
+                min=3,
+                max=MAX_USERNAME_LENGTH,
+                message="Username must be 3-80 characters.",
+            ),
+        ],
     )
+
     email = StringField(
         "Email",
         validators=[
             DataRequired(),
-            Email(message="Invalid email address")
-        ]
+            Email(message="Invalid email address."),
+            Length(max=MAX_EMAIL_LENGTH),
+        ],
     )
+
     password = PasswordField(
         "Password",
         validators=[
             DataRequired(),
-            Length(min=6, message="Password must be at least 6 characters")
-        ]
+            Length(
+                min=MAX_PASSWORD_MIN_LENGTH,
+                message="Password must be at least 6 characters.",
+            ),
+        ],
     )
+
     confirm_password = PasswordField(
         "Confirm Password",
         validators=[
             DataRequired(),
-            EqualTo("password", message="Passwords must match")
-        ]
+            EqualTo("password", message="Passwords must match."),
+        ],
     )
+
     submit = SubmitField("Create Account")
-    
+
     def validate_username(self, field):
-        """Check if username already exists"""
-        if User.query.filter_by(username=field.data).first():
+        username = field.data.strip()
+
+        if User.query.filter_by(username=username).first():
             raise ValidationError("Username already taken.")
-    
+
     def validate_email(self, field):
-        """Check if email already exists"""
-        if User.query.filter_by(email=field.data).first():
+        email = field.data.strip().lower()
+
+        if User.query.filter_by(email=email).first():
             raise ValidationError("Email already registered.")
 
 
 class LoginForm(FlaskForm):
-    """User login form"""
-    username = StringField(
-        "Username",
-        validators=[DataRequired()]
-    )
-    password = PasswordField(
-        "Password",
-        validators=[DataRequired()]
-    )
+    """User login form."""
+
+    username = StringField("Username", validators=[DataRequired()])
+    password = PasswordField("Password", validators=[DataRequired()])
     submit = SubmitField("Login")
 
 
 class ChallengeForm(FlaskForm):
-    """Challenge creation form"""
+    """Challenge creation form."""
+
     challenge_type = SelectField(
         "Challenge Type",
-        choices=[
-            ("fitness", "Fitness"),
-            ("study", "Study"),
-            ("meditation", "Meditation"),
-            ("creativity", "Creativity"),
-            ("nutrition", "Nutrition"),
-        ],
-        validators=[DataRequired()]
+        choices=list(VALID_CHALLENGE_TYPES.items()),
+        validators=[DataRequired()],
     )
+
     difficulty = SelectField(
         "Difficulty",
-        choices=[
-            ("easy", "Easy"),
-            ("medium", "Medium"),
-            ("hard", "Hard"),
-        ],
-        validators=[DataRequired()]
+        choices=list(VALID_DIFFICULTIES.items()),
+        validators=[DataRequired()],
     )
+
     mindset_type = SelectField(
         "Mindset Type",
-        choices=[
-            ("Sage", "Sage - Think & Reflect"),
-            ("Warrior", "Warrior - Act & Execute"),
-            ("Demon", "Demon - Embrace Chaos"),
-        ],
-        validators=[DataRequired()]
+        choices=list(VALID_MINDSET_TYPES.items()),
+        validators=[DataRequired()],
     )
+
     is_public = BooleanField("Share progress publicly")
     submit = SubmitField("Save Challenge")
 
 
 class ReflectionForm(FlaskForm):
-    """Daily reflection form"""
+    """Daily reflection form."""
+
     mood = SelectField(
         "Mood",
         choices=[
@@ -106,13 +131,18 @@ class ReflectionForm(FlaskForm):
             ("bad", "Bad ☹️"),
             ("terrible", "Terrible 😠"),
         ],
-        validators=[Optional()]
+        validators=[Optional()],
     )
+
     note = TextAreaField(
         "Reflection",
         validators=[
             Optional(),
-            Length(max=1000, message="Reflection must be under 1000 characters")
-        ]
+            Length(
+                max=MAX_REFLECTION_LENGTH,
+                message="Reflection must be under 1000 characters.",
+            ),
+        ],
     )
+
     submit = SubmitField("Save Reflection")
