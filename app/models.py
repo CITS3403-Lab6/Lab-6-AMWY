@@ -1,99 +1,201 @@
-from datetime import datetime, date
+from datetime import datetime, date, timezone
+
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
+
 from app import db
 
 
+def utc_now():
+    """Return a timezone-aware UTC timestamp."""
+    return datetime.now(timezone.utc)
+
+
 class User(db.Model, UserMixin):
-    """User model with authentication"""
+    """Registered HabitWise user."""
+
     id = db.Column(db.Integer, primary_key=True)
-    
+
     username = db.Column(db.String(80), unique=True, nullable=False, index=True)
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(255), nullable=False)
-    
-    is_public = db.Column(db.Boolean, default=False, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    # Relationships
-    challenges = db.relationship("Challenge", backref="user", lazy=True, cascade="all, delete-orphan")
-    tasks = db.relationship("Task", backref="user", lazy=True, cascade="all, delete-orphan")
-    progress = db.relationship("Progress", backref="user", uselist=False, cascade="all, delete-orphan")
-    reflections = db.relationship("Reflection", backref="user", lazy=True, cascade="all, delete-orphan")
-    
+
+    is_public = db.Column(db.Boolean, default=True, nullable=False)
+    created_at = db.Column(db.DateTime, default=utc_now, nullable=False)
+
+    challenges = db.relationship(
+        "Challenge",
+        backref="user",
+        lazy=True,
+        cascade="all, delete-orphan",
+    )
+
+    tasks = db.relationship(
+        "Task",
+        backref="user",
+        lazy=True,
+        cascade="all, delete-orphan",
+    )
+
+    progress = db.relationship(
+        "Progress",
+        backref="user",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
+
+    reflections = db.relationship(
+        "Reflection",
+        backref="user",
+        lazy=True,
+        cascade="all, delete-orphan",
+    )
+
     def set_password(self, password):
-        """Hash and store password"""
+        """Hash and store the user's password."""
         self.password_hash = generate_password_hash(password)
-    
+
     def check_password(self, password):
-        """Verify password against hash"""
+        """Check a raw password against the stored password hash."""
         return check_password_hash(self.password_hash, password)
-    
+
+    def latest_challenge(self):
+        """Return the user's most recently created challenge."""
+        return (
+            Challenge.query
+            .filter_by(user_id=self.id)
+            .order_by(Challenge.created_at.desc())
+            .first()
+        )
+
     def __repr__(self):
         return f"<User {self.username}>"
 
 
 class Challenge(db.Model):
-    """Challenge model"""
+    """A user's selected HabitWise challenge."""
+
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False, index=True)
-    
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey("user.id"),
+        nullable=False,
+        index=True,
+    )
+
     challenge_type = db.Column(db.String(50), nullable=False)
     difficulty = db.Column(db.String(30), nullable=False)
     mindset_type = db.Column(db.String(30), nullable=False)
-    
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
-    
+
+    created_at = db.Column(db.DateTime, default=utc_now, nullable=False, index=True)
+
+    __table_args__ = (
+        db.CheckConstraint(
+            "challenge_type IN ('fitness', 'study', 'meditation', 'creativity', 'nutrition')",
+            name="valid_challenge_type",
+        ),
+        db.CheckConstraint(
+            "difficulty IN ('easy', 'medium', 'hard')",
+            name="valid_difficulty",
+        ),
+        db.CheckConstraint(
+            "mindset_type IN ('Sage', 'Warrior', 'Demon')",
+            name="valid_mindset_type",
+        ),
+    )
+
     def __repr__(self):
-        return f"<Challenge {self.challenge_type}>"
+        return f"<Challenge {self.challenge_type} - {self.difficulty}>"
 
 
 class Task(db.Model):
-    """Task model"""
+    """Daily user task that contributes to a stat category."""
+
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False, index=True)
-    
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey("user.id"),
+        nullable=False,
+        index=True,
+    )
+
     title = db.Column(db.String(200), nullable=False)
     stat_category = db.Column(db.String(10), nullable=False)
-    
-    completed = db.Column(db.Boolean, default=False, index=True)
-    task_date = db.Column(db.Date, default=date.today, index=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
+
+    completed = db.Column(db.Boolean, default=False, nullable=False, index=True)
+    task_date = db.Column(db.Date, default=date.today, nullable=False, index=True)
+    created_at = db.Column(db.DateTime, default=utc_now, nullable=False)
+
+    __table_args__ = (
+        db.CheckConstraint(
+            "stat_category IN ('STR', 'INT', 'SPI', 'VIT', 'CHA')",
+            name="valid_stat_category",
+        ),
+    )
+
     def __repr__(self):
-        return f"<Task {self.title}>"
+        return f"<Task {self.title} - {self.stat_category}>"
 
 
 class Progress(db.Model):
-    """Progress tracking model"""
+    """A user's RPG-style progress record."""
+
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False, unique=True, index=True)
-    
-    level = db.Column(db.Integer, default=1)
-    xp = db.Column(db.Integer, default=0)
-    streak = db.Column(db.Integer, default=0)
-    
-    strength_xp = db.Column(db.Integer, default=0)
-    intelligence_xp = db.Column(db.Integer, default=0)
-    spirituality_xp = db.Column(db.Integer, default=0)
-    vitality_xp = db.Column(db.Integer, default=0)
-    charisma_xp = db.Column(db.Integer, default=0)
-    
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey("user.id"),
+        nullable=False,
+        unique=True,
+        index=True,
+    )
+
+    level = db.Column(db.Integer, default=1, nullable=False)
+    xp = db.Column(db.Integer, default=0, nullable=False)
+    streak = db.Column(db.Integer, default=0, nullable=False)
+
+    strength_xp = db.Column(db.Integer, default=0, nullable=False)
+    intelligence_xp = db.Column(db.Integer, default=0, nullable=False)
+    spirituality_xp = db.Column(db.Integer, default=0, nullable=False)
+    vitality_xp = db.Column(db.Integer, default=0, nullable=False)
+    charisma_xp = db.Column(db.Integer, default=0, nullable=False)
+
+    updated_at = db.Column(
+        db.DateTime,
+        default=utc_now,
+        onupdate=utc_now,
+        nullable=False,
+    )
+
+    __table_args__ = (
+        db.CheckConstraint("level >= 1", name="progress_level_minimum"),
+        db.CheckConstraint("xp >= 0", name="progress_xp_non_negative"),
+        db.CheckConstraint("streak >= 0", name="progress_streak_non_negative"),
+        db.CheckConstraint("strength_xp >= 0", name="strength_xp_non_negative"),
+        db.CheckConstraint("intelligence_xp >= 0", name="intelligence_xp_non_negative"),
+        db.CheckConstraint("spirituality_xp >= 0", name="spirituality_xp_non_negative"),
+        db.CheckConstraint("vitality_xp >= 0", name="vitality_xp_non_negative"),
+        db.CheckConstraint("charisma_xp >= 0", name="charisma_xp_non_negative"),
+    )
+
     def __repr__(self):
-        return f"<Progress Level {self.level}>"
+        return f"<Progress user_id={self.user_id} level={self.level} xp={self.xp}>"
 
 
 class Reflection(db.Model):
-    """Daily reflection model"""
+    """A user's daily reflection entry."""
+
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False, index=True)
-    
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey("user.id"),
+        nullable=False,
+        index=True,
+    )
+
     mood = db.Column(db.String(50), nullable=True)
     note = db.Column(db.Text, nullable=True)
-    
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
-    
+
+    created_at = db.Column(db.DateTime, default=utc_now, nullable=False, index=True)
+
     def __repr__(self):
-        return f"<Reflection {self.created_at}>"
+        return f"<Reflection user_id={self.user_id} created_at={self.created_at}>"
