@@ -14,29 +14,19 @@
 </head>
 <body>
   <div class="app-shell">
-    <aside class="sidebar">
-      <div class="brand-box">
-        <div class="brand-icon">◌</div>
-        <div>
-          <h1 class="brand-title">HabitWise</h1>
-          <p class="brand-subtitle">Stay disciplined.</p>
-        </div>
+    <header class="header">
+      <div class="header-top">
+        <div class="brand-icon">⚜</div>
+        <h1 class="brand-title">HabitWise</h1>
+        <p class="brand-subtitle">Stay disciplined.</p>
       </div>
-
       <nav class="side-nav">
         <a class="nav-item active" href="#overview">Dashboard</a>
         <a class="nav-item" href="#challenge">Challenges</a>
-        <a class="nav-item" href="#journal">Journal</a>
-        <a class="nav-item" href="#progress">Insights</a>
         <a class="nav-item" href="#community">Partners</a>
         <a class="nav-item" href="#settings">Settings</a>
       </nav>
-
-      <div class="sidebar-note">
-        <p class="note-title">Keep going!</p>
-        <p class="note-text">Consistency today, strength tomorrow.</p>
-      </div>
-    </aside>
+    </header>
 
     <main class="main-content">
       <section class="welcome-card" id="overview">
@@ -47,19 +37,35 @@
       </section>
 
       <section class="hero-grid">
-        <article class="panel challenge-panel" id="challenge">
-          <div class="panel-icon purple">▣</div>
-          <div class="panel-content">
-            <h3>Study Challenge</h3>
-            <p>Build habits, level up your focus, and become your best self.</p>
+        <article class="panel character-panel">
+          <p class="mini-label">Current Character</p>
 
-            <div class="tag-row">
-              <span class="tag tag-orange">Warrior Mode</span>
-              <span class="tag tag-blue">Day 12</span>
-              <span class="tag tag-green">75% Completion</span>
+          <div class="character-box">
+            <div class="avatar-reveal-container">
+              <img class="avatar-img" src="../img/avatar/hiddenavatar.png" alt="Character">
+              <div class="avatar-mask" id="avatar-mask"></div>
             </div>
           </div>
+
+          <div style="margin-top: 12px; text-align: center;">
+            <input type="range" min="0" max="10" value="3" id="level-test-slider" style="width: 180px; accent-color: #8b5cf6;">
+            <p style="font-size: 0.8rem; color: var(--muted); margin: 6px 0 0;">Test Level: <span id="slider-level-display">3</span></p>
+          </div>
+
+          <p class="mini-text" id="avatar-level-text">Level 1 — Keep going!</p>
         </article>
+
+        <article class="panel hp-level-panel">
+          <p class="mini-label">HP</p>
+          <h3 id="hp-value">100 / 100</h3>
+          <div class="progress-bar">
+            <div id="hp-fill" class="progress-fill hp-fill"></div>
+          </div>
+          <p class="mini-label" style="margin-top: 18px;">Level</p>
+          <h3>Level 4</h3>
+          <span class="mini-text">Warrior rank</span>
+        </article>
+            
 
         <article class="panel goal-panel">
           <p class="mini-label">Today's Goal</p>
@@ -72,23 +78,7 @@
           <p id="main-progress-text" class="mini-text">75% complete</p>
         </article>
 
-        <article class="panel character-panel">
-          <p class="mini-label">Current Character</p>
 
-          <div class="character-box">
-<pre>
-    /\
-   /__\
-   |[]|
-  /|__|\
-    ||
-   /  \
-  /_/\_\
-</pre>
-          </div>
-
-          <p class="mini-text">Your progress brings the character to life.</p>
-        </article>
       </section>
 
       <section class="metric-grid">
@@ -143,15 +133,7 @@
                 <span>Plan tomorrow's session</span>
               </label>
             </div>
-
             <p id="task-summary" class="task-summary">3 of 4 tasks complete</p>
-            <button class="btn btn-purple">Save Progress</button>
-          </article>
-
-          <article class="panel journal-panel" id="journal">
-            <h3 class="panel-heading">Quick Reflection</h3>
-            <textarea class="journal-box" placeholder="How did today go?"></textarea>
-            <button class="btn btn-purple small-btn">Save Note</button>
           </article>
         </div>
 
@@ -187,35 +169,24 @@
               <div>
                 <p class="partner-name">Alex</p>
                 <p class="partner-info">Streak: 9 days</p>
+                <p class="partner-info">Completion: 0%</p>
               </div>
-              <button class="btn btn-green small-btn">Support</button>
             </div>
 
             <div class="partner-card">
               <div>
                 <p class="partner-name">Mia</p>
+                <p class="partner-info">Streak: 9 days</p>
                 <p class="partner-info">Completion: 62%</p>
               </div>
-              <button class="btn btn-yellow small-btn">Nudge</button>
             </div>
 
             <div class="partner-card">
               <div>
                 <p class="partner-name">Ryan</p>
-                <p class="partner-info">Today: Complete</p>
+                <p class="partner-info">Streak: 10 days</p>
+                <p class="partner-info">Today: 100%</p>
               </div>
-              <button class="btn btn-blue small-btn">View</button>
-            </div>
-          </article>
-
-          <article class="panel quick-panel" id="settings">
-            <h3 class="panel-heading">Quick Actions</h3>
-
-            <div class="quick-grid">
-              <button class="quick-btn quick-purple">Edit Challenge</button>
-              <button class="quick-btn quick-green">Open Journal</button>
-              <button class="quick-btn quick-yellow">View Insights</button>
-              <button class="quick-btn quick-gray">Settings</button>
             </div>
           </article>
         </div>

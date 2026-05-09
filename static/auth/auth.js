@@ -1,3 +1,4 @@
+
 // ---------- SCREEN SWITCHING ----------
 function showScreen(screenId) {
   const screens = ["screen-signup", "screen-login", "screen-dialogue", "screen-combat"];
@@ -17,10 +18,10 @@ function showScreen(screenId) {
 
 // ---------- BACKGROUND ----------
 const backgroundImages = [
-  'static/img/backgrounds/origbig.png',
-  'static/img/backgrounds/origbig2.png',
-  'static/img/backgrounds/origbig3.png',
-  'static/img/backgrounds/origbig4.png',
+  '../img/backgrounds/origbig.png',
+  '../img/backgrounds/origbig2.png',
+  '../img/backgrounds/origbig3.png',
+  '../img/backgrounds/origbig4.png',
 ];
 
 const backGround = document.getElementById('bgLayer');
@@ -31,11 +32,11 @@ if (backGround) {
 
 // ---------- TITLE INTRO ----------
 const titleImages = [
-  'static/img/titles/habitwise_01_lava.png',
-  'static/img/titles/habitwise_02_water.png',
-  'static/img/titles/habitwise_03_crystal.png',
-  'static/img/titles/habitwise_04_dirt.png',
-  'static/img/titles/habitwise_05_cracked.png',
+  '../img/titles/habitwise_01_lava.png',
+  '../img/titles/habitwise_02_water.png',
+  '../img/titles/habitwise_03_crystal.png',
+  '../img/titles/habitwise_04_dirt.png',
+  '../img/titles/habitwise_05_cracked.png',
 ];
 
 const titleScreen = document.getElementById('screen-title');
@@ -150,7 +151,7 @@ function nextDialogue() {
         if (dialogueScreen) dialogueScreen.classList.remove('dark-bg');
         if (bg) bg.style.display = 'block';
 
-        showScreen('screen-combat');
+        showScreen('challenge.html');
         overlay.style.backgroundColor = 'white';
 
         setTimeout(() => {
@@ -160,32 +161,5 @@ function nextDialogue() {
       }, 1000);
 
     }, 1000);
-  }
-}
-
-// ---------- COMBAT ACTIONS ----------
-function selectAction(action) {
-  if (action === 'attack') {
-    const overlay = document.getElementById('transition-overlay');
-
-    overlay.style.backgroundColor = 'white';
-    overlay.classList.add('visible');
-
-    setTimeout(() => {
-      overlay.classList.remove('visible');
-      alert("Next page will be connected from here.");
-    }, 1000);
-  }
-
-  if (action === 'analyse') {
-    alert("The enemy represents resistance to change.");
-  }
-
-  if (action === 'defend') {
-    alert("Discipline requires patience as well as action.");
-  }
-
-  if (action === 'help') {
-    alert("Tip: Start small, but stay consistent.");
   }
 }

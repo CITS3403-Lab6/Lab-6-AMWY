@@ -16,27 +16,19 @@
   <div class="page-bg"></div>
 
   <div class="community-shell">
-    <aside class="sidebar">
-      <div class="brand-box">
+    <header class="header">
+      <div class="header-top">
         <div class="brand-icon">◌</div>
-        <div>
-          <h1 class="brand-title">HabitWise</h1>
-          <p class="brand-subtitle">Community</p>
-        </div>
+        <h1 class="brand-title">HabitWise</h1>
+        <p class="brand-subtitle">Stay disciplined.</p>
       </div>
-
       <nav class="side-nav">
         <a class="nav-item" href="dashboard.html">Dashboard</a>
-        <a class="nav-item" href="challenge.html">Challenge Setup</a>
-        <a class="nav-item active" href="community.html">Community</a>
+        <a class="nav-item" href="challenge.html">Challenges</a>
+        <a class="nav-item active" href="community.html">Partners</a>
         <a class="nav-item" href="settings.html">Settings</a>
       </nav>
-
-      <div class="sidebar-note">
-        <p class="note-title">Accountability matters</p>
-        <p class="note-text">Stay consistent with people who can see your progress.</p>
-      </div>
-    </aside>
+    </header>
 
     <main class="main-content">
       <section class="welcome-card">
@@ -46,6 +38,50 @@
           <p>
             Share progress, stay encouraged, and keep each other moving forward.
           </p>
+        </div>
+      </section>
+
+      <section class="party-banner">
+        <div class="party-bg">
+          <div class="party-slots">
+
+            <div class="party-slot" data-member="1">
+              <div class="slot-label">
+                <p class="slot-name">Wooji</p>
+                <p class="slot-stats">Streak: 12 days</p>
+              </div>
+              <img class="weapon-img" src="../img/icons/warrior.png" alt="Warrior">
+              <p class="slot-mode">Warrior</p>
+            </div>
+
+            <div class="party-slot" data-member="2">
+              <div class="slot-label">
+                <p class="slot-name">Alex</p>
+                <p class="slot-stats">Streak: 9 days</p>
+              </div>
+              <img class="weapon-img" src="../img/icons/sage.png" alt="Sage">
+              <p class="slot-mode">Sage</p>
+            </div>
+
+            <div class="party-slot" data-member="3">
+              <div class="slot-label">
+                <p class="slot-name">Mia</p>
+                <p class="slot-stats">Streak: 4 days</p>
+              </div>
+              <img class="weapon-img" src="../img/icons/demon.png" alt="Demon">
+              <p class="slot-mode">Demon</p>
+            </div>
+
+            <div class="party-slot empty" data-member="4">
+              <div class="slot-label">
+                <p class="slot-name">Empty</p>
+                <p class="slot-stats">Awaiting member</p>
+              </div>
+              <img class="weapon-img" src="../img/icons/Shadow.png" alt="Empty slot">
+              <p class="slot-mode">—</p>
+            </div>
+
+          </div>
         </div>
       </section>
 
@@ -62,29 +98,11 @@
           <span>Partners who finished their tasks</span>
         </article>
 
-        <article class="summary-card card-orange">
-          <p class="summary-label">Need Support</p>
-          <h3>1</h3>
-          <span>Partners who may need a nudge</span>
-        </article>
-
         <article class="summary-card card-blue">
           <p class="summary-label">Your Circle Score</p>
           <h3>81%</h3>
           <span>Average completion this week</span>
         </article>
-      </section>
-
-      <section class="toolbar">
-        <div class="filter-group">
-          <button class="filter-btn active" data-filter="all">All</button>
-          <button class="filter-btn" data-filter="complete">Completed</button>
-          <button class="filter-btn" data-filter="support">Needs Support</button>
-        </div>
-
-        <div class="toolbar-note" id="toolbar-note">
-          Showing all accountability partners
-        </div>
       </section>
 
       <section class="content-grid">
@@ -109,15 +127,7 @@
                     </div>
 
                     <p class="partner-meta">Streak: 9 days • Completion: 82%</p>
-                    <p class="partner-text">
-                      Finished today's study block and journal check-in.
-                    </p>
                   </div>
-                </div>
-
-                <div class="partner-actions">
-                  <button class="action-btn green" data-action="support" data-name="Alex">Support</button>
-                  <button class="action-btn blue" data-action="view" data-name="Alex">View</button>
                 </div>
               </div>
 
@@ -132,15 +142,7 @@
                     </div>
 
                     <p class="partner-meta">Streak: 4 days • Completion: 62%</p>
-                    <p class="partner-text">
-                      Missed one task today and may need encouragement.
-                    </p>
                   </div>
-                </div>
-
-                <div class="partner-actions">
-                  <button class="action-btn yellow" data-action="nudge" data-name="Mia">Nudge</button>
-                  <button class="action-btn blue" data-action="view" data-name="Mia">View</button>
                 </div>
               </div>
 
@@ -155,15 +157,7 @@
                     </div>
 
                     <p class="partner-meta">Streak: 12 days • Completion: 91%</p>
-                    <p class="partner-text">
-                      Stayed consistent with exercise and reflection tasks.
-                    </p>
                   </div>
-                </div>
-
-                <div class="partner-actions">
-                  <button class="action-btn green" data-action="support" data-name="Ryan">Support</button>
-                  <button class="action-btn blue" data-action="view" data-name="Ryan">View</button>
                 </div>
               </div>
             </div>
@@ -171,45 +165,6 @@
         </div>
 
         <div class="right-column">
-          <article class="panel">
-            <p class="panel-kicker">ACTIVITY</p>
-            <h3 class="panel-heading">Recent updates</h3>
-
-            <div class="activity-list">
-              <div class="activity-item">
-                <span class="activity-dot purple"></span>
-                <div>
-                  <p class="activity-title">Alex completed today's tasks</p>
-                  <p class="activity-time">10 mins ago</p>
-                </div>
-              </div>
-
-              <div class="activity-item">
-                <span class="activity-dot orange"></span>
-                <div>
-                  <p class="activity-title">Mia missed one planned task</p>
-                  <p class="activity-time">34 mins ago</p>
-                </div>
-              </div>
-
-              <div class="activity-item">
-                <span class="activity-dot green"></span>
-                <div>
-                  <p class="activity-title">Ryan saved a reflection note</p>
-                  <p class="activity-time">1 hour ago</p>
-                </div>
-              </div>
-            </div>
-          </article>
-
-          <article class="panel">
-            <p class="panel-kicker">ACTION FEED</p>
-            <h3 class="panel-heading">Interaction log</h3>
-            <div id="action-log" class="action-log">
-              <p class="empty-log">No actions yet.</p>
-            </div>
-          </article>
-
           <article class="panel invite-panel">
             <p class="panel-kicker">INVITE</p>
             <h3 class="panel-heading">Add accountability partner</h3>
