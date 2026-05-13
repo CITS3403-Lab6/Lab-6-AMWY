@@ -153,6 +153,9 @@ class Progress(db.Model):
     xp = db.Column(db.Integer, default=0, nullable=False)
     streak = db.Column(db.Integer, default=0, nullable=False)
 
+    hp = db.Column(db.Integer, default=100, nullable=False)
+    max_hp = db.Column(db.Integer, default=100, nullable=False)
+
     strength_xp = db.Column(db.Integer, default=0, nullable=False)
     intelligence_xp = db.Column(db.Integer, default=0, nullable=False)
     spirituality_xp = db.Column(db.Integer, default=0, nullable=False)
@@ -168,8 +171,11 @@ class Progress(db.Model):
 
     __table_args__ = (
         db.CheckConstraint("level >= 1", name="progress_level_minimum"),
+        db.CheckConstraint("level <= 100", name="progress_level_cap"),
         db.CheckConstraint("xp >= 0", name="progress_xp_non_negative"),
         db.CheckConstraint("streak >= 0", name="progress_streak_non_negative"),
+        db.CheckConstraint("hp >= 0 AND hp <= max_hp", name="progress_hp_range"),
+        db.CheckConstraint("max_hp > 0", name="progress_max_hp_positive"),
         db.CheckConstraint("strength_xp >= 0", name="strength_xp_non_negative"),
         db.CheckConstraint("intelligence_xp >= 0", name="intelligence_xp_non_negative"),
         db.CheckConstraint("spirituality_xp >= 0", name="spirituality_xp_non_negative"),
