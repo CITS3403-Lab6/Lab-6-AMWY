@@ -34,3 +34,16 @@ MAX_REFLECTION_LENGTH = 1000
 MAX_USERNAME_LENGTH = 80
 MAX_EMAIL_LENGTH = 120
 MAX_PASSWORD_MIN_LENGTH = 6
+
+# HP / difficulty progression mechanism
+MAX_LEVEL = 100
+MAX_HP = 100
+DEFAULT_DIFFICULTY = "medium"
+
+DIFFICULTY_TARGETS = {
+    "easy": 50,
+    "medium": 70,
+    "hard": 90,
+}
+
+CHARACTER_REVEAL_INTERVAL = 10
