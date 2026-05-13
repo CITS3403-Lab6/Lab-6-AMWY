@@ -20,14 +20,22 @@
             <span class="value">{{ progress.streak }}</span>
         </div>
     </div>
+</section>
 
-    <h2>📊 Your Stats</h2>
-    <div class="stats-grid">
-        <div class="stat-item"><strong>STR</strong><br>{{ progress.strength_xp }}</div>
-        <div class="stat-item"><strong>INT</strong><br>{{ progress.intelligence_xp }}</div>
-        <div class="stat-item"><strong>SPI</strong><br>{{ progress.spirituality_xp }}</div>
-        <div class="stat-item"><strong>VIT</strong><br>{{ progress.vitality_xp }}</div>
-        <div class="stat-item"><strong>CHA</strong><br>{{ progress.charisma_xp }}</div>
+<section class="card">
+    <h2>🌹 Character</h2>
+    <p><strong>Stage:</strong> {{ dashboard_data.character.name }}</p>
+    <p><em>{{ dashboard_data.character.description }}</em></p>
+    <p><strong>Level:</strong> {{ dashboard_data.progress.level }}</p>
+    
+    <div class="character-reveal">
+        {% set reveal_percent = (dashboard_data.character.stage | int) * 10 %}
+        {% set mask_percent = 100 - reveal_percent %}
+        <img 
+            src="{{ url_for('static', filename='img/avatar/hiddenavatar.png') }}"
+            alt="Character"
+            style="width: 100%; object-fit: contain; clip-path: inset(0 0 {{ mask_percent }}% 0);"
+        >
     </div>
 </section>
 
@@ -36,8 +44,6 @@
 
     {% if challenge %}
         <div class="challenge-info">
-            <p><strong>Type:</strong> {{ challenge.challenge_type.title() }}</p>
-            <p><strong>Difficulty:</strong> {{ challenge.difficulty.title() }}</p>
             <p><strong>Mindset:</strong> {{ challenge.mindset_type }}</p>
             <p><strong>Created:</strong> {{ challenge.created_at.strftime('%Y-%m-%d') }}</p>
         </div>
@@ -47,16 +53,6 @@
 
     <form method="POST">
         {{ challenge_form.hidden_tag() }}
-
-        <div class="form-group">
-            {{ challenge_form.challenge_type.label }}
-            {{ challenge_form.challenge_type(class="form-control") }}
-        </div>
-
-        <div class="form-group">
-            {{ challenge_form.difficulty.label }}
-            {{ challenge_form.difficulty(class="form-control") }}
-        </div>
 
         <div class="form-group">
             {{ challenge_form.mindset_type.label }}
@@ -80,25 +76,22 @@
             <label>Task Title</label>
             <input type="text" name="title" class="form-control" placeholder="e.g., Study for 30 minutes" required>
         </div>
-
-        <div class="form-group">
-            <label>Stat Category</label>
-            <select name="stat_category" class="form-control" required>
-                <option value="">Select a category</option>
-                <option value="STR">⚔ Strength</option>
-                <option value="INT">🧠 Intelligence</option>
-                <option value="SPI">✨ Spirituality</option>
-                <option value="VIT">❤️ Vitality</option>
-                <option value="CHA">💬 Charisma</option>
-            </select>
-        </div>
-
         <button class="button button-primary" type="submit" style="width: 100%;">➕ Add Task</button>
     </form>
 </section>
 
 <section class="card">
     <h2>✅ Your Tasks</h2>
+    <div class="progress-summary">
+        <div class="stat">
+            <span class="label">Today's Completion</span>
+            <span class="value">{{ dashboard_data.tasks_today.completion_percentage }}%</span>
+        </div>
+        <div class="stat">
+            <span class="label">Tasks Done</span>
+            <span class="value">{{ dashboard_data.tasks_today.completed }} / {{ dashboard_data.tasks_today.total }}</span>
+        </div>
+    </div>
 
     {% if tasks %}
         <div class="tasks-list">
@@ -106,14 +99,6 @@
                 <div class="task-item">
                     <div class="task-info">
                         <p class="task-title">{{ task.title }}</p>
-                        <p class="task-category">
-                            {% if task.stat_category == 'STR' %}⚔ Strength
-                            {% elif task.stat_category == 'INT' %}🧠 Intelligence
-                            {% elif task.stat_category == 'SPI' %}✨ Spirituality
-                            {% elif task.stat_category == 'VIT' %}❤️ Vitality
-                            {% elif task.stat_category == 'CHA' %}💬 Charisma
-                            {% endif %}
-                        </p>
                     </div>
                     
                     {% if task.completed %}
@@ -129,25 +114,5 @@
     {% else %}
         <p>No tasks added yet. Create one above to get started!</p>
     {% endif %}
-</section>
-
-<section class="card">
-    <h2>🧘 Daily Reflection</h2>
-
-    <form method="POST" action="{{ url_for('main.reflection') }}">
-        {{ reflection_form.hidden_tag() }}
-
-        <div class="form-group">
-            {{ reflection_form.mood.label }}
-            {{ reflection_form.mood(class="form-control") }}
-        </div>
-
-        <div class="form-group">
-            {{ reflection_form.note.label }}
-            {{ reflection_form.note(class="form-control", rows="4") }}
-        </div>
-
-        {{ reflection_form.submit(class="button button-primary", style="width: 100%;") }}
-    </form>
 </section>
 {% endblock %}

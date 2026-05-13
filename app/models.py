@@ -73,7 +73,7 @@ class User(db.Model, UserMixin):
 
 
 class Challenge(db.Model):
-    """A user's selected HabitWise challenge."""
+    """A user's selected HabitWise difficulty."""
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(
@@ -83,21 +83,10 @@ class Challenge(db.Model):
         index=True,
     )
 
-    challenge_type = db.Column(db.String(50), nullable=False)
-    difficulty = db.Column(db.String(30), nullable=False)
     mindset_type = db.Column(db.String(30), nullable=False)
-
     created_at = db.Column(db.DateTime, default=utc_now, nullable=False, index=True)
 
     __table_args__ = (
-        db.CheckConstraint(
-            "challenge_type IN ('fitness', 'study', 'meditation', 'creativity', 'nutrition')",
-            name="valid_challenge_type",
-        ),
-        db.CheckConstraint(
-            "difficulty IN ('easy', 'medium', 'hard')",
-            name="valid_difficulty",
-        ),
         db.CheckConstraint(
             "mindset_type IN ('Sage', 'Warrior', 'Demon')",
             name="valid_mindset_type",
@@ -105,7 +94,7 @@ class Challenge(db.Model):
     )
 
     def __repr__(self):
-        return f"<Challenge {self.challenge_type} - {self.difficulty}>"
+        return f"<Challenge {self.mindset_type}>"
 
 
 class Task(db.Model):
