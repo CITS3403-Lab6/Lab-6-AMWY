@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HabitWise Settings</title>
+</head>
+<body>
+    <main class="settings-page">
+        <h1>Settings</h1>
+
+        <section>
+            <h2>Account Details</h2>
+            <p>Username: {{ current_user.username }}</p>
+            <p>Email: {{ current_user.email }}</p>
+        </section>
+
+        <section>
+            <h2>Privacy</h2>
+            {% if current_user.is_public %}
+                <p>Your progress is currently public.</p>
+            {% else %}
+                <p>Your progress is currently private.</p>
+            {% endif %}
+        </section>
+
+        <section>
+            <h2>Challenge Preferences</h2>
+            <p>You can update your challenge and difficulty from the dashboard.</p>
+        </section>
+
+        <nav>
+            <a href="{{ url_for('main.dashboard') }}">Back to Dashboard</a>
+        </nav>
+    </main>
+</body>
+</html>

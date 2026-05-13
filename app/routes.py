@@ -259,3 +259,9 @@ def community():
     """Show public user progress."""
     public_users = get_public_users()
     return render_template("community.html", public_users=public_users)
+
+@main.route("/settings")
+@login_required
+def settings():
+    """Render basic account and privacy settings page."""
+    return render_template("settings.html")
