@@ -3,34 +3,93 @@
 {% block title %}Dashboard - HabitWise{% endblock %}
 
 {% block content %}
-<section class="card">
-    <h1>⚔ Your Dashboard ⚔</h1>
+<!-- Header Section -->
+<div class="dashboard-header">
+    <h1 class="dashboard-title">⚔ Your Quest Dashboard ⚔</h1>
+    <p class="dashboard-subtitle">Track your progress, conquer challenges, and level up</p>
+</div>
 
-    <div class="progress-summary">
-        <div class="stat">
-            <span class="label">Level</span>
-            <span class="value">{{ progress.level }}</span>
+<!-- Progress Overview -->
+<div class="dashboard-grid">
+    <section class="dashboard-card progress-card">
+        <h2 class="card-title">📈 Your Progress</h2>
+        <div class="progress-showcase">
+            <div class="progress-stat">
+                <div class="progress-value">{{ progress.level }}</div>
+                <div class="progress-label">LEVEL</div>
+            </div>
+            <div class="progress-stat">
+                <div class="progress-value">{{ progress.xp }}</div>
+                <div class="progress-label">TOTAL XP</div>
+            </div>
+            <div class="progress-stat">
+                <div class="progress-value">{{ progress.streak }}</div>
+                <div class="progress-label">STREAK</div>
+            </div>
         </div>
-        <div class="stat">
-            <span class="label">Total XP</span>
-            <span class="value">{{ progress.xp }}</span>
-        </div>
-        <div class="stat">
-            <span class="label">Streak</span>
-            <span class="value">{{ progress.streak }}</span>
-        </div>
-    </div>
+    </section>
 
-    <h2>📊 Your Stats</h2>
-    <div class="stats-grid">
-        <div class="stat-item"><strong>STR</strong><br>{{ progress.strength_xp }}</div>
-        <div class="stat-item"><strong>INT</strong><br>{{ progress.intelligence_xp }}</div>
-        <div class="stat-item"><strong>SPI</strong><br>{{ progress.spirituality_xp }}</div>
-        <div class="stat-item"><strong>VIT</strong><br>{{ progress.vitality_xp }}</div>
-        <div class="stat-item"><strong>CHA</strong><br>{{ progress.charisma_xp }}</div>
-    </div>
-</section>
+    <!-- Stats Card -->
+    <section class="dashboard-card stats-card">
+        <h2 class="card-title">⚡ Your Stats</h2>
+        <div class="mini-stats-grid">
+            <div class="mini-stat">
+                <div class="mini-stat-icon">⚔</div>
+                <div class="mini-stat-value">{{ progress.strength_xp }}</div>
+                <div class="mini-stat-label">STR</div>
+            </div>
+            <div class="mini-stat">
+                <div class="mini-stat-icon">🧠</div>
+                <div class="mini-stat-value">{{ progress.intelligence_xp }}</div>
+                <div class="mini-stat-label">INT</div>
+            </div>
+            <div class="mini-stat">
+                <div class="mini-stat-icon">✨</div>
+                <div class="mini-stat-value">{{ progress.spirituality_xp }}</div>
+                <div class="mini-stat-label">SPI</div>
+            </div>
+            <div class="mini-stat">
+                <div class="mini-stat-icon">❤️</div>
+                <div class="mini-stat-value">{{ progress.vitality_xp }}</div>
+                <div class="mini-stat-label">VIT</div>
+            </div>
+            <div class="mini-stat">
+                <div class="mini-stat-icon">💬</div>
+                <div class="mini-stat-value">{{ progress.charisma_xp }}</div>
+                <div class="mini-stat-label">CHA</div>
+            </div>
+        </div>
+    </section>
+</div>
 
+<!-- Main Content Grid -->
+<div class="dashboard-grid-main">
+    <!-- Current Challenge Card -->
+    <section class="dashboard-card challenge-card">
+        <h2 class="card-title">⚡ Current Challenge</h2>
+        
+        {% if challenge %}
+            <div class="challenge-display">
+                <div class="challenge-badge">
+                    <span class="challenge-type">{{ challenge.challenge_type.title() }}</span>
+                    <span class="challenge-difficulty difficulty-{{ challenge.difficulty }}">
+                        {{ challenge.difficulty.upper() }}
+                    </span>
+                </div>
+                <div class="challenge-details">
+                    <p><strong>Mindset:</strong> <span class="mindset">{{ challenge.mindset_type }}</span></p>
+                    <p><strong>Started:</strong> {{ challenge.created_at.strftime('%b %d, %Y') }}</p>
+                </div>
+            </div>
+            <p style="font-size: 0.85rem; color: #9ca3af; margin-top: 12px;">Ready to face this challenge?</p>
+        {% else %}
+            <div class="empty-state">
+                <p>⚠️ No active challenge</p>
+                <p style="font-size: 0.85rem; color: #9ca3af;">Choose a challenge below to start your quest!</p>
+            </div>
+        {% endif %}
+
+<<<<<<< Updated upstream
 <section class="card">
     <h2>⚡ Current Challenge</h2>
     
@@ -74,83 +133,168 @@
         </form>
     </div>
 </section>
+=======
+        <form method="POST" class="challenge-form">
+            {{ challenge_form.hidden_tag() }}
 
-<section class="card">
-    <h2>➕ Add Daily Task</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    {{ challenge_form.challenge_type.label(class="form-label") }}
+                    {{ challenge_form.challenge_type(class="form-control") }}
+                </div>
 
-    <form method="POST" action="{{ url_for('main.add_task') }}">
-        <div class="form-group">
-            <label>Task Title</label>
-            <input type="text" name="title" class="form-control" placeholder="e.g., Study for 30 minutes" required>
-        </div>
+                <div class="form-group">
+                    {{ challenge_form.difficulty.label(class="form-label") }}
+                    {{ challenge_form.difficulty(class="form-control") }}
+                </div>
+            </div>
 
-        <div class="form-group">
-            <label>Stat Category</label>
-            <select name="stat_category" class="form-control" required>
-                <option value="">Select a category</option>
-                <option value="STR">⚔ Strength</option>
-                <option value="INT">🧠 Intelligence</option>
-                <option value="SPI">✨ Spirituality</option>
-                <option value="VIT">❤️ Vitality</option>
-                <option value="CHA">💬 Charisma</option>
-            </select>
-        </div>
+            <div class="form-group">
+                {{ challenge_form.mindset_type.label(class="form-label") }}
+                {{ challenge_form.mindset_type(class="form-control") }}
+            </div>
 
-        <button class="button button-primary" type="submit" style="width: 100%;">➕ Add Task</button>
-    </form>
-</section>
+            <div class="form-group checkbox-group">
+                {{ challenge_form.is_public(class="form-checkbox") }}
+                {{ challenge_form.is_public.label(class="checkbox-label") }}
+            </div>
 
-<section class="card">
-    <h2>✅ Your Tasks</h2>
+            <button class="button button-primary button-block" type="submit" name="save_challenge">
+                <span class="button-icon">⚔</span> Save Challenge
+            </button>
+        </form>
+    </section>
 
-    {% if tasks %}
-        <div class="tasks-list">
-            {% for task in tasks %}
-                <div class="task-item">
-                    <div class="task-info">
-                        <p class="task-title">{{ task.title }}</p>
-                        <p class="task-category">
-                            {% if task.stat_category == 'STR' %}⚔ Strength
-                            {% elif task.stat_category == 'INT' %}🧠 Intelligence
-                            {% elif task.stat_category == 'SPI' %}✨ Spirituality
-                            {% elif task.stat_category == 'VIT' %}❤️ Vitality
-                            {% elif task.stat_category == 'CHA' %}💬 Charisma
-                            {% endif %}
-                        </p>
-                    </div>
-                    
-                    {% if task.completed %}
-                        <span class="badge badge-completed">✓ Done</span>
-                    {% else %}
-                        <form method="POST" action="{{ url_for('main.complete_task', task_id=task.id) }}" style="display: inline;">
-                            <button class="button button-primary button-small" type="submit">Complete</button>
-                        </form>
+    <!-- Tasks Column -->
+    <div class="dashboard-column">
+        <!-- Add Task Card -->
+        <section class="dashboard-card add-task-card">
+            <h2 class="card-title">➕ New Task</h2>
+
+            <form method="POST" action="{{ url_for('main.add_task') }}" class="quick-form">
+                <div class="form-group">
+                    <input type="text" name="title" class="form-control" 
+                           placeholder="e.g., Run for 30 mins" required 
+                           maxlength="200">
+                </div>
+>>>>>>> Stashed changes
+
+                <div class="form-group">
+                    <select name="stat_category" class="form-control" required>
+                        <option value="">Choose stat...</option>
+                        <option value="STR">⚔ Strength</option>
+                        <option value="INT">🧠 Intelligence</option>
+                        <option value="SPI">✨ Spirituality</option>
+                        <option value="VIT">❤️ Vitality</option>
+                        <option value="CHA">💬 Charisma</option>
+                    </select>
+                </div>
+
+                <button class="button button-primary button-block button-small" type="submit">
+                    Add Task
+                </button>
+            </form>
+        </section>
+
+        <!-- Tasks List Card -->
+        <section class="dashboard-card tasks-card">
+            <h2 class="card-title">✅ Your Tasks</h2>
+
+            {% if tasks %}
+                <div class="tasks-container">
+                    {% set pending_tasks = tasks | selectattr('completed', 'equalto', False) | list %}
+                    {% set completed_tasks = tasks | selectattr('completed', 'equalto', True) | list %}
+
+                    {% if pending_tasks %}
+                        <div class="tasks-section">
+                            <h3 class="tasks-subtitle">📋 Active Tasks ({{ pending_tasks | length }})</h3>
+                            <div class="tasks-list">
+                                {% for task in pending_tasks %}
+                                    <div class="task-row">
+                                        <div class="task-content">
+                                            <p class="task-title">{{ task.title }}</p>
+                                            <p class="task-category">
+                                                {% if task.stat_category == 'STR' %}⚔ Strength
+                                                {% elif task.stat_category == 'INT' %}🧠 Intelligence
+                                                {% elif task.stat_category == 'SPI' %}✨ Spirituality
+                                                {% elif task.stat_category == 'VIT' %}❤️ Vitality
+                                                {% elif task.stat_category == 'CHA' %}💬 Charisma
+                                                {% endif %} (+{{ 10 }} XP)
+                                            </p>
+                                        </div>
+                                        <form method="POST" action="{{ url_for('main.complete_task', task_id=task.id) }}" class="task-action">
+                                            <button class="button button-primary button-small" type="submit">✓ Complete</button>
+                                        </form>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if completed_tasks %}
+                        <div class="tasks-section completed">
+                            <h3 class="tasks-subtitle">🏆 Completed ({{ completed_tasks | length }})</h3>
+                            <div class="tasks-list">
+                                {% for task in completed_tasks[:3] %}
+                                    <div class="task-row completed-task">
+                                        <div class="task-content">
+                                            <p class="task-title">{{ task.title }}</p>
+                                            <p class="task-category">{{ task.stat_category }}</p>
+                                        </div>
+                                        <span class="badge badge-done">✓</span>
+                                    </div>
+                                {% endfor %}
+                                {% if completed_tasks | length > 3 %}
+                                    <p style="font-size: 0.75rem; color: #9ca3af; text-align: center; margin-top: 8px;">
+                                        +{{ completed_tasks | length - 3 }} more completed
+                                    </p>
+                                {% endif %}
+                            </div>
+                        </div>
                     {% endif %}
                 </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <p>No tasks added yet. Create one above to get started!</p>
-    {% endif %}
-</section>
+            {% else %}
+                <div class="empty-state">
+                    <p>📭 No tasks yet</p>
+                    <p style="font-size: 0.85rem; color: #9ca3af;">Add a task above to start earning XP!</p>
+                </div>
+            {% endif %}
+        </section>
+    </div>
 
-<section class="card">
-    <h2>🧘 Daily Reflection</h2>
+    <!-- Reflection Card -->
+    <section class="dashboard-card reflection-card">
+        <h2 class="card-title">🧘 Daily Reflection</h2>
+        <p style="font-size: 0.85rem; color: #9ca3af; margin-bottom: 16px;">
+            Take a moment to reflect on your day
+        </p>
 
-    <form method="POST" action="{{ url_for('main.reflection') }}">
-        {{ reflection_form.hidden_tag() }}
+        <form method="POST" action="{{ url_for('main.reflection') }}" class="reflection-form">
+            {{ reflection_form.hidden_tag() }}
 
-        <div class="form-group">
-            {{ reflection_form.mood.label }}
-            {{ reflection_form.mood(class="form-control") }}
-        </div>
+            <div class="form-group">
+                {{ reflection_form.mood.label(class="form-label") }}
+                {{ reflection_form.mood(class="form-control") }}
+            </div>
 
-        <div class="form-group">
-            {{ reflection_form.note.label }}
-            {{ reflection_form.note(class="form-control", rows="4") }}
-        </div>
+            <div class="form-group">
+                {{ reflection_form.note.label(class="form-label") }}
+                {{ reflection_form.note(class="form-control form-textarea", rows="4", placeholder="What did you learn today?") }}
+            </div>
 
-        {{ reflection_form.submit(class="button button-primary", style="width: 100%;") }}
-    </form>
-</section>
+            {{ reflection_form.submit(class="button button-primary button-block", value="💭 Save Reflection") }}
+        </form>
+    </section>
+
+    <!-- Community Quick Link Card -->
+    <section class="dashboard-card community-link-card">
+        <h2 class="card-title">🌍 Community</h2>
+        <p style="font-size: 0.85rem; color: #9ca3af; margin-bottom: 16px;">
+            See how other warriors are progressing on their quests
+        </p>
+        <a class="button button-secondary button-block" href="{{ url_for('main.community') }}">
+            View Community →
+        </a>
+    </section>
+</div>
 {% endblock %}

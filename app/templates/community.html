@@ -3,39 +3,146 @@
 {% block title %}Community - HabitWise{% endblock %}
 
 {% block content %}
-<section class="card">
-    <h1>🌍 Community Progress 🌍</h1>
-    <p>See how other HabitWise warriors are progressing on their challenges.</p>
-</section>
+<!-- Header Section -->
+<div class="community-header">
+    <h1 class="community-title">🌍 Community Leaderboard 🌍</h1>
+    <p class="community-subtitle">
+        See how other warriors are progressing on their quests
+    </p>
+    <p class="community-description">
+        These are public profiles of users who have chosen to share their progress
+    </p>
+</div>
 
 {% if public_users %}
-    <div class="community-grid">
-        {% for user in public_users %}
-            <div class="card community-user-card">
-                <h3>⚔ {{ user.username }} ⚔</h3>
-                
-                {% if user.progress %}
-                    <div class="user-stats">
-                        <p><strong>Level</strong> <span>{{ user.progress.level }}</span></p>
-                        <p><strong>Total XP</strong> <span>{{ user.progress.xp }}</span></p>
-                        <p><strong>Streak</strong> <span>{{ user.progress.streak }}</span></p>
-                        <p style="border-bottom: none; margin-top: 15px; font-size: 0.85rem;">
-                            <strong>STR:</strong> {{ user.progress.strength_xp }} | 
-                            <strong>INT:</strong> {{ user.progress.intelligence_xp }} | 
-                            <strong>SPI:</strong> {{ user.progress.spirituality_xp }}<br>
-                            <strong>VIT:</strong> {{ user.progress.vitality_xp }} | 
-                            <strong>CHA:</strong> {{ user.progress.charisma_xp }}
-                        </p>
+    <div class="community-container">
+        <!-- Leaderboard by Level -->
+        <section class="community-section">
+            <h2 class="section-header">🏆 Top Warriors by Level</h2>
+            <div class="leaderboard-grid">
+                {% for user in (public_users | sort(attribute='progress.level', reverse=true))[:6] %}
+                    <div class="leaderboard-card">
+                        <div class="leaderboard-rank">{{ loop.index }}</div>
+                        
+                        <div class="user-header">
+                            <h3 class="user-name">⚔ {{ user.username }}</h3>
+                            <div class="user-level-badge">
+                                <span class="level-label">Lv.</span>
+                                <span class="level-value">{{ user.progress.level if user.progress else '1' }}</span>
+                            </div>
+                        </div>
+
+                        {% if user.progress %}
+                            <div class="user-stats-mini">
+                                <div class="stat-mini">
+                                    <span class="stat-icon">⚡</span>
+                                    <span class="stat-value">{{ user.progress.xp }}</span>
+                                    <span class="stat-label">XP</span>
+                                </div>
+                                <div class="stat-mini">
+                                    <span class="stat-icon">🔥</span>
+                                    <span class="stat-value">{{ user.progress.streak }}</span>
+                                    <span class="stat-label">Streak</span>
+                                </div>
+                            </div>
+
+                            <div class="stat-bars">
+                                <div class="stat-bar-row">
+                                    <span class="bar-icon">⚔</span>
+                                    <div class="bar-container">
+                                        <div class="bar-fill str-bar" style="width: {{ 100 if user.progress.strength_xp > 100 else user.progress.strength_xp }}%"></div>
+                                    </div>
+                                    <span class="bar-value">{{ user.progress.strength_xp }}</span>
+                                </div>
+                                <div class="stat-bar-row">
+                                    <span class="bar-icon">🧠</span>
+                                    <div class="bar-container">
+                                        <div class="bar-fill int-bar" style="width: {{ 100 if user.progress.intelligence_xp > 100 else user.progress.intelligence_xp }}%"></div>
+                                    </div>
+                                    <span class="bar-value">{{ user.progress.intelligence_xp }}</span>
+                                </div>
+                                <div class="stat-bar-row">
+                                    <span class="bar-icon">✨</span>
+                                    <div class="bar-container">
+                                        <div class="bar-fill spi-bar" style="width: {{ 100 if user.progress.spirituality_xp > 100 else user.progress.spirituality_xp }}%"></div>
+                                    </div>
+                                    <span class="bar-value">{{ user.progress.spirituality_xp }}</span>
+                                </div>
+                                <div class="stat-bar-row">
+                                    <span class="bar-icon">❤️</span>
+                                    <div class="bar-container">
+                                        <div class="bar-fill vit-bar" style="width: {{ 100 if user.progress.vitality_xp > 100 else user.progress.vitality_xp }}%"></div>
+                                    </div>
+                                    <span class="bar-value">{{ user.progress.vitality_xp }}</span>
+                                </div>
+                                <div class="stat-bar-row">
+                                    <span class="bar-icon">💬</span>
+                                    <div class="bar-container">
+                                        <div class="bar-fill cha-bar" style="width: {{ 100 if user.progress.charisma_xp > 100 else user.progress.charisma_xp }}%"></div>
+                                    </div>
+                                    <span class="bar-value">{{ user.progress.charisma_xp }}</span>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="user-empty">
+                                <p style="font-size: 0.85rem; color: #9ca3af;">⚠️ Just joined the quest!</p>
+                            </div>
+                        {% endif %}
                     </div>
-                {% else %}
-                    <p style="color: #9ca3af; font-size: 0.9rem;">Just joined the quest!</p>
-                {% endif %}
+                {% endfor %}
             </div>
-        {% endfor %}
+        </section>
+
+        <!-- All Community Members -->
+        <section class="community-section">
+            <h2 class="section-header">⚔ All Adventurers ({{ public_users | length }})</h2>
+            <div class="community-members">
+                {% for user in public_users %}
+                    <div class="community-member-card">
+                        <div class="member-header">
+                            <h4 class="member-name">{{ user.username }}</h4>
+                            <div class="member-badge">
+                                {% if user.progress %}
+                                    <span class="member-level">Lv. {{ user.progress.level }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {% if user.progress %}
+                            <div class="member-info">
+                                <p><strong>Total XP:</strong> {{ user.progress.xp }}</p>
+                                <p><strong>Streak:</strong> {{ user.progress.streak }} 🔥</p>
+                                <p style="font-size: 0.85rem; color: #9ca3af; margin-top: 8px;">
+                                    STR: {{ user.progress.strength_xp }} | 
+                                    INT: {{ user.progress.intelligence_xp }} | 
+                                    SPI: {{ user.progress.spirituality_xp }}<br>
+                                    VIT: {{ user.progress.vitality_xp }} | 
+                                    CHA: {{ user.progress.charisma_xp }}
+                                </p>
+                            </div>
+                        {% else %}
+                            <p style="color: #9ca3af; font-size: 0.9rem;">Just joined the quest!</p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
     </div>
+
 {% else %}
-    <section class="card">
-        <p>🏜️ The public leaderboard is empty. Be the first to share your progress!</p>
+    <section class="card empty-community">
+        <div class="empty-state-large">
+            <p class="empty-icon">🏜️</p>
+            <h2>The Quest Awaits...</h2>
+            <p>The public leaderboard is empty.</p>
+            <p style="font-size: 0.85rem; color: #9ca3af; margin-top: 8px;">The public leaderboard is currently empty.</p>
+            <p style="font-size: 0.85rem; color: #9ca3af; margin: 12px 0;">
+                Be the first warrior to share your progress!
+            </p>
+            <p style="font-size: 0.8rem; color: #6b7280;">
+                Make your profile public in your dashboard to appear here.
+            </p>
+        </div>
     </section>
 {% endif %}
 {% endblock %}

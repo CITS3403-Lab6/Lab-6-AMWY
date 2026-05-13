@@ -82,6 +82,47 @@ forms.forEach(form => {
     });
 });
 
+// Mobile Navigation Toggle
+document.addEventListener('DOMContentLoaded', function() {
+    const navToggle = document.getElementById('navToggle');
+    const navMenu = document.getElementById('navMenu');
+    const navLinks = document.querySelectorAll('.nav-link');
+
+    if (navToggle && navMenu) {
+        navToggle.addEventListener('click', function() {
+            navToggle.classList.toggle('active');
+            navMenu.classList.toggle('active');
+        });
+
+        // Close menu when a link is clicked
+        navLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                navToggle.classList.remove('active');
+                navMenu.classList.remove('active');
+            });
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.navbar')) {
+                navToggle.classList.remove('active');
+                navMenu.classList.remove('active');
+            }
+        });
+    }
+
+    // Close messages after 5 seconds
+    const messages = document.querySelectorAll('.message');
+    messages.forEach(msg => {
+        setTimeout(() => {
+            msg.style.transition = 'opacity 0.3s ease-out';
+            msg.style.opacity = '0';
+            setTimeout(() => msg.remove(), 300);
+        }, 5000);
+    });
+});
+});
+
 // Console greeting
 console.log('%c⚔️ HabitWise ⚔️', 'font-size: 24px; color: #22c55e; font-weight: bold; text-shadow: 2px 2px 0px rgba(0,0,0,0.5);');
 console.log('%cMake the oath. Face the monsters. Build unbreakable habits.', 'font-size: 12px; color: #d1d5db;');
