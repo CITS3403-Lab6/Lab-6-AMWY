@@ -3,39 +3,101 @@
 {% block title %}Community - HabitWise{% endblock %}
 
 {% block content %}
-<section class="card">
-    <h1>🌍 Community Progress 🌍</h1>
-    <p>See how other HabitWise warriors are progressing on their challenges.</p>
-</section>
-
-{% if public_users %}
-    <div class="community-grid">
-        {% for user in public_users %}
-            <div class="card community-user-card">
-                <h3>⚔ {{ user.username }} ⚔</h3>
-                
-                {% if user.progress %}
-                    <div class="user-stats">
-                        <p><strong>Level</strong> <span>{{ user.progress.level }}</span></p>
-                        <p><strong>Total XP</strong> <span>{{ user.progress.xp }}</span></p>
-                        <p><strong>Streak</strong> <span>{{ user.progress.streak }}</span></p>
-                        <p style="border-bottom: none; margin-top: 15px; font-size: 0.85rem;">
-                            <strong>STR:</strong> {{ user.progress.strength_xp }} | 
-                            <strong>INT:</strong> {{ user.progress.intelligence_xp }} | 
-                            <strong>SPI:</strong> {{ user.progress.spirituality_xp }}<br>
-                            <strong>VIT:</strong> {{ user.progress.vitality_xp }} | 
-                            <strong>CHA:</strong> {{ user.progress.charisma_xp }}
-                        </p>
-                    </div>
-                {% else %}
-                    <p style="color: #9ca3af; font-size: 0.9rem;">Just joined the quest!</p>
-                {% endif %}
-            </div>
-        {% endfor %}
-    </div>
-{% else %}
-    <section class="card">
-        <p>🏜️ The public leaderboard is empty. Be the first to share your progress!</p>
+<main class="community-page">
+    <section class="community-header">
+        <h1>Community</h1>
+        <p>Build your accountability circle, add public partners, and track shared progress.</p>
     </section>
-{% endif %}
+
+    <section class="community-card">
+        <h2>Add Accountability Partner</h2>
+        <p>Add a public user by username or email. Private users cannot be added unless they make their profile public.</p>
+
+        <form method="POST" action="{{ url_for('main.add_partner') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <label for="partner_identifier">Username or email</label>
+            <input
+                id="partner_identifier"
+                type="text"
+                name="partner_identifier"
+                placeholder="e.g. demo_public or demo_public@example.com"
+                required
+            >
+            <button type="submit">Add Partner</button>
+        </form>
+    </section>
+
+    <section class="community-card">
+        <h2>Your Accountability Circle</h2>
+        <p><strong>Circle Score:</strong> {{ circle_score }}</p>
+
+        {% if partner_cards %}
+            <div class="partner-grid">
+                {% for partner in partner_cards %}
+                    <article class="partner-card">
+                        <h3>{{ partner.username }}</h3>
+                        <p><strong>Level:</strong> {{ partner.level }}</p>
+                        <p><strong>XP:</strong> {{ partner.xp }}</p>
+                        <p><strong>HP:</strong> {{ partner.hp }} / {{ partner.max_hp }}</p>
+                        <p><strong>Streak:</strong> {{ partner.streak }}</p>
+
+                        {% if partner.current_challenge %}
+                            <p><strong>Goal:</strong> {{ partner.current_challenge|capitalize }}</p>
+                            <p><strong>Difficulty:</strong> {{ partner.difficulty|capitalize }}</p>
+                        {% else %}
+                            <p><strong>Goal:</strong> No challenge selected yet.</p>
+                        {% endif %}
+
+                        <form method="POST" action="{{ url_for('main.remove_partner', partner_id=partner.id) }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit">Remove Partner</button>
+                        </form>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>Your accountability circle is empty. Add a public user to begin.</p>
+        {% endif %}
+    </section>
+
+    <section class="community-card">
+        <h2>Public Leaderboard</h2>
+
+        {% if public_users %}
+            <div class="leaderboard-list">
+                {% for user in public_users %}
+                    <article class="leaderboard-card">
+                        <h3>{{ user.username }}</h3>
+
+                        {% if user.progress %}
+                            <p><strong>Level:</strong> {{ user.progress.level }}</p>
+                            <p><strong>XP:</strong> {{ user.progress.xp }}</p>
+                            <p><strong>Streak:</strong> {{ user.progress.streak }}</p>
+                        {% endif %}
+
+                        {% if user.latest_challenge() %}
+                            <p><strong>Goal:</strong> {{ user.latest_challenge().challenge_type|capitalize }}</p>
+                            <p><strong>Difficulty:</strong> {{ user.latest_challenge().difficulty|capitalize }}</p>
+                        {% else %}
+                            <p><strong>Goal:</strong> No challenge selected yet.</p>
+                        {% endif %}
+
+                        <form method="POST" action="{{ url_for('main.add_partner') }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="partner_identifier" value="{{ user.username }}">
+                            <button type="submit">Add to Circle</button>
+                        </form>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>The public leaderboard is empty.</p>
+        {% endif %}
+    </section>
+
+    <nav class="community-nav">
+        <a href="{{ url_for('main.dashboard') }}">Back to Dashboard</a>
+        <a href="{{ url_for('main.settings') }}">Privacy Settings</a>
+    </nav>
+</main>
 {% endblock %}

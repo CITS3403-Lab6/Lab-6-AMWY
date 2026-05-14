@@ -206,3 +206,51 @@ class Reflection(db.Model):
 
     def __repr__(self):
         return f"<Reflection user_id={self.user_id} created_at={self.created_at}>"
+
+class AccountabilityPartner(db.Model):
+    """A user-selected accountability partner relationship."""
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey("user.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    partner_id = db.Column(
+        db.Integer,
+        db.ForeignKey("user.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    created_at = db.Column(db.DateTime, default=utc_now, nullable=False)
+
+    owner = db.relationship(
+        "User",
+        foreign_keys=[user_id],
+        backref=db.backref("accountability_partners", cascade="all, delete-orphan"),
+    )
+
+    partner = db.relationship(
+        "User",
+        foreign_keys=[partner_id],
+    )
+
+    __table_args__ = (
+        db.UniqueConstraint(
+            "user_id",
+            "partner_id",
+            name="unique_accountability_partner",
+        ),
+        db.CheckConstraint(
+            "user_id != partner_id",
+            name="cannot_add_self_as_accountability_partner",
+        ),
+    )
+
+    def __repr__(self):
+        return f"<AccountabilityPartner user={self.user_id} partner={self.partner_id}>"
+

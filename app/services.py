@@ -14,6 +14,7 @@ from app.constants import (
     VALID_STAT_CATEGORIES,
 )
 from app.models import Challenge, Progress, Reflection, Task, User
+from app.models import AccountabilityPartner
 
 
 STAT_XP_FIELD_MAP = {
@@ -388,3 +389,134 @@ def get_public_users():
         .order_by(User.created_at.desc())
         .all()
     )
+
+def find_public_partner_candidate(identifier, current_user_id):
+    """Find a public user by username or email for accountability partnering."""
+    normalized_identifier = (identifier or "").strip().lower()
+
+    if not normalized_identifier:
+        raise ValueError("Please enter a username or email.")
+
+    return (
+        User.query
+        .filter(User.id != current_user_id)
+        .filter(User.is_public.is_(True))
+        .filter(
+            db.or_(
+                db.func.lower(User.username) == normalized_identifier,
+                db.func.lower(User.email) == normalized_identifier,
+            )
+        )
+        .first()
+    )
+
+
+def add_accountability_partner(user, identifier):
+    """Add a public user as the current user's accountability partner."""
+    if user is None or getattr(user, "id", None) is None:
+        raise ValueError("A valid logged-in user is required.")
+
+    candidate = find_public_partner_candidate(identifier, user.id)
+
+    if candidate is None:
+        raise ValueError("No public user found with that username or email.")
+
+    existing_partner = (
+        AccountabilityPartner.query
+        .filter_by(user_id=user.id, partner_id=candidate.id)
+        .first()
+    )
+
+    if existing_partner is not None:
+        raise ValueError("This user is already in your accountability circle.")
+
+    partner_link = AccountabilityPartner(
+        user_id=user.id,
+        partner_id=candidate.id,
+    )
+
+    db.session.add(partner_link)
+    db.session.commit()
+
+    return partner_link
+
+
+def remove_accountability_partner(user, partner_id):
+    """Remove an accountability partner from the current user's circle."""
+    if user is None or getattr(user, "id", None) is None:
+        raise ValueError("A valid logged-in user is required.")
+
+    partner_id = int(partner_id)
+
+    partner_link = (
+        AccountabilityPartner.query
+        .filter_by(user_id=user.id, partner_id=partner_id)
+        .first()
+    )
+
+    if partner_link is None:
+        raise ValueError("That accountability partner was not found.")
+
+    db.session.delete(partner_link)
+    db.session.commit()
+
+    return True
+
+
+def get_accountability_partner_cards(user):
+    """Return partner data for display on the community page."""
+    if user is None or getattr(user, "id", None) is None:
+        return []
+
+    partner_links = (
+        AccountabilityPartner.query
+        .filter_by(user_id=user.id)
+        .order_by(AccountabilityPartner.created_at.desc())
+        .all()
+    )
+
+    partner_cards = []
+
+    for link in partner_links:
+        partner = link.partner
+
+        if partner is None or not partner.is_public:
+            continue
+
+        progress = get_or_create_progress(partner)
+        latest_challenge = partner.latest_challenge()
+
+        partner_cards.append(
+            {
+                "id": partner.id,
+                "username": partner.username,
+                "email": partner.email,
+                "streak": progress.streak,
+                "level": progress.level,
+                "xp": progress.xp,
+                "hp": progress.hp,
+                "max_hp": progress.max_hp,
+                "current_challenge": latest_challenge.challenge_type if latest_challenge else None,
+                "difficulty": latest_challenge.difficulty if latest_challenge else None,
+            }
+        )
+
+    return partner_cards
+
+
+def calculate_circle_score(user):
+    """Calculate a simple accountability circle score from partner progress."""
+    partner_cards = get_accountability_partner_cards(user)
+
+    if not partner_cards:
+        return 0
+
+    partner_scores = []
+
+    for partner in partner_cards:
+        level_score = min(50, partner["level"] * 5)
+        streak_score = min(50, partner["streak"] * 5)
+        partner_scores.append(level_score + streak_score)
+
+    return round(sum(partner_scores) / len(partner_scores))
+

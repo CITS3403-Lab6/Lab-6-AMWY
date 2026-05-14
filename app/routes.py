@@ -12,6 +12,10 @@ from app.constants import (
 from app.forms import ChallengeForm, LoginForm, ReflectionForm, SignupForm
 from app.models import Challenge, Task, User
 from app.services import (
+    add_accountability_partner,
+    calculate_circle_score,
+    get_accountability_partner_cards,
+    remove_accountability_partner,
     apply_daily_hp_result,
     build_dashboard_data,
     complete_user_task,
@@ -258,9 +262,23 @@ def reflection():
 @main.route("/community")
 @login_required
 def community():
-    """Show public user progress."""
-    public_users = get_public_users()
-    return render_template("community.html", public_users=public_users)
+    """Show public users and the current user's accountability circle."""
+    try:
+        public_users = get_public_users(current_user.id)
+    except TypeError:
+        public_users = get_public_users()
+
+    partner_cards = get_accountability_partner_cards(current_user)
+    circle_score = calculate_circle_score(current_user)
+
+    return render_template(
+        "community.html",
+        users=public_users,
+        public_users=public_users,
+        partners=partner_cards,
+        partner_cards=partner_cards,
+        circle_score=circle_score,
+    )
 
 @main.route("/settings", methods=["GET", "POST"])
 @login_required
@@ -326,4 +344,49 @@ def evaluate_day():
         flash("Could not evaluate today. Please try again.", "error")
 
     return redirect(url_for("main.dashboard"))
+
+@main.route("/community/add-partner", methods=["POST"])
+@main.route("/community/partners/add", methods=["POST"])
+@main.route("/add-partner", methods=["POST"])
+@login_required
+def add_partner():
+    """Add a public user to the current user's accountability circle."""
+    identifier = (
+        request.form.get("partner_identifier")
+        or request.form.get("partner_username")
+        or request.form.get("partner_email")
+        or request.form.get("username")
+        or request.form.get("email")
+        or request.form.get("user_identifier")
+        or ""
+    ).strip()
+
+    try:
+        partner_link = add_accountability_partner(current_user, identifier)
+        flash(f"{partner_link.partner.username} added to your accountability circle.", "success")
+    except ValueError as exc:
+        flash(str(exc), "error")
+    except Exception:
+        db.session.rollback()
+        flash("Could not add accountability partner. Please try again.", "error")
+
+    return redirect(url_for("main.community"))
+
+
+@main.route("/community/remove-partner/<int:partner_id>", methods=["POST"])
+@main.route("/community/partners/<int:partner_id>/remove", methods=["POST"])
+@main.route("/remove-partner/<int:partner_id>", methods=["POST"])
+@login_required
+def remove_partner(partner_id):
+    """Remove a user from the current user's accountability circle."""
+    try:
+        remove_accountability_partner(current_user, partner_id)
+        flash("Accountability partner removed.", "success")
+    except ValueError as exc:
+        flash(str(exc), "error")
+    except Exception:
+        db.session.rollback()
+        flash("Could not remove accountability partner. Please try again.", "error")
+
+    return redirect(url_for("main.community"))
 
