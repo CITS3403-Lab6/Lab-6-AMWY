@@ -1,27 +1,24 @@
 from datetime import date
+
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy.exc import IntegrityError
 
 from app import db
-from app.constants import (
-    MAX_TASK_TITLE_LENGTH,
-    TASK_XP_REWARD,
-    VALID_STAT_CATEGORIES,
-)
+from app.constants import MAX_TASK_TITLE_LENGTH, TASK_XP_REWARD
 from app.forms import ChallengeForm, LoginForm, ReflectionForm, SignupForm
 from app.models import Challenge, Task, User
 from app.services import (
     add_accountability_partner,
-    calculate_circle_score,
-    get_accountability_partner_cards,
-    remove_accountability_partner,
     apply_daily_hp_result,
     build_dashboard_data,
+    calculate_circle_score,
     complete_user_task,
     create_reflection,
+    get_accountability_partner_cards,
     get_or_create_progress,
     get_public_users,
+    remove_accountability_partner,
 )
 
 main = Blueprint("main", __name__)
@@ -84,6 +81,7 @@ def login():
             get_or_create_progress(user)
             login_user(user)
             flash("Logged in successfully.", "success")
+
             next_page = request.args.get("next")
             return redirect(next_page or url_for("main.dashboard"))
 
@@ -116,15 +114,13 @@ def dashboard():
 
             challenge = Challenge(
                 user_id=current_user.id,
-                challenge_type=challenge_form.challenge_type.data,
-                difficulty=challenge_form.difficulty.data,
                 mindset_type=challenge_form.mindset_type.data,
             )
 
             db.session.add(challenge)
             db.session.commit()
 
-            flash("Challenge saved successfully.", "success")
+            flash("Challenge started successfully.", "success")
             return redirect(url_for("main.dashboard"))
 
         except IntegrityError:
@@ -134,10 +130,9 @@ def dashboard():
             db.session.rollback()
             flash("Could not save challenge. Please try again.", "error")
 
-    latest_challenge = current_user.latest_challenge()
     tasks = (
         Task.query
-        .filter_by(user_id=current_user.id)
+        .filter_by(user_id=current_user.id, task_date=date.today())
         .order_by(Task.completed.asc(), Task.created_at.desc())
         .all()
     )
@@ -148,11 +143,19 @@ def dashboard():
         "dashboard.html",
         challenge_form=challenge_form,
         reflection_form=reflection_form,
-        challenge=latest_challenge,
+        challenge=current_user.latest_challenge(),
         tasks=tasks,
         progress=progress,
         dashboard_data=dashboard_data,
     )
+
+
+@main.route("/challenge", methods=["GET"])
+@login_required
+def challenge_setup():
+    """Render challenge/difficulty setup page."""
+    challenge_form = ChallengeForm()
+    return render_template("challenge_setup.html", challenge_form=challenge_form)
 
 
 @main.route("/add-task", methods=["POST"])
@@ -168,10 +171,6 @@ def add_task():
 
     if len(title) > MAX_TASK_TITLE_LENGTH:
         flash("Task title must be under 200 characters.", "error")
-        return redirect(url_for("main.dashboard"))
-
-    if stat_category not in VALID_STAT_CATEGORIES:
-        flash("Invalid stat category.", "error")
         return redirect(url_for("main.dashboard"))
 
     try:
@@ -213,7 +212,10 @@ def complete_task(task_id):
             flash(f"Task completed! You earned {TASK_XP_REWARD} XP.", "success")
 
             if levelled_up:
-                flash(f"Level up! You are now level {current_user.progress.level}.", "success")
+                flash(
+                    f"Level up! You are now level {current_user.progress.level}.",
+                    "success",
+                )
         else:
             flash("Task was already completed.", "info")
 
@@ -280,6 +282,7 @@ def community():
         circle_score=circle_score,
     )
 
+
 @main.route("/settings", methods=["GET", "POST"])
 @login_required
 def settings():
@@ -299,16 +302,22 @@ def settings():
             "on",
         }
 
-        db.session.commit()
+        try:
+            db.session.commit()
 
-        if current_user.is_public:
-            flash("Your progress is now public in the community page.", "success")
-        else:
-            flash("Your progress is now private.", "success")
+            if current_user.is_public:
+                flash("Your progress is now public in the community page.", "success")
+            else:
+                flash("Your progress is now private.", "success")
+
+        except Exception:
+            db.session.rollback()
+            flash("Could not update privacy settings.", "error")
 
         return redirect(url_for("main.settings"))
 
     return render_template("settings.html")
+
 
 @main.route("/evaluate-day", methods=["POST"])
 @login_required
@@ -331,6 +340,7 @@ def evaluate_day():
             completion_percentage=completion_percentage,
             difficulty=difficulty,
         )
+
         progress.last_evaluated_date = today
         db.session.commit()
 
@@ -344,6 +354,7 @@ def evaluate_day():
         flash("Could not evaluate today. Please try again.", "error")
 
     return redirect(url_for("main.dashboard"))
+
 
 @main.route("/community/add-partner", methods=["POST"])
 @main.route("/community/partners/add", methods=["POST"])
@@ -363,7 +374,10 @@ def add_partner():
 
     try:
         partner_link = add_accountability_partner(current_user, identifier)
-        flash(f"{partner_link.partner.username} added to your accountability circle.", "success")
+        flash(
+            f"{partner_link.partner.username} added to your accountability circle.",
+            "success",
+        )
     except ValueError as exc:
         flash(str(exc), "error")
     except Exception:
@@ -389,4 +403,3 @@ def remove_partner(partner_id):
         flash("Could not remove accountability partner. Please try again.", "error")
 
     return redirect(url_for("main.community"))
-

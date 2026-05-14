@@ -1,6 +1,8 @@
 from datetime import date, datetime
 import math
 
+from sqlalchemy import or_
+
 from app import db
 from app.constants import (
     CHARACTER_REVEAL_INTERVAL,
@@ -11,28 +13,12 @@ from app.constants import (
     MAX_LEVEL,
     MAX_REFLECTION_LENGTH,
     TASK_XP_REWARD,
-    VALID_STAT_CATEGORIES,
 )
-from app.models import Challenge, Progress, Reflection, Task, User
-from app.models import AccountabilityPartner
-
-
-STAT_XP_FIELD_MAP = {
-    "STR": "strength_xp",
-    "INT": "intelligence_xp",
-    "SPI": "spirituality_xp",
-    "VIT": "vitality_xp",
-    "CHA": "charisma_xp",
-}
+from app.models import AccountabilityPartner, Progress, Reflection, Task, User
 
 
 def _coerce_int(value, field_name, default=None):
-    """
-    Safely convert a value to int.
-
-    If default is provided, None becomes default.
-    Invalid non-numeric values still raise ValueError so bugs are not hidden.
-    """
+    """Safely convert a value to int."""
     if value is None:
         if default is not None:
             return default
@@ -50,18 +36,13 @@ def _coerce_int(value, field_name, default=None):
 
 
 def _clamp_int(value, minimum, maximum, field_name, default=None):
-    """Convert a value to int and clamp it inside a safe range."""
+    """Convert a value to int and clamp it between minimum and maximum."""
     number = _coerce_int(value, field_name, default=default)
     return max(minimum, min(maximum, number))
 
 
 def normalise_progress_fields(progress):
-    """
-    Repair unsafe progress values before using them in calculations.
-
-    This protects the dashboard from corrupted, missing, or out-of-range
-    progress data.
-    """
+    """Repair unsafe progress values before calculations."""
     if progress is None:
         raise ValueError("Progress record is required.")
 
@@ -84,13 +65,7 @@ def normalise_progress_fields(progress):
 
 
 def calculate_level_from_xp(xp):
-    """
-    Convert total XP into a capped level.
-
-    Level 1: 0-99 XP
-    Level 2: 100-199 XP
-    Level cap: 100
-    """
+    """Convert XP into a capped level."""
     safe_xp = _coerce_int(xp, "XP", default=0)
 
     if safe_xp < 0:
@@ -100,12 +75,7 @@ def calculate_level_from_xp(xp):
 
 
 def get_or_create_progress(user):
-    """
-    Ensure a user has a progress record.
-
-    Also normalises unsafe progress values so old/corrupted records do not
-    crash the dashboard or progression calculations.
-    """
+    """Return a user's progress record, creating one if missing."""
     if user is None or getattr(user, "id", None) is None:
         raise ValueError("A valid user is required to load progress.")
 
@@ -126,45 +96,20 @@ def get_or_create_progress(user):
 
     return progress
 
-def validate_task_category(stat_category):
-    """Validate that a task category is supported."""
-    if stat_category not in VALID_STAT_CATEGORIES:
-        raise ValueError("Invalid stat category.")
-
 
 def award_task_xp(user, task):
-    """
-    Award XP to a user for a completed task.
-
-    Returns:
-        bool: True if the user levelled up.
-    """
+    """Award XP for a completed task and update level."""
     progress = get_or_create_progress(user)
 
-    validate_task_category(task.stat_category)
-
     old_level = progress.level
-
     progress.xp += TASK_XP_REWARD
-
-    stat_field = STAT_XP_FIELD_MAP[task.stat_category]
-    current_stat_xp = getattr(progress, stat_field)
-    setattr(progress, stat_field, current_stat_xp + TASK_XP_REWARD)
-
     progress.level = calculate_level_from_xp(progress.xp)
 
     return progress.level > old_level
 
 
 def complete_user_task(user, task):
-    """
-    Complete a user's task and award XP exactly once.
-
-    Returns:
-        tuple:
-            completed_now: True if task changed from incomplete to complete.
-            levelled_up: True if completing the task increased the user's level.
-    """
+    """Complete a user's task and award XP only once."""
     if task.user_id != user.id:
         raise PermissionError("Cannot complete another user's task.")
 
@@ -178,19 +123,10 @@ def complete_user_task(user, task):
     return True, levelled_up
 
 
-
-
 def get_difficulty_target(difficulty):
-    """
-    Return the daily completion percentage needed to avoid HP damage.
-
-    Easy = 50%
-    Medium = 70%
-    Hard = 90%
-
-    Unknown, blank, or badly-cased difficulty values fall back to medium.
-    """
+    """Return required daily completion percentage for difficulty."""
     normalized_difficulty = str(difficulty or DEFAULT_DIFFICULTY).strip().lower()
+
     return DIFFICULTY_TARGETS.get(
         normalized_difficulty,
         DIFFICULTY_TARGETS[DEFAULT_DIFFICULTY],
@@ -198,15 +134,7 @@ def get_difficulty_target(difficulty):
 
 
 def calculate_completion_percentage(total_tasks, completed_tasks):
-    """
-    Calculate daily task completion percentage safely.
-
-    Handles:
-    - zero tasks
-    - negative task values
-    - completed count greater than total
-    - numeric strings
-    """
+    """Calculate completion percentage safely."""
     safe_total = _coerce_int(total_tasks, "total_tasks", default=0)
     safe_completed = _coerce_int(completed_tasks, "completed_tasks", default=0)
 
@@ -219,14 +147,7 @@ def calculate_completion_percentage(total_tasks, completed_tasks):
 
 
 def calculate_character_reveal_stage(level):
-    """
-    Reveal a new character stage every 10 levels.
-
-    Level 1-9 = stage 0
-    Level 10 = stage 1
-    Level 20 = stage 2
-    Level 100 = stage 10
-    """
+    """Reveal a new character stage every CHARACTER_REVEAL_INTERVAL levels."""
     safe_level = _clamp_int(
         value=level,
         minimum=1,
@@ -239,18 +160,7 @@ def calculate_character_reveal_stage(level):
 
 
 def apply_daily_hp_result(progress, completion_percentage, difficulty=None):
-    """
-    Apply HP damage or streak gain based on daily completion percentage.
-
-    This function does not commit by itself. The caller should commit after
-    applying the result.
-
-    Defensive behaviour:
-    - clamps completion percentage between 0 and 100
-    - falls back invalid difficulty to medium
-    - repairs unsafe HP/max HP/streak values
-    - never allows HP to drop below zero
-    """
+    """Apply HP damage or streak gain based on daily completion."""
     progress = normalise_progress_fields(progress)
 
     safe_completion = _clamp_int(
@@ -287,7 +197,7 @@ def apply_daily_hp_result(progress, completion_percentage, difficulty=None):
 
 
 def get_today_tasks(user_id, task_date=None):
-    """Return the user's tasks for a specific date, defaulting to today."""
+    """Return the user's tasks for a selected date, defaulting to today."""
     safe_user_id = _coerce_int(user_id, "user_id")
 
     if safe_user_id <= 0:
@@ -311,7 +221,7 @@ def get_today_tasks(user_id, task_date=None):
 
 
 def get_latest_challenge(user):
-    """Return a user's latest challenge, if one exists."""
+    """Return a user's latest challenge."""
     if user is None:
         raise ValueError("A valid user is required to load latest challenge.")
 
@@ -319,12 +229,7 @@ def get_latest_challenge(user):
 
 
 def build_dashboard_data(user):
-    """
-    Build clean dashboard data for frontend use.
-
-    This keeps the dashboard template from needing to understand backend
-    progression calculations and provides safe fallback values.
-    """
+    """Build dashboard data safely for the frontend."""
     if user is None or getattr(user, "id", None) is None:
         raise ValueError("A valid user is required to build dashboard data.")
 
@@ -336,8 +241,20 @@ def build_dashboard_data(user):
     completion_percentage = calculate_completion_percentage(total_tasks, completed_tasks)
 
     latest_challenge = get_latest_challenge(user)
-    difficulty = latest_challenge.difficulty if latest_challenge else DEFAULT_DIFFICULTY
+
+    difficulty = (
+        getattr(latest_challenge, "difficulty", DEFAULT_DIFFICULTY)
+        if latest_challenge
+        else DEFAULT_DIFFICULTY
+    )
+
     difficulty_target = get_difficulty_target(difficulty)
+
+    current_challenge = (
+        getattr(latest_challenge, "mindset_type", None)
+        if latest_challenge
+        else None
+    )
 
     return {
         "total_tasks": total_tasks,
@@ -348,20 +265,21 @@ def build_dashboard_data(user):
         "xp": progress.xp,
         "level": progress.level,
         "streak": progress.streak,
-        "current_challenge": latest_challenge.challenge_type if latest_challenge else None,
+        "current_challenge": current_challenge,
         "difficulty": difficulty,
         "difficulty_target": difficulty_target,
         "character_reveal_stage": calculate_character_reveal_stage(progress.level),
         "today_tasks": today_tasks,
     }
 
-def create_reflection(user, mood, note):
-    """
-    Create a reflection entry for a user.
 
-    Blank notes are allowed because a user may only want to record mood.
-    Extremely long notes are rejected.
-    """
+def get_dashboard_data(user):
+    """Compatibility wrapper for dashboard data."""
+    return build_dashboard_data(user)
+
+
+def create_reflection(user, mood, note):
+    """Create a reflection entry."""
     cleaned_note = note.strip() if note else ""
 
     if len(cleaned_note) > MAX_REFLECTION_LENGTH:
@@ -379,16 +297,15 @@ def create_reflection(user, mood, note):
     return reflection
 
 
-def get_public_users():
-    """
-    Return only users who have opted into public progress sharing.
-    """
-    return (
-        User.query
-        .filter_by(is_public=True)
-        .order_by(User.created_at.desc())
-        .all()
-    )
+def get_public_users(exclude_user_id=None):
+    """Return users who share progress publicly."""
+    query = User.query.filter_by(is_public=True)
+
+    if exclude_user_id is not None:
+        query = query.filter(User.id != exclude_user_id)
+
+    return query.order_by(User.created_at.desc()).all()
+
 
 def find_public_partner_candidate(identifier, current_user_id):
     """Find a public user by username or email for accountability partnering."""
@@ -402,7 +319,7 @@ def find_public_partner_candidate(identifier, current_user_id):
         .filter(User.id != current_user_id)
         .filter(User.is_public.is_(True))
         .filter(
-            db.or_(
+            or_(
                 db.func.lower(User.username) == normalized_identifier,
                 db.func.lower(User.email) == normalized_identifier,
             )
@@ -496,8 +413,16 @@ def get_accountability_partner_cards(user):
                 "xp": progress.xp,
                 "hp": progress.hp,
                 "max_hp": progress.max_hp,
-                "current_challenge": latest_challenge.challenge_type if latest_challenge else None,
-                "difficulty": latest_challenge.difficulty if latest_challenge else None,
+                "current_challenge": (
+                    getattr(latest_challenge, "mindset_type", None)
+                    if latest_challenge
+                    else None
+                ),
+                "difficulty": (
+                    getattr(latest_challenge, "difficulty", DEFAULT_DIFFICULTY)
+                    if latest_challenge
+                    else DEFAULT_DIFFICULTY
+                ),
             }
         )
 
@@ -519,4 +444,3 @@ def calculate_circle_score(user):
         partner_scores.append(level_score + streak_score)
 
     return round(sum(partner_scores) / len(partner_scores))
-
