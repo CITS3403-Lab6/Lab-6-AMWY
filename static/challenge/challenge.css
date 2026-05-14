@@ -73,9 +73,9 @@ body {
 }
 
 .setup-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18px;
+  grid-template-columns: 1fr;
+  max-width: 600px;
+  margin: 0 auto 18px;
 }
 
 .panel {
@@ -222,6 +222,38 @@ body {
 
 .start-btn:not(:disabled):hover {
   transform: translateY(-2px);
+}
+
+.hp-explainer {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.hp-rule {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 18px;
+  flex: 1;
+}
+
+.hp-icon {
+  font-size: 1.3rem;
+}
+
+.hp-rule p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.hp-rule strong {
+  color: var(--text);
 }
 
 @media (max-width: 980px) {

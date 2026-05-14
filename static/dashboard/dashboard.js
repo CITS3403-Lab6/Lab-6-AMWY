@@ -37,3 +37,38 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     }
   });
 });
+
+document.addEventListener("DOMContentLoaded", function() {
+  const TOTAL_TASKS_COMPLETED = 35;
+  const level = Math.min(Math.floor(TOTAL_TASKS_COMPLETED / 10), 10);
+
+  function updateAvatarReveal(level) {
+    const mask = document.getElementById("avatar-mask");
+    const levelText = document.getElementById("avatar-level-text");
+
+    const revealPercent = (level / 10) * 100;
+    const maskHeight = 100 - revealPercent;
+
+    if (mask) {
+      mask.style.height = maskHeight + "%";
+      mask.style.top = "auto";
+      mask.style.bottom = "0";
+    }
+    if (levelText) levelText.textContent = level >= 10
+      ? "Level 10 — Fully revealed!"
+      : `Level ${level} — ${10 - level} levels until full reveal`;
+  }
+
+  updateAvatarReveal(level);
+
+  const slider = document.getElementById("level-test-slider");
+  const sliderDisplay = document.getElementById("slider-level-display");
+
+  if (slider) {
+    slider.addEventListener("input", () => {
+      const testLevel = parseInt(slider.value);
+      sliderDisplay.textContent = testLevel;
+      updateAvatarReveal(testLevel);
+    });
+  }
+});

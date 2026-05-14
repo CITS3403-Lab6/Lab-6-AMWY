@@ -16,34 +16,29 @@
   <div class="page-bg"></div>
 
   <div class="settings-shell">
-    <aside class="sidebar">
-      <div class="brand-box">
+    <header class="header">
+      <div class="header-top">
         <div class="brand-icon">◌</div>
-        <div>
-          <h1 class="brand-title">HabitWise</h1>
-          <p class="brand-subtitle">Settings</p>
-        </div>
+        <h1 class="brand-title">HabitWise</h1>
+        <p class="brand-subtitle">Stay disciplined.</p>
       </div>
-
       <nav class="side-nav">
         <a class="nav-item" href="dashboard.html">Dashboard</a>
-        <a class="nav-item" href="challenge.html">Challenge Setup</a>
-        <a class="nav-item" href="community.html">Community</a>
+        <a class="nav-item" href="challenge.html">Challenges</a>
+        <a class="nav-item" href="community.html">Partners</a>
         <a class="nav-item active" href="settings.html">Settings</a>
       </nav>
-
-      <div class="sidebar-note">
-        <p class="note-title">Keep it simple</p>
-        <p class="note-text">Adjust your preferences without clutter.</p>
-      </div>
-    </aside>
+    </header>
 
     <main class="main-content">
       <section class="welcome-card">
-        <div>
-          <p class="eyebrow">PREFERENCES</p>
-          <h2 id="welcome-name">Account settings</h2>
-          <p>Manage your account, notifications, privacy, appearance, and challenge preferences.</p>
+        <div class="welcome-inner">
+          <div>
+            <p class="eyebrow">PREFERENCES</p>
+            <h2 id="welcome-name">Account settings</h2>
+            <p>Manage your account, notifications, privacy, and challenge preferences.</p>
+          </div>
+          <button id="save-settings-btn" class="action-btn green">Save Settings</button>
         </div>
       </section>
 
@@ -52,7 +47,7 @@
           <article class="panel">
             <p class="panel-kicker">ACCOUNT</p>
             <h3 class="panel-heading">Profile details</h3>
-
+ 
             <div class="info-grid">
               <div class="info-box">
                 <p class="info-label">Username</p>
@@ -138,28 +133,6 @@
           </article>
 
           <article class="panel">
-            <p class="panel-kicker">APPEARANCE</p>
-            <h3 class="panel-heading">Theme preferences</h3>
-
-            <div class="select-group">
-              <label class="input-label" for="theme-select">Theme</label>
-              <select id="theme-select" class="select-input">
-                <option value="dark">Dark</option>
-                <option value="light">Light</option>
-              </select>
-            </div>
-
-            <div class="preview-card">
-              <p class="preview-label">Theme preview</p>
-              <div class="preview-box">
-                <div class="preview-panel preview-primary"></div>
-                <div class="preview-panel preview-secondary"></div>
-                <div class="preview-panel preview-accent"></div>
-              </div>
-            </div>
-          </article>
-
-          <article class="panel">
             <p class="panel-kicker">CHALLENGE</p>
             <h3 class="panel-heading">Challenge preferences</h3>
 
@@ -170,7 +143,7 @@
 
             <div class="button-row">
               <button id="change-challenge-btn" class="action-btn blue">Change Challenge</button>
-              <button id="save-settings-btn" class="action-btn green">Save Settings</button>
+             
             </div>
 
             <p id="save-message" class="save-message"></p>

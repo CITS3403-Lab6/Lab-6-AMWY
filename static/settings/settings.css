@@ -42,25 +42,43 @@ body {
   z-index: -1;
 }
 
-.settings-shell {
-  display: grid;
-  grid-template-columns: 240px 1fr;
-  min-height: 100vh;
+.header {
+  background: linear-gradient(180deg, #081324 0%, #06101d 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 20px 32px 0;
+  text-align: center;
 }
 
-.sidebar {
-  background: linear-gradient(180deg, #081324 0%, #06101d 100%);
-  border-right: 1px solid var(--border);
-  padding: 28px 18px;
+.header-top {
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  align-items: center;
+  gap: 6px;
+  padding-bottom: 12px;
 }
 
-.brand-box {
+.side-nav {
   display: flex;
-  align-items: center;
-  gap: 14px;
+  flex-direction: row;
+  justify-content: center;
+  gap: 4px;
+  border-top: 1px solid var(--border);
+  padding: 4px 0;
+}
+
+.nav-item {
+  text-decoration: none;
+  color: #b9c5da;
+  padding: 10px 18px;
+  border-radius: 8px;
+  transition: 0.2s ease;
+  font-weight: 600;
+}
+
+.nav-item:hover,
+.nav-item.active {
+  background: rgba(139, 92, 246, 0.14);
+  color: #d8c6ff;
 }
 
 .brand-icon {
@@ -79,41 +97,13 @@ body {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 800;
+  color: var(--text);
 }
 
 .brand-subtitle {
   margin: 4px 0 0;
   color: var(--muted);
   font-size: 0.95rem;
-}
-
-.side-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.nav-item {
-  text-decoration: none;
-  color: #b9c5da;
-  padding: 14px 16px;
-  border-radius: 14px;
-  transition: 0.2s ease;
-  font-weight: 600;
-}
-
-.nav-item:hover,
-.nav-item.active {
-  background: rgba(139, 92, 246, 0.14);
-  color: #d8c6ff;
-}
-
-.sidebar-note {
-  margin-top: auto;
-  padding: 18px;
-  border-radius: 18px;
-  background: linear-gradient(180deg, #0c182d 0%, #0a1526 100%);
-  border: 1px solid var(--border);
 }
 
 .note-title {
@@ -139,6 +129,13 @@ body {
   border-radius: 22px;
   padding: 26px 30px;
   margin-bottom: 18px;
+}
+
+.welcome-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
 }
 
 .eyebrow {
@@ -383,11 +380,6 @@ body.light-theme {
     #eef3fb;
 }
 
-body.light-theme .sidebar {
-  background: linear-gradient(180deg, #f7f9fd 0%, #edf2f8 100%);
-  border-right: 1px solid rgba(22, 34, 53, 0.08);
-}
-
 body.light-theme .nav-item {
   color: #44526a;
 }
@@ -397,7 +389,6 @@ body.light-theme .nav-item:hover {
   color: #5d39b8;
 }
 
-body.light-theme .sidebar-note,
 body.light-theme .welcome-card,
 body.light-theme .panel,
 body.light-theme .summary-box,

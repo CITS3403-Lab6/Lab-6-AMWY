@@ -5,55 +5,56 @@ if (storedUsername && welcomeName) {
   welcomeName.textContent = `${storedUsername}'s community`;
 }
 
-const filterButtons = document.querySelectorAll(".filter-btn");
 const partnerCards = document.querySelectorAll(".partner-card");
-const toolbarNote = document.getElementById("toolbar-note");
-const actionLog = document.getElementById("action-log");
 const inviteBtn = document.getElementById("invite-btn");
 const inviteStatus = document.getElementById("invite-status");
 const partnerNameInput = document.getElementById("partner-name");
 const partnerCodeInput = document.getElementById("partner-code");
 
-function setToolbarText(filter) {
-  if (filter === "all") toolbarNote.textContent = "Showing all accountability partners";
-  if (filter === "complete") toolbarNote.textContent = "Showing partners who completed today";
-  if (filter === "support") toolbarNote.textContent = "Showing partners who may need support";
-}
+const partyMembers = [
+  { name: "Wooji", streak: 12, mode: "Warrior" },  // slot 1 — party leader
+  { name: "Alex", streak: 9, mode: "Sage" },         // slot 2 — joined second
+  { name: "Mia", streak: 4, mode: "Demon" },         // slot 3 — joined third
+  null                                                // slot 4 — empty
+];
 
-filterButtons.forEach(button => {
-  button.addEventListener("click", () => {
-    filterButtons.forEach(btn => btn.classList.remove("active"));
-    button.classList.add("active");
+//the following code is to replace the above after flask is connected.
+//const partyMembers = await fetch('/api/circle/members').then(r => r.json());
 
-    const filter = button.dataset.filter;
-    setToolbarText(filter);
+const modeIcons = {
+  Sage: "../img/icons/sage.png",
+  Warrior: "../img/icons/warrior.png",
+  Demon: "../img/icons/demon.png"
+};
 
-    partnerCards.forEach(card => {
-      const status = card.dataset.status;
+function renderParty() {
+  const slots = document.querySelectorAll(".party-slot");
+  slots.forEach((slot, i) => {
+    const member = partyMembers[i];
+    const nameEl = slot.querySelector(".slot-name");
+    const statsEl = slot.querySelector(".slot-stats");
+    const imgEl = slot.querySelector(".weapon-img");
+    const modeEl = slot.querySelector(".slot-mode");
 
-      if (filter === "all") {
-        card.style.display = "flex";
-      } else if (filter === "complete" && status === "complete") {
-        card.style.display = "flex";
-      } else if (filter === "support" && status === "support") {
-        card.style.display = "flex";
-      } else {
-        card.style.display = "none";
-      }
-    });
+    if (member) {
+      slot.classList.remove("empty");
+      nameEl.textContent = member.name;
+      statsEl.textContent = `Streak: ${member.streak} days`;
+      imgEl.src = modeIcons[member.mode];
+      imgEl.alt = member.mode;
+      modeEl.textContent = member.mode;
+    } else {
+      slot.classList.add("empty");
+      nameEl.textContent = "Empty";
+      statsEl.textContent = "Awaiting member";
+      imgEl.src = "../img/icons/Shadow.png";
+      imgEl.alt = "Empty slot";
+      modeEl.textContent = "—";
+    }
   });
-});
-
-function addLogItem(message) {
-  if (actionLog.querySelector(".empty-log")) {
-    actionLog.innerHTML = "";
-  }
-
-  const item = document.createElement("div");
-  item.className = "log-item";
-  item.textContent = message;
-  actionLog.prepend(item);
 }
+
+renderParty();
 
 document.querySelectorAll("[data-action]").forEach(button => {
   button.addEventListener("click", () => {
