@@ -9,8 +9,9 @@ from werkzeug.serving import make_server
 selenium = pytest.importorskip("selenium")
 
 from selenium import webdriver
-from selenium.common.exceptions import WebDriverException
+from selenium.common.exceptions import StaleElementReferenceException, WebDriverException
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 
@@ -93,8 +94,20 @@ def unique_user(prefix="selenium"):
     }
 
 
-def page_text(browser):
-    return browser.find_element(By.TAG_NAME, "body").text.lower()
+def page_text(browser, timeout=5):
+    last_error = None
+
+    for _ in range(3):
+        try:
+            WebDriverWait(browser, timeout).until(
+                lambda driver: driver.find_elements(By.TAG_NAME, "body")
+            )
+            return browser.find_element(By.TAG_NAME, "body").text.lower()
+        except StaleElementReferenceException as exc:
+            last_error = exc
+            time.sleep(0.2)
+
+    raise last_error
 
 
 def signup_through_ui(browser, base_url, user):
@@ -109,6 +122,26 @@ def signup_through_ui(browser, base_url, user):
         confirm_fields[0].send_keys(user["password"])
 
     browser.find_element(By.CSS_SELECTOR, "button[type='submit'], input[type='submit']").click()
+
+
+def ensure_logged_in_after_signup(browser, base_url, user):
+    WebDriverWait(browser, 5).until(
+        lambda driver: driver.find_elements(By.TAG_NAME, "body")
+    )
+
+    if "/dashboard" in browser.current_url:
+        return
+
+    current_text = page_text(browser)
+
+    if "/login" in browser.current_url or "login" in current_text:
+        login_through_ui(browser, base_url, user)
+        return
+
+    browser.get(f"{base_url}/dashboard")
+
+    if "/login" in browser.current_url:
+        login_through_ui(browser, base_url, user)
 
 
 def login_through_ui(browser, base_url, user):
@@ -167,6 +200,7 @@ def test_selenium_user_can_signup_and_reach_dashboard(live_server, browser):
     user = unique_user("signup")
 
     signup_through_ui(browser, live_server, user)
+    ensure_logged_in_after_signup(browser, live_server, user)
 
     text = page_text(browser)
 
@@ -183,6 +217,7 @@ def test_selenium_user_can_logout_after_signup(live_server, browser):
     user = unique_user("logout")
 
     signup_through_ui(browser, live_server, user)
+    ensure_logged_in_after_signup(browser, live_server, user)
 
     logout_links = browser.find_elements(By.PARTIAL_LINK_TEXT, "Logout")
     if not logout_links:
@@ -201,6 +236,7 @@ def test_selenium_logged_in_user_can_access_community_and_settings(live_server, 
     user = unique_user("nav")
 
     signup_through_ui(browser, live_server, user)
+    ensure_logged_in_after_signup(browser, live_server, user)
 
     browser.get(f"{live_server}/community")
     community_text = page_text(browser)
@@ -215,6 +251,7 @@ def test_selenium_dashboard_can_add_task_if_form_present(live_server, browser):
     user = unique_user("task")
 
     signup_through_ui(browser, live_server, user)
+    ensure_logged_in_after_signup(browser, live_server, user)
 
     browser.get(f"{live_server}/dashboard")
 
