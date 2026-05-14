@@ -2,6 +2,8 @@ from datetime import date, datetime
 import math
 
 from app import db
+from datetime import date
+from app.constants import (
 from app.constants import (
     CHARACTER_REVEAL_INTERVAL,
     DEFAULT_DIFFICULTY,
@@ -11,7 +13,18 @@ from app.constants import (
     MAX_LEVEL,
     MAX_REFLECTION_LENGTH,
     TASK_XP_REWARD,
-    VALID_STAT_CATEGORIES,
+    VALID_MINDSET_TYPES,
+    PLACEHOLDER_CURRENT_HP,
+    PLACEHOLDER_MAX_HP,
+)
+    LEVEL_XP_MULTIPLIER,
+    MAX_HP,
+    MAX_LEVEL,
+    MAX_REFLECTION_LENGTH,
+    TASK_XP_REWARD,
+    VALID_MINDSET_TYPES,
+    PLACEHOLDER_CURRENT_HP,
+    PLACEHOLDER_MAX_HP
 )
 from app.models import Challenge, Progress, Reflection, Task, User
 
@@ -23,6 +36,84 @@ STAT_XP_FIELD_MAP = {
     "VIT": "vitality_xp",
     "CHA": "charisma_xp",
 }
+
+def get_character_stage(level):
+    """
+    Determine what character stage a user has reached.
+
+    Args:
+        level: The user's current level (like 1, 10, 20, 30, etc)
+        
+    Returns:
+        dict: A dictionary with stage, name, description.
+    """
+
+    current_stage = CHARACTER_REVEAL_LEVELS[1]
+    for level_threshold in sorted(CHARACTER_REVEAL_LEVELS.keys()):
+        if level >= level_threshold:
+            current_stage = CHARACTER_REVEAL_LEVELS[level_threshold]
+        else:
+            break
+    
+    return current_stage
+
+
+
+def _coerce_int(value, field_name, default=None):
+    """
+    Safely convert a value to int.
+
+    If default is provided, None becomes default.
+    Invalid non-numeric values still raise ValueError so bugs are not hidden.
+    """
+    if value is None:
+        if default is not None:
+            return default
+        raise ValueError(f"{field_name} is required.")
+
+    try:
+        number = float(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{field_name} must be numeric.") from exc
+
+    if not math.isfinite(number):
+        raise ValueError(f"{field_name} must be finite.")
+
+    return int(round(number))
+
+
+def _clamp_int(value, minimum, maximum, field_name, default=None):
+    """Convert a value to int and clamp it inside a safe range."""
+    number = _coerce_int(value, field_name, default=default)
+    return max(minimum, min(maximum, number))
+
+
+def normalise_progress_fields(progress):
+    """
+    Repair unsafe progress values before using them in calculations.
+
+    This protects the dashboard from corrupted, missing, or out-of-range
+    progress data.
+    """
+    if progress is None:
+        raise ValueError("Progress record is required.")
+
+    max_hp = _coerce_int(getattr(progress, "max_hp", None), "max_hp", default=MAX_HP)
+    if max_hp <= 0:
+        max_hp = MAX_HP
+
+    hp = _coerce_int(getattr(progress, "hp", None), "hp", default=max_hp)
+    xp = _coerce_int(getattr(progress, "xp", None), "xp", default=0)
+    level = _coerce_int(getattr(progress, "level", None), "level", default=1)
+    streak = _coerce_int(getattr(progress, "streak", None), "streak", default=0)
+
+    progress.max_hp = max_hp
+    progress.hp = max(0, min(max_hp, hp))
+    progress.xp = max(0, xp)
+    progress.level = max(1, min(MAX_LEVEL, level))
+    progress.streak = max(0, streak)
+
+    return progress
 
 
 def _coerce_int(value, field_name, default=None):
@@ -125,10 +216,6 @@ def get_or_create_progress(user):
 
     return progress
 
-def validate_task_category(stat_category):
-    """Validate that a task category is supported."""
-    if stat_category not in VALID_STAT_CATEGORIES:
-        raise ValueError("Invalid stat category.")
 
 
 def award_task_xp(user, task):
@@ -139,8 +226,6 @@ def award_task_xp(user, task):
         bool: True if the user levelled up.
     """
     progress = get_or_create_progress(user)
-
-    validate_task_category(task.stat_category)
 
     old_level = progress.level
 
@@ -388,3 +473,101 @@ def get_public_users():
         .order_by(User.created_at.desc())
         .all()
     )
+
+def get_today_tasks(user):
+    "Return list of tasks created today for the user."
+    today = date.today()
+    return (
+        Task.query
+        .filter_by(user_id=user.id, task_date=today)
+        .order_by(Task.completed.asc(), Task.created_at.desc())
+        .all()
+    )
+
+def get_dashboard_data(user):
+    """
+    Returns dictionary of dashboard data in one package
+        - HP (placeholder for now)
+        - Level
+        - XP progress
+        - Streak
+        - Today's tasks
+        - Daily completion percentage
+        - Current challenge/difficulty
+        - Character stage
+    """
+
+    progress = get_or_create_progress(user)
+    today_tasks = get_today_tasks(user)
+    total_today = len(today_tasks)
+    completed_today = sum(1 for task in today_tasks if task.completed)
+
+    if total_today > 0:
+        completion_percentage = (completed_today / total_today) * 100
+    else:
+        completion_percentage = 0
+
+    xp_for_current_level = (progress.level - 1) * LEVEL_XP_MULTIPLIER
+    xp_for_next_level = progress.level * LEVEL_XP_MULTIPLIER
+    xp_progress = progress.xp - xp_for_current_level
+    xp_for_next_level_gap = xp_for_next_level - xp_for_current_level
+    
+    if xp_for_next_level_gap > 0:
+        xp_progress_percentage = (xp_progress / xp_for_next_level_gap) * 100
+    else:
+        xp_progress_percentage = 0
+    
+    latest_challenge = user.latest_challenge()
+    mindset_data = {}
+    mindset_requirement = 0
+    
+    if latest_challenge:
+        mindset_type = latest_challenge.mindset_type
+        mindset_info = VALID_MINDSET_TYPES.get(mindset_type, {})
+        mindset_requirement = mindset_info.get("min_completion_percentage", 0)
+
+        mindset_data = {
+            "mindset": mindset_type,
+            "name": mindset_info.get("name", mindset_type),
+            "description": mindset_info.get("description", ""),
+            "min_completion_percentage": mindset_requirement,
+        }
+
+    character_stage = get_character_stage(progress.level)
+
+    dashboard_data = {
+  
+        "hp": {
+            "current": PLACEHOLDER_CURRENT_HP,
+            "max": PLACEHOLDER_MAX_HP,
+        },
+        
+
+        "progress": {
+            "level": progress.level,
+            "xp": progress.xp,
+            "xp_progress_percentage": round(xp_progress_percentage, 1),
+        },
+        
+
+        "streak": progress.streak,
+        
+
+        "tasks_today": {
+            "total": total_today,
+            "completed": completed_today,
+            "completion_percentage": round(completion_percentage, 1),
+        },
+        
+        "mindset": mindset_data,
+        "mindset_requirement": mindset_requirement,
+        
+        # Character info
+        "character": {
+            "stage": character_stage["stage"],
+            "name": character_stage["name"],
+            "description": character_stage["description"],
+        },
+    }
+    
+    return dashboard_data

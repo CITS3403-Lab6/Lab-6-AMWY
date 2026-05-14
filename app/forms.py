@@ -21,8 +21,6 @@ from app.constants import (
     MAX_PASSWORD_MIN_LENGTH,
     MAX_REFLECTION_LENGTH,
     MAX_USERNAME_LENGTH,
-    VALID_CHALLENGE_TYPES,
-    VALID_DIFFICULTIES,
     VALID_MINDSET_TYPES,
 )
 from app.models import User
@@ -97,28 +95,16 @@ class LoginForm(FlaskForm):
 class ChallengeForm(FlaskForm):
     """Challenge creation form."""
 
-    challenge_type = SelectField(
-        "Challenge Type",
-        choices=list(VALID_CHALLENGE_TYPES.items()),
-        validators=[DataRequired()],
-    )
-
-    difficulty = SelectField(
-        "Difficulty",
-        choices=list(VALID_DIFFICULTIES.items()),
-        validators=[DataRequired()],
-    )
-
     mindset_type = SelectField(
-        "Mindset Type",
-        choices=list(VALID_MINDSET_TYPES.items()),
+        "Challenge/difficulty Type",
+        choices=[(key, value["name"]) for key, value in VALID_MINDSET_TYPES.items()],
         validators=[DataRequired()],
     )
 
     is_public = BooleanField("Share progress publicly")
-    submit = SubmitField("Save Challenge")
+    submit = SubmitField("Start Challenge")
 
-
+#To remove feature
 class ReflectionForm(FlaskForm):
     """Daily reflection form."""
 

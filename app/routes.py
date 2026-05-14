@@ -2,12 +2,11 @@ from datetime import date
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy.exc import IntegrityError
-
+from datetime import date
 from app import db
 from app.constants import (
     MAX_TASK_TITLE_LENGTH,
     TASK_XP_REWARD,
-    VALID_STAT_CATEGORIES,
 )
 from app.forms import ChallengeForm, LoginForm, ReflectionForm, SignupForm
 from app.models import Challenge, Task, User
@@ -16,6 +15,7 @@ from app.services import (
     build_dashboard_data,
     complete_user_task,
     create_reflection,
+    get_dashboard_data,
     get_or_create_progress,
     get_public_users,
 )
@@ -104,6 +104,8 @@ def dashboard():
     progress = get_or_create_progress(current_user)
 
     challenge_form = ChallengeForm()
+
+    #to remove
     reflection_form = ReflectionForm()
 
     if challenge_form.validate_on_submit() and request.form.get("save_challenge"):
@@ -112,15 +114,13 @@ def dashboard():
 
             challenge = Challenge(
                 user_id=current_user.id,
-                challenge_type=challenge_form.challenge_type.data,
-                difficulty=challenge_form.difficulty.data,
                 mindset_type=challenge_form.mindset_type.data,
             )
 
             db.session.add(challenge)
             db.session.commit()
 
-            flash("Challenge saved successfully.", "success")
+            flash("Challenge started successfully.", "success")
             return redirect(url_for("main.dashboard"))
 
         except IntegrityError:
@@ -129,11 +129,12 @@ def dashboard():
         except Exception:
             db.session.rollback()
             flash("Could not save challenge. Please try again.", "error")
+    
+    dashboard_data = get_dashboard_data(current_user)
 
-    latest_challenge = current_user.latest_challenge()
     tasks = (
         Task.query
-        .filter_by(user_id=current_user.id)
+        .filter_by(user_id=current_user.id, task_date=date.today())
         .order_by(Task.completed.asc(), Task.created_at.desc())
         .all()
     )
@@ -142,9 +143,10 @@ def dashboard():
 
     return render_template(
         "dashboard.html",
+        dashboard_data=dashboard_data,
         challenge_form=challenge_form,
+        challenge=current_user.latest_challenge(),
         reflection_form=reflection_form,
-        challenge=latest_challenge,
         tasks=tasks,
         progress=progress,
         dashboard_data=dashboard_data,
@@ -164,10 +166,6 @@ def add_task():
 
     if len(title) > MAX_TASK_TITLE_LENGTH:
         flash("Task title must be under 200 characters.", "error")
-        return redirect(url_for("main.dashboard"))
-
-    if stat_category not in VALID_STAT_CATEGORIES:
-        flash("Invalid stat category.", "error")
         return redirect(url_for("main.dashboard"))
 
     try:
