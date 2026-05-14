@@ -10,6 +10,7 @@ from app.constants import (
 from app.forms import ChallengeForm, LoginForm, ReflectionForm, SignupForm
 from app.models import Challenge, Task, User
 from app.services import (
+    build_dashboard_data,
     complete_user_task,
     create_reflection,
     get_dashboard_data,
@@ -136,6 +137,8 @@ def dashboard():
         .all()
     )
 
+    dashboard_data = build_dashboard_data(current_user)
+
     return render_template(
         "dashboard.html",
         dashboard_data=dashboard_data,
@@ -144,6 +147,7 @@ def dashboard():
         reflection_form=reflection_form,
         tasks=tasks,
         progress=progress,
+        dashboard_data=dashboard_data,
     )
 
 
@@ -152,7 +156,7 @@ def dashboard():
 def add_task():
     """Add a daily task for the current user."""
     title = request.form.get("title", "").strip()
-    stat_category = "STR"
+    stat_category = request.form.get("stat_category", "VIT").strip() or "VIT"
 
     if not title:
         flash("Task title is required.", "error")
