@@ -116,6 +116,63 @@ def normalise_progress_fields(progress):
     return progress
 
 
+def _coerce_int(value, field_name, default=None):
+    """
+    Safely convert a value to int.
+
+    If default is provided, None becomes default.
+    Invalid non-numeric values still raise ValueError so bugs are not hidden.
+    """
+    if value is None:
+        if default is not None:
+            return default
+        raise ValueError(f"{field_name} is required.")
+
+    try:
+        number = float(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{field_name} must be numeric.") from exc
+
+    if not math.isfinite(number):
+        raise ValueError(f"{field_name} must be finite.")
+
+    return int(round(number))
+
+
+def _clamp_int(value, minimum, maximum, field_name, default=None):
+    """Convert a value to int and clamp it inside a safe range."""
+    number = _coerce_int(value, field_name, default=default)
+    return max(minimum, min(maximum, number))
+
+
+def normalise_progress_fields(progress):
+    """
+    Repair unsafe progress values before using them in calculations.
+
+    This protects the dashboard from corrupted, missing, or out-of-range
+    progress data.
+    """
+    if progress is None:
+        raise ValueError("Progress record is required.")
+
+    max_hp = _coerce_int(getattr(progress, "max_hp", None), "max_hp", default=MAX_HP)
+    if max_hp <= 0:
+        max_hp = MAX_HP
+
+    hp = _coerce_int(getattr(progress, "hp", None), "hp", default=max_hp)
+    xp = _coerce_int(getattr(progress, "xp", None), "xp", default=0)
+    level = _coerce_int(getattr(progress, "level", None), "level", default=1)
+    streak = _coerce_int(getattr(progress, "streak", None), "streak", default=0)
+
+    progress.max_hp = max_hp
+    progress.hp = max(0, min(max_hp, hp))
+    progress.xp = max(0, xp)
+    progress.level = max(1, min(MAX_LEVEL, level))
+    progress.streak = max(0, streak)
+
+    return progress
+
+
 def calculate_level_from_xp(xp):
     """
     Convert total XP into a capped level.

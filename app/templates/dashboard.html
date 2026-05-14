@@ -1,118 +1,158 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HabitWise Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    {% set data = dashboard_data if dashboard_data is defined else {} %}
 
-{% block title %}Dashboard - HabitWise{% endblock %}
+    <main class="dashboard-page">
+        <section class="dashboard-header">
+            <h1>Welcome, {{ current_user.username }}</h1>
+            <p>Your daily HabitWise progress summary.</p>
 
-{% block content %}
-<section class="card">
-    <h1>⚔ Your Dashboard ⚔</h1>
-
-    <div class="progress-summary">
-        <div class="stat">
-            <span class="label">Level</span>
-            <span class="value">{{ progress.level }}</span>
-        </div>
-        <div class="stat">
-            <span class="label">Total XP</span>
-            <span class="value">{{ progress.xp }}</span>
-        </div>
-        <div class="stat">
-            <span class="label">Streak</span>
-            <span class="value">{{ progress.streak }}</span>
-        </div>
-    </div>
-</section>
-
-<section class="card">
-    <h2>🌹 Character</h2>
-    <p><strong>Stage:</strong> {{ dashboard_data.character.name }}</p>
-    <p><em>{{ dashboard_data.character.description }}</em></p>
-    <p><strong>Level:</strong> {{ dashboard_data.progress.level }}</p>
-    
-    <div class="character-reveal">
-        {% set reveal_percent = (dashboard_data.character.stage | int) * 10 %}
-        {% set mask_percent = 100 - reveal_percent %}
-        <img 
-            src="{{ url_for('static', filename='img/avatar/hiddenavatar.png') }}"
-            alt="Character"
-            style="width: 100%; object-fit: contain; clip-path: inset(0 0 {{ mask_percent }}% 0);"
-        >
-    </div>
-</section>
-
-<section class="card">
-    <h2>⚡ Current Challenge</h2>
-
-    {% if challenge %}
-        <div class="challenge-info">
-            <p><strong>Mindset:</strong> {{ challenge.mindset_type }}</p>
-            <p><strong>Created:</strong> {{ challenge.created_at.strftime('%Y-%m-%d') }}</p>
-        </div>
-    {% else %}
-        <p>No challenge selected yet. Create one below to get started!</p>
-    {% endif %}
-
-    <form method="POST">
-        {{ challenge_form.hidden_tag() }}
-
-        <div class="form-group">
-            {{ challenge_form.mindset_type.label }}
-            {{ challenge_form.mindset_type(class="form-control") }}
-        </div>
-
-        <div class="form-group checkbox">
-            {{ challenge_form.is_public() }}
-            {{ challenge_form.is_public.label }}
-        </div>
-
-        <button class="button button-primary" type="submit" name="save_challenge" style="width: 100%;">⚔ Save Challenge</button>
-    </form>
-</section>
-
-<section class="card">
-    <h2>➕ Add Daily Task</h2>
-
-    <form method="POST" action="{{ url_for('main.add_task') }}">
-        <div class="form-group">
-            <label>Task Title</label>
-            <input type="text" name="title" class="form-control" placeholder="e.g., Study for 30 minutes" required>
-        </div>
-        <button class="button button-primary" type="submit" style="width: 100%;">➕ Add Task</button>
-    </form>
-</section>
-
-<section class="card">
-    <h2>✅ Your Tasks</h2>
-    <div class="progress-summary">
-        <div class="stat">
-            <span class="label">Today's Completion</span>
-            <span class="value">{{ dashboard_data.tasks_today.completion_percentage }}%</span>
-        </div>
-        <div class="stat">
-            <span class="label">Tasks Done</span>
-            <span class="value">{{ dashboard_data.tasks_today.completed }} / {{ dashboard_data.tasks_today.total }}</span>
-        </div>
-    </div>
-
-    {% if tasks %}
-        <div class="tasks-list">
-            {% for task in tasks %}
-                <div class="task-item">
-                    <div class="task-info">
-                        <p class="task-title">{{ task.title }}</p>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <p class="flash {{ category }}">{{ message }}</p>
+                        {% endfor %}
                     </div>
-                    
-                    {% if task.completed %}
-                        <span class="badge badge-completed">✓ Done</span>
-                    {% else %}
-                        <form method="POST" action="{{ url_for('main.complete_task', task_id=task.id) }}" style="display: inline;">
-                            <button class="button button-primary button-small" type="submit">Complete</button>
-                        </form>
-                    {% endif %}
-                </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <p>No tasks added yet. Create one above to get started!</p>
-    {% endif %}
-</section>
-{% endblock %}
+                {% endif %}
+            {% endwith %}
+        </section>
+
+        <section class="progress-grid">
+            <div class="progress-card">
+                <h2>HP</h2>
+                <p>{{ data.get("hp", 100) }} / {{ data.get("max_hp", 100) }}</p>
+                <progress value="{{ data.get('hp', 100) }}" max="{{ data.get('max_hp', 100) }}"></progress>
+            </div>
+
+            <div class="progress-card">
+                <h2>Level</h2>
+                <p>Level {{ data.get("level", 1) }}</p>
+                <p>{{ data.get("xp", 0) }} XP</p>
+            </div>
+
+            <div class="progress-card">
+                <h2>Streak</h2>
+                <p>{{ data.get("streak", 0) }} days</p>
+            </div>
+
+            <div class="progress-card">
+                <h2>Daily Completion</h2>
+                <p>{{ data.get("completed_tasks", 0) }} / {{ data.get("total_tasks", 0) }} tasks</p>
+                <p>{{ data.get("completion_percentage", 0) }}%</p>
+            </div>
+
+            <div class="progress-card">
+                <h2>Difficulty Target</h2>
+                <p>{{ data.get("difficulty", "medium")|capitalize }}</p>
+                <p>Target: {{ data.get("difficulty_target", 70) }}%</p>
+            </div>
+
+            <div class="progress-card">
+                <h2>Character Reveal</h2>
+                <p>Stage {{ data.get("character_reveal_stage", 0) }}</p>
+            </div>
+        </section>
+
+        <section class="challenge-section">
+            <h2>Current Challenge</h2>
+            {% if challenge %}
+                <p>{{ challenge.challenge_type|capitalize }} — {{ challenge.difficulty|capitalize }}</p>
+            {% else %}
+                <p>No challenge selected yet.</p>
+            {% endif %}
+
+            <form method="POST" action="{{ url_for('main.dashboard') }}">
+                {{ challenge_form.hidden_tag() }}
+
+                <label>Challenge</label>
+                {{ challenge_form.challenge_type }}
+
+                <label>Difficulty</label>
+                {{ challenge_form.difficulty }}
+
+                <label>Mindset</label>
+                {{ challenge_form.mindset_type }}
+
+                <label>
+                    {{ challenge_form.is_public }}
+                    Share progress publicly
+                </label>
+
+                <button type="submit" name="save_challenge" value="1">Save Challenge</button>
+            </form>
+        </section>
+
+
+        <section class="evaluate-section">
+            <h2>Evaluate Today</h2>
+            <p>Check today's completion against your difficulty target and update HP/streak.</p>
+            <form method="POST" action="{{ url_for('main.evaluate_day') }}">
+                <button type="submit">Evaluate Today</button>
+            </form>
+        </section>
+
+        <section class="tasks-section">
+            <h2>Today's Tasks</h2>
+
+            <form method="POST" action="{{ url_for('main.add_task') }}">
+                <input type="text" name="title" placeholder="Add a daily task" required>
+                <input type="hidden" name="stat_category" value="VIT">
+                <button type="submit">Add Task</button>
+            </form>
+
+            {% if tasks %}
+                <ul class="task-list">
+                    {% for task in tasks %}
+                        <li>
+                            <span>
+                                {% if task.completed %}
+                                    ✅
+                                {% else %}
+                                    ⬜
+                                {% endif %}
+                                {{ task.title }}
+                            </span>
+
+                            {% if not task.completed %}
+                                <form method="POST" action="{{ url_for('main.complete_task', task_id=task.id) }}">
+                                    <button type="submit">Complete</button>
+                                </form>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No tasks yet. Add one above.</p>
+            {% endif %}
+        </section>
+
+        <section class="reflection-section">
+            <h2>Reflection</h2>
+            <form method="POST" action="{{ url_for('main.reflection') }}">
+                {{ reflection_form.hidden_tag() }}
+
+                <label>Mood</label>
+                {{ reflection_form.mood }}
+
+                <label>Note</label>
+                {{ reflection_form.note }}
+
+                <button type="submit">Save Reflection</button>
+            </form>
+        </section>
+
+        <nav class="dashboard-nav">
+            <a href="{{ url_for('main.community') }}">Community</a>
+            <a href="{{ url_for('main.settings') }}">Settings</a>
+            <a href="{{ url_for('main.logout') }}">Logout</a>
+        </nav>
+    </main>
+</body>
+</html>
