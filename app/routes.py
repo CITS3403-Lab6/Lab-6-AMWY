@@ -1,3 +1,4 @@
+from datetime import date
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy.exc import IntegrityError
@@ -11,6 +12,7 @@ from app.constants import (
 from app.forms import ChallengeForm, LoginForm, ReflectionForm, SignupForm
 from app.models import Challenge, Task, User
 from app.services import (
+    apply_daily_hp_result,
     build_dashboard_data,
     complete_user_task,
     create_reflection,
@@ -265,3 +267,39 @@ def community():
 def settings():
     """Render basic account and privacy settings page."""
     return render_template("settings.html")
+
+@main.route("/evaluate-day", methods=["POST"])
+@login_required
+def evaluate_day():
+    """Evaluate today's completion and apply HP damage or streak gain."""
+    progress = get_or_create_progress(current_user)
+    today = date.today()
+
+    if getattr(progress, "last_evaluated_date", None) == today:
+        flash("Today has already been evaluated.", "info")
+        return redirect(url_for("main.dashboard"))
+
+    dashboard_data = build_dashboard_data(current_user)
+    completion_percentage = dashboard_data.get("completion_percentage", 0)
+    difficulty = dashboard_data.get("difficulty", None)
+
+    try:
+        result = apply_daily_hp_result(
+            progress=progress,
+            completion_percentage=completion_percentage,
+            difficulty=difficulty,
+        )
+        progress.last_evaluated_date = today
+        db.session.commit()
+
+        if result["met_target"]:
+            flash("Daily target met. Streak increased.", "success")
+        else:
+            flash(f"Daily target missed. HP reduced by {result['hp_lost']}.", "warning")
+
+    except Exception:
+        db.session.rollback()
+        flash("Could not evaluate today. Please try again.", "error")
+
+    return redirect(url_for("main.dashboard"))
+

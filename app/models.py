@@ -152,6 +152,7 @@ class Progress(db.Model):
     level = db.Column(db.Integer, default=1, nullable=False)
     xp = db.Column(db.Integer, default=0, nullable=False)
     streak = db.Column(db.Integer, default=0, nullable=False)
+    last_evaluated_date = db.Column(db.Date, nullable=True)
 
     hp = db.Column(db.Integer, default=100, nullable=False)
     max_hp = db.Column(db.Integer, default=100, nullable=False)

@@ -89,6 +89,15 @@
             </form>
         </section>
 
+
+        <section class="evaluate-section">
+            <h2>Evaluate Today</h2>
+            <p>Check today's completion against your difficulty target and update HP/streak.</p>
+            <form method="POST" action="{{ url_for('main.evaluate_day') }}">
+                <button type="submit">Evaluate Today</button>
+            </form>
+        </section>
+
         <section class="tasks-section">
             <h2>Today's Tasks</h2>
 
