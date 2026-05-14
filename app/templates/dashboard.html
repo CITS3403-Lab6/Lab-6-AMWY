@@ -94,6 +94,8 @@
             <h2>Evaluate Today</h2>
             <p>Check today's completion against your difficulty target and update HP/streak.</p>
             <form method="POST" action="{{ url_for('main.evaluate_day') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
                 <button type="submit">Evaluate Today</button>
             </form>
         </section>
@@ -102,6 +104,8 @@
             <h2>Today's Tasks</h2>
 
             <form method="POST" action="{{ url_for('main.add_task') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
                 <input type="text" name="title" placeholder="Add a daily task" required>
                 <input type="hidden" name="stat_category" value="VIT">
                 <button type="submit">Add Task</button>
@@ -122,6 +126,8 @@
 
                             {% if not task.completed %}
                                 <form method="POST" action="{{ url_for('main.complete_task', task_id=task.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
                                     <button type="submit">Complete</button>
                                 </form>
                             {% endif %}
