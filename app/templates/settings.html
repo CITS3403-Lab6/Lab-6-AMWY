@@ -1,36 +1,50 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>HabitWise Settings</title>
-</head>
-<body>
-    <main class="settings-page">
+{% extends "base.html" %}
+
+{% block title %}Settings - HabitWise{% endblock %}
+
+{% block content %}
+<main class="settings-page">
+    <section class="settings-header">
         <h1>Settings</h1>
+        <p>Manage your account details, privacy, and challenge preferences.</p>
+    </section>
 
-        <section>
-            <h2>Account Details</h2>
-            <p>Username: {{ current_user.username }}</p>
-            <p>Email: {{ current_user.email }}</p>
-        </section>
+    <section class="settings-card">
+        <h2>Account Details</h2>
+        <p><strong>Username:</strong> {{ current_user.username }}</p>
+        <p><strong>Email:</strong> {{ current_user.email }}</p>
+    </section>
 
-        <section>
-            <h2>Privacy</h2>
-            {% if current_user.is_public %}
-                <p>Your progress is currently public.</p>
-            {% else %}
-                <p>Your progress is currently private.</p>
-            {% endif %}
-        </section>
+    <section class="settings-card">
+        <h2>Privacy Settings</h2>
 
-        <section>
-            <h2>Challenge Preferences</h2>
-            <p>You can update your challenge and difficulty from the dashboard.</p>
-        </section>
+        {% if current_user.is_public %}
+            <p>Your progress is currently <strong>public</strong>. Other users can see your progress in the community page.</p>
+        {% else %}
+            <p>Your progress is currently <strong>private</strong>. Other users cannot see your progress in the community page.</p>
+        {% endif %}
 
-        <nav>
-            <a href="{{ url_for('main.dashboard') }}">Back to Dashboard</a>
-        </nav>
-    </main>
-</body>
-</html>
+        <form method="POST" action="{{ url_for('main.settings') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <label for="privacy">Community visibility</label>
+            <select id="privacy" name="privacy">
+                <option value="public" {% if current_user.is_public %}selected{% endif %}>Public</option>
+                <option value="private" {% if not current_user.is_public %}selected{% endif %}>Private</option>
+            </select>
+
+            <button type="submit">Save Privacy Settings</button>
+        </form>
+    </section>
+
+    <section class="settings-card">
+        <h2>Challenge Preferences</h2>
+        <p>You can update your challenge and difficulty from the dashboard or challenge page.</p>
+    </section>
+
+    <nav class="settings-nav">
+        <a href="{{ url_for('main.dashboard') }}">Back to Dashboard</a>
+        <a href="{{ url_for('main.community') }}">View Community</a>
+    </nav>
+</main>
+{% endblock %}

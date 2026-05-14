@@ -262,10 +262,34 @@ def community():
     public_users = get_public_users()
     return render_template("community.html", public_users=public_users)
 
-@main.route("/settings")
+@main.route("/settings", methods=["GET", "POST"])
 @login_required
 def settings():
-    """Render basic account and privacy settings page."""
+    """Render and update account/privacy settings."""
+    if request.method == "POST":
+        privacy_value = (
+            request.form.get("privacy")
+            or request.form.get("is_public")
+            or ""
+        ).strip().lower()
+
+        current_user.is_public = privacy_value in {
+            "public",
+            "true",
+            "1",
+            "yes",
+            "on",
+        }
+
+        db.session.commit()
+
+        if current_user.is_public:
+            flash("Your progress is now public in the community page.", "success")
+        else:
+            flash("Your progress is now private.", "success")
+
+        return redirect(url_for("main.settings"))
+
     return render_template("settings.html")
 
 @main.route("/evaluate-day", methods=["POST"])
