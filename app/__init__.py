@@ -5,9 +5,11 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 
 from app.config import config
+from flask_wtf import CSRFProtect
 
 
 db = SQLAlchemy()
+csrf = CSRFProtect()
 login_manager = LoginManager()
 
 
@@ -27,6 +29,7 @@ def create_app(config_name="development"):
     app.config.from_object(config[config_name])
 
     db.init_app(app)
+    csrf.init_app(app)
 
     login_manager.init_app(app)
     login_manager.login_view = "main.login"

@@ -14,6 +14,7 @@
 
 <body>
   {% set challenge = current_user.latest_challenge() if current_user.latest_challenge is defined else None %}
+  {% set challenge_name = challenge.mindset_type if challenge and challenge.mindset_type else "Not selected" %}
 
   <div class="page-bg"></div>
 
@@ -74,19 +75,15 @@
 
               <div class="info-box">
                 <p class="info-label">Current Challenge</p>
-                {% if challenge and challenge.challenge_type %}
-                  <p class="info-value">{{ challenge.challenge_type|capitalize }}</p>
-                {% else %}
-                  <p class="info-value">Not selected</p>
-                {% endif %}
+                <p class="info-value">{{ challenge_name }}</p>
               </div>
 
               <div class="info-box">
-                <p class="info-label">Current Mode</p>
-                {% if challenge and challenge.mindset_type %}
-                  <p class="info-value">{{ challenge.mindset_type }}</p>
+                <p class="info-label">Community Visibility</p>
+                {% if current_user.is_public %}
+                  <p class="info-value">Public</p>
                 {% else %}
-                  <p class="info-value">Not selected</p>
+                  <p class="info-value">Private</p>
                 {% endif %}
               </div>
             </div>
@@ -141,7 +138,19 @@
             <p class="panel-kicker">PRIVACY</p>
             <h3 class="panel-heading">Visibility controls</h3>
 
+            {% if current_user.is_public %}
+              <p class="toggle-sub" style="margin-bottom: 16px;">
+                Your progress is currently public. Other users can see your progress in the community page.
+              </p>
+            {% else %}
+              <p class="toggle-sub" style="margin-bottom: 16px;">
+                Your progress is currently private. Other users cannot see your progress in the community page.
+              </p>
+            {% endif %}
+
             <form method="POST" action="{{ url_for('main.settings') }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
               <div class="toggle-list">
                 <label class="toggle-row">
                   <div>
@@ -154,20 +163,6 @@
                     class="toggle-input"
                     type="checkbox"
                     {% if current_user.is_public %}checked{% endif %}
-                  >
-                </label>
-
-                <label class="toggle-row">
-                  <div>
-                    <p class="toggle-title">Show activity status</p>
-                    <p class="toggle-sub">Let others see whether you completed today's tasks.</p>
-                  </div>
-
-                  <input
-                    class="toggle-input"
-                    type="checkbox"
-                    {% if current_user.is_public %}checked{% endif %}
-                    disabled
                   >
                 </label>
               </div>
@@ -184,21 +179,13 @@
 
             <div class="challenge-summary">
               <p>
-                <strong>Selected challenge:</strong>
-                {% if challenge and challenge.challenge_type %}
-                  <span>{{ challenge.challenge_type|capitalize }}</span>
-                {% else %}
-                  <span>Not selected</span>
-                {% endif %}
+                <strong>Selected mode:</strong>
+                <span>{{ challenge_name }}</span>
               </p>
 
               <p>
-                <strong>Selected mode:</strong>
-                {% if challenge and challenge.mindset_type %}
-                  <span>{{ challenge.mindset_type }}</span>
-                {% else %}
-                  <span>Not selected</span>
-                {% endif %}
+                <strong>Progress system:</strong>
+                <span>HP, XP, level, streak, and difficulty target</span>
               </p>
             </div>
 

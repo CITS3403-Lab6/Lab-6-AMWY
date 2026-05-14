@@ -13,6 +13,10 @@
 </head>
 
 <body>
+  {% set partners = partner_cards if partner_cards is defined else [] %}
+  {% set users = public_users if public_users is defined else [] %}
+  {% set score = circle_score if circle_score is defined else 0 %}
+
   <div class="page-bg"></div>
 
   <div class="community-shell">
@@ -37,121 +41,131 @@
         <div>
           <p class="eyebrow">ACCOUNTABILITY CIRCLE</p>
           <h2>Your community</h2>
-          <p>
-            Share progress, stay encouraged, and keep each other moving forward.
-          </p>
+          <p>Build your accountability circle, add public partners, and track shared progress.</p>
         </div>
-      </section>
 
-      <section class="party-banner">
-        <div class="party-bg">
-          <div class="party-slots">
-
-            {% if public_users %}
-              {% for user in public_users[:4] %}
-                {% set progress = user.progress %}
-                {% set challenge = user.latest_challenge() %}
-                {% set mode = challenge.mindset_type if challenge and challenge.mindset_type else "Warrior" %}
-
-                <div class="party-slot" data-member="{{ loop.index }}">
-                  <div class="slot-label">
-                    <p class="slot-name">{{ user.username }}</p>
-                    <p class="slot-stats">
-                      Streak:
-                      {% if progress %}
-                        {{ progress.streak }}
-                      {% else %}
-                        0
-                      {% endif %}
-                      days
-                    </p>
-                  </div>
-
-                  {% if mode == "Sage" %}
-                    <img class="weapon-img" src="{{ url_for('static', filename='img/icons/sage.png') }}" alt="Sage">
-                    <p class="slot-mode">Sage</p>
-                  {% elif mode == "Demon" %}
-                    <img class="weapon-img" src="{{ url_for('static', filename='img/icons/demon.png') }}" alt="Demon">
-                    <p class="slot-mode">Demon</p>
-                  {% else %}
-                    <img class="weapon-img" src="{{ url_for('static', filename='img/icons/warrior.png') }}" alt="Warrior">
-                    <p class="slot-mode">Warrior</p>
-                  {% endif %}
-                </div>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div style="margin-top: 16px;">
+              {% for category, message in messages %}
+                <p class="partner-meta">{{ message }}</p>
               {% endfor %}
-
-              {% for i in range(4 - public_users[:4]|length) %}
-                <div class="party-slot empty">
-                  <div class="slot-label">
-                    <p class="slot-name">Empty</p>
-                    <p class="slot-stats">Awaiting member</p>
-                  </div>
-                  <img class="weapon-img" src="{{ url_for('static', filename='img/icons/Shadow.png') }}" alt="Empty slot">
-                  <p class="slot-mode">—</p>
-                </div>
-              {% endfor %}
-            {% else %}
-              {% for i in range(4) %}
-                <div class="party-slot empty">
-                  <div class="slot-label">
-                    <p class="slot-name">Empty</p>
-                    <p class="slot-stats">Awaiting member</p>
-                  </div>
-                  <img class="weapon-img" src="{{ url_for('static', filename='img/icons/Shadow.png') }}" alt="Empty slot">
-                  <p class="slot-mode">—</p>
-                </div>
-              {% endfor %}
-            {% endif %}
-
-          </div>
-        </div>
+            </div>
+          {% endif %}
+        {% endwith %}
       </section>
 
       <section class="summary-grid">
         <article class="summary-card card-purple">
           <p class="summary-label">Active Partners</p>
-          <h3>{{ public_users|length if public_users else 0 }}</h3>
-          <span>People currently sharing progress</span>
+          <h3>{{ partners|length }}</h3>
+          <span>People in your accountability circle</span>
         </article>
 
         <article class="summary-card card-green">
           <p class="summary-label">Public Profiles</p>
-          <h3>{{ public_users|length if public_users else 0 }}</h3>
+          <h3>{{ users|length }}</h3>
           <span>Users visible in community</span>
         </article>
 
         <article class="summary-card card-blue">
-          <p class="summary-label">Your Visibility</p>
-          {% if current_user.is_public %}
-            <h3>Public</h3>
-            <span>Your progress can appear here</span>
-          {% else %}
-            <h3>Private</h3>
-            <span>Your progress is hidden from others</span>
-          {% endif %}
+          <p class="summary-label">Circle Score</p>
+          <h3>{{ score }}{% if score is number %}%{% endif %}</h3>
+          <span>Shared progress summary</span>
         </article>
       </section>
 
       <section class="content-grid">
         <div class="left-column">
           <article class="panel">
-            <div class="panel-heading-row">
-              <div>
-                <p class="panel-kicker">PARTNERS</p>
-                <h3 class="panel-heading">Your accountability circle</h3>
-              </div>
-            </div>
+            <p class="panel-kicker">ADD PARTNER</p>
+            <h3 class="panel-heading">Add accountability partner</h3>
+
+            <p class="partner-meta">
+              Add a public user by username or email. Private users cannot be added.
+            </p>
+
+            <form method="POST" action="{{ url_for('main.add_partner') }}" style="margin-top: 18px;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+              <label class="input-label" for="partner_identifier">Username or email</label>
+              <input
+                id="partner_identifier"
+                class="text-input"
+                type="text"
+                name="partner_identifier"
+                placeholder="e.g. demo_public or demo_public@example.com"
+                required
+              >
+
+              <button class="primary-btn" type="submit">Add Partner</button>
+            </form>
+          </article>
+
+          <article class="panel">
+            <p class="panel-kicker">PARTNERS</p>
+            <h3 class="panel-heading">Your accountability circle</h3>
 
             <div class="partner-list">
-              {% if public_users %}
-                {% for user in public_users %}
-                  {% set progress = user.progress %}
-                  {% set challenge = user.latest_challenge() %}
-                  {% set mode = challenge.mindset_type if challenge and challenge.mindset_type else "Not selected" %}
-
+              {% if partners %}
+                {% for partner in partners %}
                   <div class="partner-card">
                     <div class="partner-main">
                       <div class="avatar avatar-purple">
+                        {{ partner.username[0]|upper }}
+                      </div>
+
+                      <div class="partner-info">
+                        <div class="name-row">
+                          <h4>{{ partner.username }}</h4>
+                          <span class="status-badge complete">Partner</span>
+                        </div>
+
+                        <p class="partner-meta">
+                          Level: {{ partner.level }}
+                          • XP: {{ partner.xp }}
+                          • HP: {{ partner.hp }} / {{ partner.max_hp }}
+                          • Streak: {{ partner.streak }}
+                        </p>
+
+                        {% if partner.current_challenge %}
+                          <p class="partner-meta">
+                            Goal: {{ partner.current_challenge|capitalize }}
+                            • Difficulty: {{ partner.difficulty|capitalize }}
+                          </p>
+                        {% else %}
+                          <p class="partner-meta">Goal: No challenge selected yet.</p>
+                        {% endif %}
+                      </div>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('main.remove_partner', partner_id=partner.id) }}">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <button class="action-btn red" type="submit">Remove</button>
+                    </form>
+                  </div>
+                {% endfor %}
+              {% else %}
+                <p class="partner-meta">Your accountability circle is empty. Add a public user to begin.</p>
+              {% endif %}
+            </div>
+          </article>
+        </div>
+
+        <div class="right-column">
+          <article class="panel">
+            <p class="panel-kicker">PUBLIC LEADERBOARD</p>
+            <h3 class="panel-heading">Public HabitWise users</h3>
+
+            <div class="partner-list">
+              {% if users %}
+                {% for user in users %}
+                  {% set progress = user.progress %}
+                  {% set challenge = user.latest_challenge() %}
+
+                  <div class="partner-card">
+                    <div class="partner-main">
+                      <div class="avatar avatar-green">
                         {{ user.username[0]|upper }}
                       </div>
 
@@ -167,73 +181,51 @@
                         </div>
 
                         <p class="partner-meta">
-                          Mode: {{ mode }}
-                          • Streak:
-                          {% if progress %}
-                            {{ progress.streak }}
-                          {% else %}
-                            0
-                          {% endif %}
-                          days
-                          • Level:
-                          {% if progress %}
-                            {{ progress.level }}
-                          {% else %}
-                            1
-                          {% endif %}
-                          • XP:
-                          {% if progress %}
-                            {{ progress.xp }}
-                          {% else %}
-                            0
-                          {% endif %}
-                          • HP:
-                          {% if progress %}
-                            {{ progress.hp }} / {{ progress.max_hp }}
-                          {% else %}
-                            100 / 100
-                          {% endif %}
+                          Level: {% if progress %}{{ progress.level }}{% else %}1{% endif %}
+                          • XP: {% if progress %}{{ progress.xp }}{% else %}0{% endif %}
+                          • Streak: {% if progress %}{{ progress.streak }}{% else %}0{% endif %}
                         </p>
+
+                        {% if challenge and challenge.mindset_type %}
+                          <p class="partner-meta">Mode: {{ challenge.mindset_type }}</p>
+                        {% else %}
+                          <p class="partner-meta">Mode: Not selected</p>
+                        {% endif %}
                       </div>
                     </div>
+
+                    {% if user.id != current_user.id %}
+                      <form method="POST" action="{{ url_for('main.add_partner') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="partner_identifier" value="{{ user.username }}">
+                        <button class="action-btn green" type="submit">Add</button>
+                      </form>
+                    {% endif %}
                   </div>
                 {% endfor %}
               {% else %}
-                <p class="partner-meta">
-                  No public users to display yet. Enable public sharing in settings to appear here.
-                </p>
+                <p class="partner-meta">The public leaderboard is empty.</p>
               {% endif %}
             </div>
           </article>
-        </div>
 
-        <div class="right-column">
           <article class="panel invite-panel">
             <p class="panel-kicker">PRIVACY</p>
             <h3 class="panel-heading">Community visibility</h3>
 
             {% if current_user.is_public %}
               <p class="partner-meta">
-                Your progress is currently public. Other users can see your username, streak, level, XP, and HP.
+                Your progress is public. Other users can find and add you as an accountability partner.
               </p>
             {% else %}
               <p class="partner-meta">
-                Your progress is currently private. Turn on sharing in settings if you want to appear in the community page.
+                Your progress is private. Enable public sharing in settings if you want to appear here.
               </p>
             {% endif %}
 
             <a class="primary-btn" href="{{ url_for('main.settings') }}" style="display:block; text-align:center; text-decoration:none;">
               Manage Privacy
             </a>
-          </article>
-
-          <article class="panel invite-panel">
-            <p class="panel-kicker">MVP NOTE</p>
-            <h3 class="panel-heading">Partner invites</h3>
-
-            <p class="partner-meta">
-              Invite/support features are not active yet. For the MVP, this page focuses on showing public users and privacy-based community visibility.
-            </p>
           </article>
         </div>
       </section>
