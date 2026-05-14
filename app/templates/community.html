@@ -1,41 +1,243 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HabitWise | Community</title>
 
-{% block title %}Community - HabitWise{% endblock %}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-{% block content %}
-<section class="card">
-    <h1>🌍 Community Progress 🌍</h1>
-    <p>See how other HabitWise warriors are progressing on their challenges.</p>
-</section>
+  <link rel="stylesheet" href="{{ url_for('static', filename='community/community.css') }}">
+</head>
 
-{% if public_users %}
-    <div class="community-grid">
-        {% for user in public_users %}
-            <div class="card community-user-card">
-                <h3>⚔ {{ user.username }} ⚔</h3>
-                
-                {% if user.progress %}
-                    <div class="user-stats">
-                        <p><strong>Level</strong> <span>{{ user.progress.level }}</span></p>
-                        <p><strong>Total XP</strong> <span>{{ user.progress.xp }}</span></p>
-                        <p><strong>Streak</strong> <span>{{ user.progress.streak }}</span></p>
-                        <p style="border-bottom: none; margin-top: 15px; font-size: 0.85rem;">
-                            <strong>STR:</strong> {{ user.progress.strength_xp }} | 
-                            <strong>INT:</strong> {{ user.progress.intelligence_xp }} | 
-                            <strong>SPI:</strong> {{ user.progress.spirituality_xp }}<br>
-                            <strong>VIT:</strong> {{ user.progress.vitality_xp }} | 
-                            <strong>CHA:</strong> {{ user.progress.charisma_xp }}
-                        </p>
-                    </div>
-                {% else %}
-                    <p style="color: #9ca3af; font-size: 0.9rem;">Just joined the quest!</p>
-                {% endif %}
+<body>
+  <div class="page-bg"></div>
+
+  <div class="community-shell">
+    <header class="header">
+      <div class="header-top">
+        <div class="brand-icon">◌</div>
+        <h1 class="brand-title">HabitWise</h1>
+        <p class="brand-subtitle">Stay disciplined.</p>
+      </div>
+
+      <nav class="side-nav">
+        <a class="nav-item" href="{{ url_for('main.dashboard') }}">Dashboard</a>
+        <a class="nav-item" href="{{ url_for('main.challenge_setup') }}">Challenges</a>
+        <a class="nav-item active" href="{{ url_for('main.community') }}">Partners</a>
+        <a class="nav-item" href="{{ url_for('main.settings') }}">Settings</a>
+        <a class="nav-item" href="{{ url_for('main.logout') }}">Logout</a>
+      </nav>
+    </header>
+
+    <main class="main-content">
+      <section class="welcome-card">
+        <div>
+          <p class="eyebrow">ACCOUNTABILITY CIRCLE</p>
+          <h2>Your community</h2>
+          <p>
+            Share progress, stay encouraged, and keep each other moving forward.
+          </p>
+        </div>
+      </section>
+
+      <section class="party-banner">
+        <div class="party-bg">
+          <div class="party-slots">
+
+            {% if public_users %}
+              {% for user in public_users[:4] %}
+                {% set progress = user.progress %}
+                {% set challenge = user.latest_challenge() %}
+                {% set mode = challenge.mindset_type if challenge and challenge.mindset_type else "Warrior" %}
+
+                <div class="party-slot" data-member="{{ loop.index }}">
+                  <div class="slot-label">
+                    <p class="slot-name">{{ user.username }}</p>
+                    <p class="slot-stats">
+                      Streak:
+                      {% if progress %}
+                        {{ progress.streak }}
+                      {% else %}
+                        0
+                      {% endif %}
+                      days
+                    </p>
+                  </div>
+
+                  {% if mode == "Sage" %}
+                    <img class="weapon-img" src="{{ url_for('static', filename='img/icons/sage.png') }}" alt="Sage">
+                    <p class="slot-mode">Sage</p>
+                  {% elif mode == "Demon" %}
+                    <img class="weapon-img" src="{{ url_for('static', filename='img/icons/demon.png') }}" alt="Demon">
+                    <p class="slot-mode">Demon</p>
+                  {% else %}
+                    <img class="weapon-img" src="{{ url_for('static', filename='img/icons/warrior.png') }}" alt="Warrior">
+                    <p class="slot-mode">Warrior</p>
+                  {% endif %}
+                </div>
+              {% endfor %}
+
+              {% for i in range(4 - public_users[:4]|length) %}
+                <div class="party-slot empty">
+                  <div class="slot-label">
+                    <p class="slot-name">Empty</p>
+                    <p class="slot-stats">Awaiting member</p>
+                  </div>
+                  <img class="weapon-img" src="{{ url_for('static', filename='img/icons/Shadow.png') }}" alt="Empty slot">
+                  <p class="slot-mode">—</p>
+                </div>
+              {% endfor %}
+            {% else %}
+              {% for i in range(4) %}
+                <div class="party-slot empty">
+                  <div class="slot-label">
+                    <p class="slot-name">Empty</p>
+                    <p class="slot-stats">Awaiting member</p>
+                  </div>
+                  <img class="weapon-img" src="{{ url_for('static', filename='img/icons/Shadow.png') }}" alt="Empty slot">
+                  <p class="slot-mode">—</p>
+                </div>
+              {% endfor %}
+            {% endif %}
+
+          </div>
+        </div>
+      </section>
+
+      <section class="summary-grid">
+        <article class="summary-card card-purple">
+          <p class="summary-label">Active Partners</p>
+          <h3>{{ public_users|length if public_users else 0 }}</h3>
+          <span>People currently sharing progress</span>
+        </article>
+
+        <article class="summary-card card-green">
+          <p class="summary-label">Public Profiles</p>
+          <h3>{{ public_users|length if public_users else 0 }}</h3>
+          <span>Users visible in community</span>
+        </article>
+
+        <article class="summary-card card-blue">
+          <p class="summary-label">Your Visibility</p>
+          {% if current_user.is_public %}
+            <h3>Public</h3>
+            <span>Your progress can appear here</span>
+          {% else %}
+            <h3>Private</h3>
+            <span>Your progress is hidden from others</span>
+          {% endif %}
+        </article>
+      </section>
+
+      <section class="content-grid">
+        <div class="left-column">
+          <article class="panel">
+            <div class="panel-heading-row">
+              <div>
+                <p class="panel-kicker">PARTNERS</p>
+                <h3 class="panel-heading">Your accountability circle</h3>
+              </div>
             </div>
-        {% endfor %}
-    </div>
-{% else %}
-    <section class="card">
-        <p>🏜️ The public leaderboard is empty. Be the first to share your progress!</p>
-    </section>
-{% endif %}
-{% endblock %}
+
+            <div class="partner-list">
+              {% if public_users %}
+                {% for user in public_users %}
+                  {% set progress = user.progress %}
+                  {% set challenge = user.latest_challenge() %}
+                  {% set mode = challenge.mindset_type if challenge and challenge.mindset_type else "Not selected" %}
+
+                  <div class="partner-card">
+                    <div class="partner-main">
+                      <div class="avatar avatar-purple">
+                        {{ user.username[0]|upper }}
+                      </div>
+
+                      <div class="partner-info">
+                        <div class="name-row">
+                          <h4>{{ user.username }}</h4>
+
+                          {% if user.id == current_user.id %}
+                            <span class="status-badge complete">You</span>
+                          {% else %}
+                            <span class="status-badge complete">Public</span>
+                          {% endif %}
+                        </div>
+
+                        <p class="partner-meta">
+                          Mode: {{ mode }}
+                          • Streak:
+                          {% if progress %}
+                            {{ progress.streak }}
+                          {% else %}
+                            0
+                          {% endif %}
+                          days
+                          • Level:
+                          {% if progress %}
+                            {{ progress.level }}
+                          {% else %}
+                            1
+                          {% endif %}
+                          • XP:
+                          {% if progress %}
+                            {{ progress.xp }}
+                          {% else %}
+                            0
+                          {% endif %}
+                          • HP:
+                          {% if progress %}
+                            {{ progress.hp }} / {{ progress.max_hp }}
+                          {% else %}
+                            100 / 100
+                          {% endif %}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              {% else %}
+                <p class="partner-meta">
+                  No public users to display yet. Enable public sharing in settings to appear here.
+                </p>
+              {% endif %}
+            </div>
+          </article>
+        </div>
+
+        <div class="right-column">
+          <article class="panel invite-panel">
+            <p class="panel-kicker">PRIVACY</p>
+            <h3 class="panel-heading">Community visibility</h3>
+
+            {% if current_user.is_public %}
+              <p class="partner-meta">
+                Your progress is currently public. Other users can see your username, streak, level, XP, and HP.
+              </p>
+            {% else %}
+              <p class="partner-meta">
+                Your progress is currently private. Turn on sharing in settings if you want to appear in the community page.
+              </p>
+            {% endif %}
+
+            <a class="primary-btn" href="{{ url_for('main.settings') }}" style="display:block; text-align:center; text-decoration:none;">
+              Manage Privacy
+            </a>
+          </article>
+
+          <article class="panel invite-panel">
+            <p class="panel-kicker">MVP NOTE</p>
+            <h3 class="panel-heading">Partner invites</h3>
+
+            <p class="partner-meta">
+              Invite/support features are not active yet. For the MVP, this page focuses on showing public users and privacy-based community visibility.
+            </p>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

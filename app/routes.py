@@ -1,13 +1,11 @@
 from datetime import date
+
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy.exc import IntegrityError
-from datetime import date
+
 from app import db
-from app.constants import (
-    MAX_TASK_TITLE_LENGTH,
-    TASK_XP_REWARD,
-)
+from app.constants import MAX_TASK_TITLE_LENGTH, TASK_XP_REWARD
 from app.forms import ChallengeForm, LoginForm, ReflectionForm, SignupForm
 from app.models import Challenge, Task, User
 from app.services import (
@@ -15,7 +13,6 @@ from app.services import (
     build_dashboard_data,
     complete_user_task,
     create_reflection,
-    get_dashboard_data,
     get_or_create_progress,
     get_public_users,
 )
@@ -80,6 +77,7 @@ def login():
             get_or_create_progress(user)
             login_user(user)
             flash("Logged in successfully.", "success")
+
             next_page = request.args.get("next")
             return redirect(next_page or url_for("main.dashboard"))
 
@@ -104,8 +102,6 @@ def dashboard():
     progress = get_or_create_progress(current_user)
 
     challenge_form = ChallengeForm()
-
-    #to remove
     reflection_form = ReflectionForm()
 
     if challenge_form.validate_on_submit() and request.form.get("save_challenge"):
@@ -129,8 +125,6 @@ def dashboard():
         except Exception:
             db.session.rollback()
             flash("Could not save challenge. Please try again.", "error")
-    
-    dashboard_data = get_dashboard_data(current_user)
 
     tasks = (
         Task.query
@@ -143,14 +137,21 @@ def dashboard():
 
     return render_template(
         "dashboard.html",
-        dashboard_data=dashboard_data,
         challenge_form=challenge_form,
-        challenge=current_user.latest_challenge(),
         reflection_form=reflection_form,
+        challenge=current_user.latest_challenge(),
         tasks=tasks,
         progress=progress,
         dashboard_data=dashboard_data,
     )
+
+
+@main.route("/challenge", methods=["GET"])
+@login_required
+def challenge_setup():
+    """Render challenge/difficulty setup page."""
+    challenge_form = ChallengeForm()
+    return render_template("challenge_setup.html", challenge_form=challenge_form)
 
 
 @main.route("/add-task", methods=["POST"])
@@ -207,7 +208,10 @@ def complete_task(task_id):
             flash(f"Task completed! You earned {TASK_XP_REWARD} XP.", "success")
 
             if levelled_up:
-                flash(f"Level up! You are now level {current_user.progress.level}.", "success")
+                flash(
+                    f"Level up! You are now level {current_user.progress.level}.",
+                    "success",
+                )
         else:
             flash("Task was already completed.", "info")
 
@@ -260,11 +264,25 @@ def community():
     public_users = get_public_users()
     return render_template("community.html", public_users=public_users)
 
-@main.route("/settings")
+
+@main.route("/settings", methods=["GET", "POST"])
 @login_required
 def settings():
-    """Render basic account and privacy settings page."""
+    """Render and update basic account/privacy settings page."""
+    if request.method == "POST":
+        current_user.is_public = bool(request.form.get("is_public"))
+
+        try:
+            db.session.commit()
+            flash("Privacy settings updated.", "success")
+        except Exception:
+            db.session.rollback()
+            flash("Could not update privacy settings.", "error")
+
+        return redirect(url_for("main.settings"))
+
     return render_template("settings.html")
+
 
 @main.route("/evaluate-day", methods=["POST"])
 @login_required
@@ -287,6 +305,7 @@ def evaluate_day():
             completion_percentage=completion_percentage,
             difficulty=difficulty,
         )
+
         progress.last_evaluated_date = today
         db.session.commit()
 
@@ -300,4 +319,3 @@ def evaluate_day():
         flash("Could not evaluate today. Please try again.", "error")
 
     return redirect(url_for("main.dashboard"))
-
