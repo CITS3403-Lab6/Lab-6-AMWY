@@ -444,6 +444,10 @@ body {
   flex-wrap: wrap;
 }
 
+.partner-actions form {
+  margin: 0;
+}
+
 .action-btn,
 .primary-btn {
   border: none;
@@ -546,6 +550,15 @@ body {
 .primary-btn {
   width: 100%;
   background: linear-gradient(180deg, #8c5cf6, #7648db);
+}
+
+.partner-actions .primary-btn,
+.partner-actions .action-btn {
+  width: auto;
+}
+
+.empty-state {
+  padding: 4px 2px;
 }
 
 .invite-status {
