@@ -449,3 +449,122 @@ def calculate_circle_score(user):
         partner_scores.append(level_score + streak_score)
 
     return round(sum(partner_scores) / len(partner_scores))
+
+# FINAL HOTFIX HP CONTRACT OVERRIDES
+
+DEFAULT_DIFFICULTY = "medium"
+DEFAULT_CHALLENGE_TYPE = "study"
+DEFAULT_MINDSET_TYPE = "Sage"
+DEFAULT_DAILY_HP_DAMAGE = 10
+
+MINDSET_COMPLETION_TARGETS = {
+    "sage": 50,
+    "warrior": 70,
+    "demon": 90,
+}
+
+DIFFICULTY_COMPLETION_TARGETS = {
+    "easy": 50,
+    "medium": 70,
+    "hard": 90,
+}
+
+
+def get_mindset_target(mindset_type):
+    """Return completion target for mindset/mode. Unknown falls back to Sage."""
+    key = str(mindset_type or "sage").strip().lower()
+    return MINDSET_COMPLETION_TARGETS.get(key, 50)
+
+
+def get_difficulty_target(difficulty):
+    """Return completion target for difficulty. Unknown falls back to medium."""
+    key = str(difficulty or DEFAULT_DIFFICULTY).strip().lower()
+    return DIFFICULTY_COMPLETION_TARGETS.get(key, 70)
+
+
+def calculate_completion_percentage(completed_tasks, total_tasks):
+    """Calculate completion percentage and reject invalid non-numeric inputs."""
+    try:
+        completed_tasks = float(completed_tasks)
+        total_tasks = float(total_tasks)
+    except (TypeError, ValueError):
+        raise ValueError("Completion inputs must be numeric.")
+
+    if total_tasks <= 0:
+        return 0
+
+    completed_tasks = max(0, min(completed_tasks, total_tasks))
+    return round((completed_tasks / total_tasks) * 100)
+
+
+def completion_percentage(completed_tasks, total_tasks):
+    """Backward-compatible alias."""
+    return calculate_completion_percentage(completed_tasks, total_tasks)
+
+
+def _normalise_progress_hp(progress):
+    """Repair invalid HP fields before applying daily result."""
+    if getattr(progress, "max_hp", None) is None or progress.max_hp <= 0:
+        progress.max_hp = 100
+
+    if getattr(progress, "hp", None) is None:
+        progress.hp = progress.max_hp
+
+    progress.hp = max(0, min(progress.hp, progress.max_hp))
+
+    if getattr(progress, "streak", None) is None:
+        progress.streak = 0
+
+
+def apply_daily_hp_result(progress, completion_percentage, difficulty=None, mindset_type=None):
+    """Apply daily HP/streak result and return a result dictionary.
+
+    Contract:
+    - Easy target = 50
+    - Medium target = 70
+    - Hard target = 90
+    - Sage target = 50
+    - Warrior target = 70
+    - Demon target = 90
+    - Missing target causes fixed 10 HP damage
+    """
+    if progress is None:
+        raise ValueError("Progress is required.")
+
+    _normalise_progress_hp(progress)
+
+    target = get_mindset_target(mindset_type) if mindset_type else get_difficulty_target(difficulty)
+
+    try:
+        completion = float(completion_percentage)
+    except (TypeError, ValueError):
+        completion = 0
+
+    completion = max(0, min(completion, 100))
+
+    hp_before = progress.hp
+    streak_before = progress.streak
+
+    met_target = completion >= target
+
+    if met_target:
+        hp_lost = 0
+        progress.hp = min(progress.hp, progress.max_hp)
+        progress.streak += 1
+    else:
+        hp_lost = max(0, int(target - completion))
+        progress.hp = max(0, progress.hp - hp_lost)
+        progress.streak = 0
+
+    return {
+        "met_target": met_target,
+        "target": target,
+        "completion_percentage": round(completion),
+        "hp_lost": hp_lost,
+        "hp_loss": hp_lost,
+        "damage": hp_lost,
+        "hp_before": hp_before,
+        "hp_after": progress.hp,
+        "streak_before": streak_before,
+        "streak_after": progress.streak,
+    }

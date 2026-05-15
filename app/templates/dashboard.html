@@ -1,4 +1,25 @@
-<!DOCTYPE html>
+{% set dashboard_data = dashboard_data if dashboard_data is defined and dashboard_data else {} %}
+
+{% if dashboard_data.progress is defined %}
+  {% set progress_data = dashboard_data.progress %}
+{% elif progress is defined %}
+  {% set progress_data = progress %}
+{% else %}
+  {% set progress_data = namespace(level=1, xp=0, hp=100, max_hp=100, streak=0, completion_percentage=0, difficulty_target=70) %}
+{% endif %}
+
+{% if dashboard_data.tasks_today is defined %}
+  {% set tasks_today_data = dashboard_data.tasks_today %}
+{% else %}
+  {% set tasks_today_data = namespace(total=total_tasks|default(0), completed=completed_tasks|default(0), completion_percentage=completion_percentage|default(0)) %}
+{% endif %}
+
+{% if dashboard_data.character is defined %}
+  {% set character_data = dashboard_data.character %}
+{% else %}
+  {% set character_data = namespace(name="Stage 0", stage=0, avatar="hiddenavatar.png") %}
+{% endif %}
+\n<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -18,7 +39,12 @@
   </script>
   <script src="{{ url_for('static', filename='js/dashboard.js') }}" defer></script>
 </head>
-<body>
+<body>\n
+<div id="compat-dashboard-controls" style="position: absolute; left: 1rem; top: 1rem; z-index: 9999;">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <a id="compat-logout-link" href="{{ url_for('main.logout') }}">Logout</a>
+</div>
+
   <div class="app-shell">
     <header class="header">
       <div class="header-top">

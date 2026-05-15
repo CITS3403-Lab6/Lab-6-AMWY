@@ -103,6 +103,12 @@ def unique_user(prefix="selenium"):
     }
 
 
+
+
+def safe_click(browser, element):
+    browser.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
+    browser.execute_script("arguments[0].click();", element)
+
 def page_text(browser, timeout=5):
     last_error = None
 
