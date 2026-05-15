@@ -19,6 +19,13 @@
   <script src="{{ url_for('static', filename='js/dashboard.js') }}" defer></script>
 </head>
 <body>
+
+<div id="dashboard-compat-controls" style="position:absolute; left:1rem; top:1rem; z-index:9999;">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <a href="{{ url_for('main.logout') }}" id="dashboard-logout-link">Logout</a>
+</div>
+
+
   <div class="app-shell">
     <header class="header">
       <div class="header-top">

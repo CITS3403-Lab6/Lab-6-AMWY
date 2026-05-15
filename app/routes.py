@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 
 from app import db
 from app.constants import MAX_TASK_TITLE_LENGTH, TASK_XP_REWARD
-from app.forms import ChallengeForm, LoginForm, SignupForm
+from app.forms import ChallengeForm, LoginForm, ReflectionForm, SignupForm
 from app.models import Challenge, Task, User
 from app.services import (
     add_accountability_partner,
@@ -14,6 +14,7 @@ from app.services import (
     build_dashboard_data,
     calculate_circle_score,
     complete_user_task,
+    create_reflection,
     get_accountability_partner_cards,
     get_or_create_progress,
     get_public_users,
@@ -105,6 +106,7 @@ def dashboard():
     progress = get_or_create_progress(current_user)
 
     challenge_form = ChallengeForm()
+    reflection_form = ReflectionForm()
 
     if challenge_form.validate_on_submit() and request.form.get("save_challenge"):
         try:
@@ -140,6 +142,7 @@ def dashboard():
     return render_template(
         "dashboard.html",
         challenge_form=challenge_form,
+        reflection_form=reflection_form,
         challenge=current_user.latest_challenge(),
         tasks=tasks,
         progress=progress,
@@ -227,6 +230,35 @@ def complete_task(task_id):
     return redirect(url_for("main.dashboard"))
 
 
+@main.route("/reflection", methods=["POST"])
+@login_required
+def reflection():
+    """Save a daily reflection."""
+    form = ReflectionForm()
+
+    if not form.validate_on_submit():
+        flash("Reflection was not saved because the form was invalid.", "error")
+        return redirect(url_for("main.dashboard"))
+
+    try:
+        create_reflection(
+            user=current_user,
+            mood=form.mood.data,
+            note=form.note.data,
+        )
+
+        flash("Reflection saved successfully.", "success")
+
+    except ValueError as error:
+        db.session.rollback()
+        flash(str(error), "error")
+    except Exception:
+        db.session.rollback()
+        flash("Could not save reflection. Please try again.", "error")
+
+    return redirect(url_for("main.dashboard"))
+
+
 @main.route("/community")
 @login_required
 def community():
@@ -266,9 +298,6 @@ def settings():
             "yes",
             "on",
         }
-        current_user.notify_daily = "notify_daily" in request.form
-        current_user.notify_streak = "notify_streak" in request.form
-        current_user.notify_community = "notify_community" in request.form
 
         try:
             db.session.commit()
@@ -290,7 +319,7 @@ def settings():
 @main.route("/evaluate-day", methods=["POST"])
 @login_required
 def evaluate_day():
-    """Evaluate today's completion and apply HP damage or streak gain."""
+    """Evaluate today's completion and apply HP/streak result once per day."""
     progress = get_or_create_progress(current_user)
     today = date.today()
 
@@ -298,30 +327,58 @@ def evaluate_day():
         flash("Today has already been evaluated.", "info")
         return redirect(url_for("main.dashboard"))
 
-    dashboard_data = build_dashboard_data(current_user)
-    completion_percentage = dashboard_data.get("completion_percentage", 0)
-    mindset_type = dashboard_data.get("current_challenge", None)
+    tasks = (
+        Task.query
+        .filter_by(user_id=current_user.id, task_date=today)
+        .all()
+    )
 
-    try:
-        result = apply_daily_hp_result(
-            progress=progress,
-            completion_percentage=completion_percentage,
-            mindset_type=mindset_type,
+    total_tasks = len(tasks)
+    completed_tasks = sum(1 for task in tasks if task.completed)
+    completion_percentage = round((completed_tasks / total_tasks) * 100) if total_tasks else 0
+
+    latest_challenge = current_user.latest_challenge()
+
+    if latest_challenge is not None:
+        challenge_difficulty = getattr(latest_challenge, "difficulty", None)
+        challenge_mindset = (
+            getattr(latest_challenge, "mindset_type", None)
+            or getattr(latest_challenge, "mode", None)
+            or "Sage"
         )
 
-        progress.last_evaluated_date = today
-        db.session.commit()
-
-        if result["met_target"]:
-            flash("Daily target met. Streak increased.", "success")
+        if challenge_difficulty:
+            result = apply_daily_hp_result(
+                progress,
+                completion_percentage,
+                difficulty=challenge_difficulty,
+                mindset_type=None,
+            )
         else:
-            flash(f"Daily target missed. HP reduced by {result['hp_lost']}.", "warning")
+            result = apply_daily_hp_result(
+                progress,
+                completion_percentage,
+                difficulty=None,
+                mindset_type=challenge_mindset,
+            )
+    else:
+        result = apply_daily_hp_result(
+            progress,
+            completion_percentage,
+            difficulty=None,
+            mindset_type="Sage",
+        )
 
-    except Exception:
-        db.session.rollback()
-        flash("Could not evaluate today. Please try again.", "error")
+    progress.last_evaluated_date = today
+    db.session.commit()
+
+    if result.get("met_target"):
+        flash("Daily target met. Streak increased.", "success")
+    else:
+        flash("Daily target missed. HP reduced.", "warning")
 
     return redirect(url_for("main.dashboard"))
+
 
 
 @main.route("/community/add-partner", methods=["POST"])
