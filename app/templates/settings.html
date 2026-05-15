@@ -67,10 +67,34 @@
                   <p class="info-label">Email</p>
                   <p class="info-value">{{ current_user.email }}</p>
                 </div>
-                <div class="info-box">
-                  <p class="info-label">Profile Visibility</p>
-                  <p class="info-value">
-                    {{ "Public" if current_user.is_public else "Private" }}
+                <input id="notify-streak" class="toggle-input" type="checkbox">
+              </label>
+
+              <label class="toggle-row">
+                <div>
+                  <p class="toggle-title">Community updates</p>
+                  <p class="toggle-sub">Receive simple accountability partner updates.</p>
+                </div>
+                <input id="notify-community" class="toggle-input" type="checkbox">
+              </label>
+            </div>
+          </article>
+        </div>
+
+        <div class="column">
+          <article class="panel">
+            <p class="panel-kicker">PRIVACY</p>
+            <h3 class="panel-heading">Visibility controls</h3>
+            <p class="panel-subheading">Privacy Settings</p>
+
+            <div class="toggle-list">
+              <label class="toggle-row">
+                <div>
+                  <p class="toggle-title">Share progress with partners</p>
+                  <p class="toggle-sub">
+                    Allow your accountability circle to view your progress.
+                    Currently: {{ "Public" if current_user.is_public else "Private" }}.
+                    Change this in the dashboard challenge form.
                   </p>
                 </div>
                 <div class="info-box">

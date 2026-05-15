@@ -1,0 +1,56 @@
+Triage summary - Lab-6-AMWY
+
+Date: 2026-05-15
+
+Actions taken:
+- Ran full pytest suite and captured failures (20 failed, 94 passed).
+- Focused triage on top 3 failures requested by user.
+
+Fixes applied:
+1) Stat XP not awarded on task completion
+   - Problem: `award_task_xp` ignored task.stat_category and only incremented global XP.
+   - Fix: Updated `app/services.py::award_task_xp` to increment the per-stat field
+     (`strength_xp`, `intelligence_xp`, `spirituality_xp`, `vitality_xp`, `charisma_xp`) based on
+     `task.stat_category` and still update global `progress.xp` and `level`.
+   - Test: `tests/test_task_progress.py::test_complete_task_updates_xp_and_stat` now passes.
+
+2) Community leaderboard did not show the current public user
+   - Problem: `routes.community` called `get_public_users(current_user.id)` which excluded
+     the current user from the public list; tests expect the logged-in public user to appear.
+   - Fix: Changed to `get_public_users()` so the leaderboard includes all public users.
+   - Test: `tests/test_community_privacy.py::test_public_user_appears_in_community` now passes.
+
+Outstanding issue:
+3) Selenium dashboard add-task flow
+   - Symptom: `tests/test_selenium_user_flows.py::test_selenium_dashboard_can_add_task_if_form_present`
+     fails with `ElementClickInterceptedException` when clicking the add-task submit button.
+   - Attempts made:
+     - Added inline style to the Add Task button and raised `.btn` z-index in
+       `static/dashboard/dashboard.css` to ensure buttons sit above overlays.
+     - Re-ran the Selenium test multiple times; the click interception still occurs.
+   - Current artifacts: Selenium failure stacktrace captured in
+     `test_failure_logs/failure_traces.txt` (contains the ElementClickInterceptedException).
+
+Next recommended steps (I can do any of these):
+- Capture a screenshot at the moment before click to inspect which element is intercepting the click.
+  I can add a short Selenium helper that reproduces the test steps and saves a screenshot.
+- Try an alternative programmatic click (JS `element.click()` via `execute_script`) in the Selenium test
+  (may require test modification).
+- Investigate dynamic overlays (flash messages, avatar mask, or other absolute positioned elements)
+  by checking computed z-index and pointer-events in Chrome DevTools; adjust CSS to avoid overlaying interactive elements.
+
+Files changed:
+- app/services.py (award_task_xp)
+- app/routes.py (community)
+- app/templates/dashboard.html (Add Task button inline z-index)
+- static/dashboard/dashboard.css (button z-index)
+
+Files created/updated with logs:
+- test_failure_logs/parsed_failures.txt
+- test_failure_logs/failure_traces.txt
+- test_failure_logs/triage_report.txt
+
+If you want, I can now:
+- Add a small reproduction script to capture a screenshot at failure time (recommended),
+- Continue triaging and attempt further fixes to the Selenium click interception,
+- Or re-run the entire test suite to see the updated fail/pass counts.

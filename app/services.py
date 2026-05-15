@@ -6,8 +6,6 @@ from sqlalchemy import or_
 from app import db
 from app.constants import (
     CHARACTER_REVEAL_INTERVAL,
-    DEFAULT_DIFFICULTY,
-    DIFFICULTY_TARGETS,
     LEVEL_XP_MULTIPLIER,
     MAX_HP,
     MAX_LEVEL,
@@ -101,6 +99,8 @@ def award_task_xp(user, task):
     progress = get_or_create_progress(user)
 
     old_level = progress.level
+
+    # Global XP and level
     progress.xp += TASK_XP_REWARD
     progress.level = calculate_level_from_xp(progress.xp)
 
@@ -122,14 +122,17 @@ def complete_user_task(user, task):
     return True, levelled_up
 
 
-def get_difficulty_target(difficulty):
-    """Return required daily completion percentage for difficulty."""
-    normalized_difficulty = str(difficulty or DEFAULT_DIFFICULTY).strip().lower()
-
-    return DIFFICULTY_TARGETS.get(
-        normalized_difficulty,
-        DIFFICULTY_TARGETS[DEFAULT_DIFFICULTY],
-    )
+def get_mindset_target(mindset_type):
+    """Return required daily completion percentage for a mindset type."""
+    from app.constants import VALID_MINDSET_TYPES
+    
+    normalized_mindset = str(mindset_type or "Sage").strip()
+    
+    mindset_config = VALID_MINDSET_TYPES.get(normalized_mindset)
+    if mindset_config:
+        return mindset_config.get("min_completion_percentage", 50)
+    
+    return VALID_MINDSET_TYPES["Sage"]["min_completion_percentage"]
 
 
 def calculate_completion_percentage(total_tasks, completed_tasks):
@@ -158,7 +161,7 @@ def calculate_character_reveal_stage(level):
     return safe_level // CHARACTER_REVEAL_INTERVAL
 
 
-def apply_daily_hp_result(progress, completion_percentage, difficulty=None):
+def apply_daily_hp_result(progress, completion_percentage, mindset_type=None):
     """Apply HP damage or streak gain based on daily completion."""
     progress = normalise_progress_fields(progress)
 
@@ -170,7 +173,7 @@ def apply_daily_hp_result(progress, completion_percentage, difficulty=None):
         default=0,
     )
 
-    target = get_difficulty_target(difficulty)
+    target = get_mindset_target(mindset_type)
 
     if safe_completion >= target:
         progress.streak += 1
@@ -239,21 +242,27 @@ def build_dashboard_data(user):
     completed_tasks = sum(1 for task in today_tasks if bool(task.completed))
     completion_percentage = calculate_completion_percentage(total_tasks, completed_tasks)
 
+def build_dashboard_data(user):
+    """Build dashboard data safely for the frontend."""
+    if user is None or getattr(user, "id", None) is None:
+        raise ValueError("A valid user is required to build dashboard data.")
+
+    progress = get_or_create_progress(user)
+    today_tasks = get_today_tasks(user.id)
+
+    total_tasks = len(today_tasks)
+    completed_tasks = sum(1 for task in today_tasks if bool(task.completed))
+    completion_percentage = calculate_completion_percentage(total_tasks, completed_tasks)
+
     latest_challenge = get_latest_challenge(user)
-
-    difficulty = (
-        getattr(latest_challenge, "difficulty", DEFAULT_DIFFICULTY)
-        if latest_challenge
-        else DEFAULT_DIFFICULTY
-    )
-
-    difficulty_target = get_difficulty_target(difficulty)
 
     current_challenge = (
         getattr(latest_challenge, "mindset_type", None)
         if latest_challenge
         else None
     )
+
+    mindset_target = get_mindset_target(current_challenge)
 
     return {
         "total_tasks": total_tasks,
@@ -265,8 +274,7 @@ def build_dashboard_data(user):
         "level": progress.level,
         "streak": progress.streak,
         "current_challenge": current_challenge,
-        "difficulty": difficulty,
-        "difficulty_target": difficulty_target,
+        "mindset_target": mindset_target,
         "character_reveal_stage": calculate_character_reveal_stage(progress.level),
         "today_tasks": today_tasks,
     }

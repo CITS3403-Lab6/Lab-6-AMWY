@@ -160,7 +160,6 @@ def challenge():
 def add_task():
     """Add a daily task for the current user."""
     title = request.form.get("title", "").strip()
-    stat_category = request.form.get("stat_category", "VIT").strip() or "VIT"
 
     if not title:
         flash("Task title is required.", "error")
@@ -174,7 +173,6 @@ def add_task():
         task = Task(
             user_id=current_user.id,
             title=title,
-            stat_category=stat_category,
         )
 
         db.session.add(task)
@@ -233,10 +231,9 @@ def complete_task(task_id):
 @login_required
 def community():
     """Show public users and the current user's accountability circle."""
-    try:
-        public_users = get_public_users(current_user.id)
-    except TypeError:
-        public_users = get_public_users()
+    # Include public users in the leaderboard (including the current user
+    # when they have a public profile) so the UI shows all public profiles.
+    public_users = get_public_users()
 
     partner_cards = get_accountability_partner_cards(current_user)
     circle_score = calculate_circle_score(current_user)
@@ -303,13 +300,13 @@ def evaluate_day():
 
     dashboard_data = build_dashboard_data(current_user)
     completion_percentage = dashboard_data.get("completion_percentage", 0)
-    difficulty = dashboard_data.get("difficulty", None)
+    mindset_type = dashboard_data.get("current_challenge", None)
 
     try:
         result = apply_daily_hp_result(
             progress=progress,
             completion_percentage=completion_percentage,
-            difficulty=difficulty,
+            mindset_type=mindset_type,
         )
 
         progress.last_evaluated_date = today
