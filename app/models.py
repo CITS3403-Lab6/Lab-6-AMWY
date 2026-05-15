@@ -52,15 +52,12 @@ class User(db.Model, UserMixin):
     )
 
     def set_password(self, password):
-        """Hash and store the user's password."""
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
-        """Check a raw password against the stored password hash."""
         return check_password_hash(self.password_hash, password)
 
     def latest_challenge(self):
-        """Return the user's most recently created challenge."""
         return (
             Challenge.query
             .filter_by(user_id=self.id)
