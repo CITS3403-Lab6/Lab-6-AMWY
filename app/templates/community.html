@@ -9,7 +9,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/community.css') }}">
-  <script src="{{ url_for('static', filename='js/community.js') }}" defer></script>
 </head>
 <body>
   <div class="page-bg"></div>
@@ -108,8 +107,8 @@
 
         <article class="summary-card card-green">
           <p class="summary-label">Accountability Circle</p>
-          <h3>Coming Soon</h3>
-          <span>Partner system in progress</span>
+          <h3>{{ partners | length }}</h3>
+          <span>Active partner links</span>
         </article>
 
         <article class="summary-card card-blue">
@@ -145,6 +144,9 @@
                               Level {{ user.progress.level }}
                             </span>
                           {% endif %}
+                          {% if user.id == current_user.id %}
+                            <span class="status-badge support">You</span>
+                          {% endif %}
                         </div>
                         {% if user.progress %}
                           <p class="partner-meta">
@@ -156,12 +158,70 @@
                         {% endif %}
                       </div>
                     </div>
+                    {% if user.id != current_user.id %}
+                      <div class="partner-actions">
+                        <form method="post" action="{{ url_for('main.add_partner') }}">
+                          <input type="hidden" name="partner_identifier" value="{{ user.username }}">
+                          <button type="submit" class="primary-btn">Add Partner</button>
+                        </form>
+                      </div>
+                    {% endif %}
                   </div>
                 {% endfor %}
               {% else %}
-                <p style="color: var(--muted);">
-                  🏜️ The public leaderboard is empty. Be the first to share your progress!
-                </p>
+                <div class="empty-state">
+                  <p class="partner-text">The public leaderboard is empty.</p>
+                  <p class="partner-meta">Be the first to share your progress in Settings.</p>
+                </div>
+              {% endif %}
+            </div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-heading-row">
+              <div>
+                <p class="panel-kicker">CIRCLE</p>
+                <h3 class="panel-heading">Your current partners</h3>
+              </div>
+            </div>
+
+            <div class="partner-list">
+              {% if partners %}
+                {% for partner in partners %}
+                  <div class="partner-card">
+                    <div class="partner-main">
+                      <div class="avatar avatar-green">
+                        {{ partner.username[0] | upper }}
+                      </div>
+                      <div class="partner-info">
+                        <div class="name-row">
+                          <h4>{{ partner.username }}</h4>
+                          {% if partner.current_challenge %}
+                            <span class="status-badge support">
+                              {{ partner.current_challenge }}
+                            </span>
+                          {% endif %}
+                        </div>
+                        <p class="partner-meta">
+                          Streak: {{ partner.streak }} days • Level {{ partner.level }} • XP {{ partner.xp }}
+                        </p>
+                        <p class="partner-text">
+                          HP {{ partner.hp }}/{{ partner.max_hp }}
+                        </p>
+                      </div>
+                    </div>
+                    <div class="partner-actions">
+                      <form method="post" action="{{ url_for('main.remove_partner', partner_id=partner.id) }}">
+                        <button type="submit" class="action-btn red">Remove</button>
+                      </form>
+                    </div>
+                  </div>
+                {% endfor %}
+              {% else %}
+                <div class="empty-state">
+                  <p class="partner-text">No partners yet.</p>
+                  <p class="partner-meta">Add someone from the public list to build your circle.</p>
+                </div>
               {% endif %}
             </div>
           </article>
@@ -172,16 +232,14 @@
             <p class="panel-kicker">INVITE</p>
             <h3 class="panel-heading">Add accountability partner</h3>
 
-            <label class="input-label" for="partner-name">Partner name</label>
-            <input id="partner-name" class="text-input" type="text"
-              placeholder="Enter name">
+            <form method="post" action="{{ url_for('main.add_partner') }}">
+              <label class="input-label" for="partner-identifier">Partner ID / Username</label>
+              <input id="partner-identifier" class="text-input" name="partner_identifier" type="text"
+                placeholder="Enter username or email" required>
 
-            <label class="input-label" for="partner-code">Partner ID / Username</label>
-            <input id="partner-code" class="text-input" type="text"
-              placeholder="Enter ID">
-
-            <button id="invite-btn" class="primary-btn">Send Invite</button>
-            <p id="invite-status" class="invite-status"></p>
+              <button type="submit" class="primary-btn">Add Partner</button>
+            </form>
+            <p class="invite-status">Only public users can be added to your accountability circle.</p>
           </article>
         </div>
       </section>

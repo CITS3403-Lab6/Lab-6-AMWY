@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css') }}">
+  <script src="{{ url_for('static', filename='js/settings.js') }}" defer></script>
 </head>
 <body>
   <div class="page-bg"></div>
@@ -125,30 +126,31 @@
             <h3 class="panel-heading">Visibility controls</h3>
             <p class="panel-subheading">Privacy Settings</p>
 
-            <div class="toggle-list">
-              <label class="toggle-row">
-                <div>
-                  <p class="toggle-title">Share progress with partners</p>
-                  <p class="toggle-sub">
-                    Allow your accountability circle to view your progress.
-                    Currently: {{ "Public" if current_user.is_public else "Private" }}.
-                    Change this in the dashboard challenge form.
-                  </p>
-                </div>
-                <input class="toggle-input" type="checkbox"
-                  {{ "checked" if current_user.is_public else "" }} disabled>
-              </label>
+            <form id="privacy-form" method="post" action="{{ url_for('main.settings') }}">
+              <div class="toggle-list">
+                <label class="toggle-row" for="privacy-toggle">
+                  <div>
+                    <p class="toggle-title">Share progress with partners</p>
+                    <p class="toggle-sub">
+                      Allow your accountability circle to view your progress.
+                      Currently: {{ "Public" if current_user.is_public else "Private" }}.
+                    </p>
+                  </div>
+                  <input id="privacy-toggle" name="is_public" class="toggle-input" type="checkbox"
+                    {{ "checked" if current_user.is_public else "" }}>
+                </label>
 
-              <label class="toggle-row">
-                <div>
-                  <p class="toggle-title">Show activity status</p>
-                  <p class="toggle-sub">
-                    Let others see whether you completed today's tasks.
-                  </p>
-                </div>
-                <input id="privacy-status" class="toggle-input" type="checkbox">
-              </label>
-            </div>
+                <label class="toggle-row">
+                  <div>
+                    <p class="toggle-title">Show activity status</p>
+                    <p class="toggle-sub">
+                      Let others see whether you completed today's tasks.
+                    </p>
+                  </div>
+                  <input id="privacy-status" class="toggle-input" type="checkbox" disabled>
+                </label>
+              </div>
+            </form>
           </article>
 
           <article class="panel">

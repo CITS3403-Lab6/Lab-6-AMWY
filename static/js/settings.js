@@ -1,1 +1,8 @@
-/** all removed as entire file was localStorage based*/
+const privacyForm = document.getElementById("privacy-form");
+const privacyToggle = document.getElementById("privacy-toggle");
+
+if (privacyForm && privacyToggle) {
+	privacyToggle.addEventListener("change", () => {
+		privacyForm.submit();
+	});
+}

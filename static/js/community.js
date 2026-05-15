@@ -1,10 +1,3 @@
-
-const partnerCards = document.querySelectorAll(".partner-card");
-const inviteBtn = document.getElementById("invite-btn");
-const inviteStatus = document.getElementById("invite-status");
-const partnerNameInput = document.getElementById("partner-name");
-const partnerCodeInput = document.getElementById("partner-code");
-
 const partyMembers = [
   { name: "Wooji", streak: 12, mode: "Warrior" },  // slot 1 — party leader
   { name: "Alex", streak: 9, mode: "Sage" },         // slot 2 — joined second
@@ -49,39 +42,3 @@ function renderParty() {
 }
 
 renderParty();
-
-document.querySelectorAll("[data-action]").forEach(button => {
-  button.addEventListener("click", () => {
-    const action = button.dataset.action;
-    const name = button.dataset.name;
-
-    if (action === "support") {
-      addLogItem(`You sent support to ${name}.`);
-    }
-
-    if (action === "nudge") {
-      addLogItem(`You sent a gentle nudge to ${name}.`);
-    }
-
-    if (action === "view") {
-      addLogItem(`You viewed ${name}'s recent progress.`);
-    }
-  });
-});
-
-inviteBtn.addEventListener("click", () => {
-  const name = partnerNameInput.value.trim();
-  const code = partnerCodeInput.value.trim();
-
-  if (!name || !code) {
-    inviteStatus.textContent = "Please fill in both fields.";
-    inviteStatus.style.color = "#f0a86b";
-    return;
-  }
-
-  inviteStatus.textContent = `Invite sent to ${name}.`;
-  inviteStatus.style.color = "#8fd7a2";
-
-  partnerNameInput.value = "";
-  partnerCodeInput.value = "";
-});

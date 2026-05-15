@@ -426,8 +426,6 @@ def get_accountability_partner_cards(user):
                     if latest_challenge
                     else None
                 ),
-                
-                "difficulty": DEFAULT_DIFFICULTY,
             }
         )
 
