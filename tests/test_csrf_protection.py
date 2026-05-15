@@ -43,7 +43,7 @@ def test_plain_post_forms_include_csrf_token_or_flask_wtf_hidden_tag():
     checked_forms = 0
 
     for template_path in template_dir.glob("*.html"):
-        text = template_path.read_text()
+        text = template_path.read_text(encoding="utf-8")
         post_forms = extract_post_forms(text)
 
         for form in post_forms:
@@ -62,7 +62,7 @@ def test_csrf_javascript_helper_exists_for_frontend_ajax():
 
     assert csrf_js.exists()
 
-    text = csrf_js.read_text()
+    text = csrf_js.read_text(encoding="utf-8")
 
     assert "X-CSRFToken" in text
     assert "window.fetch" in text

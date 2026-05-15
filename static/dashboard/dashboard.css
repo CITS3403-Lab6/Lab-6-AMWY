@@ -188,6 +188,7 @@ body {
   background: #13142c;
   z-index: 3;
   transition: height 0.8s ease;
+  pointer-events: none;
 }
 
 .challenge-panel {
@@ -491,6 +492,8 @@ body {
   font: inherit;
   font-weight: 600;
   cursor: pointer;
+  position: relative;
+  z-index: 1000;
 }
 
 .btn-purple,

@@ -5,7 +5,7 @@ from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy.exc import IntegrityError
 
 from app import db
-from app.constants import MAX_TASK_TITLE_LENGTH, TASK_XP_REWARD
+from app.constants import MAX_TASK_TITLE_LENGTH, TASK_XP_REWARD, DEFAULT_DIFFICULTY
 from app.forms import ChallengeForm, LoginForm, ReflectionForm, SignupForm
 from app.models import Challenge, Task, User
 from app.services import (
@@ -112,8 +112,18 @@ def dashboard():
         try:
             current_user.is_public = bool(challenge_form.is_public.data)
 
+            # Accept challenge_type and difficulty from the form or POST payload
+            challenge_type = (
+                request.form.get("challenge_type") or request.form.get("challenge") or "study"
+            )
+            difficulty = (
+                request.form.get("difficulty") or request.form.get("difficulty_level") or DEFAULT_DIFFICULTY
+            )
+
             challenge = Challenge(
                 user_id=current_user.id,
+                challenge_type=challenge_type,
+                difficulty=difficulty,
                 mindset_type=challenge_form.mindset_type.data,
             )
 
@@ -265,10 +275,9 @@ def reflection():
 @login_required
 def community():
     """Show public users and the current user's accountability circle."""
-    try:
-        public_users = get_public_users(current_user.id)
-    except TypeError:
-        public_users = get_public_users()
+    # Include public users in the leaderboard (including the current user
+    # when they have a public profile) so the UI shows all public profiles.
+    public_users = get_public_users()
 
     partner_cards = get_accountability_partner_cards(current_user)
     circle_score = calculate_circle_score(current_user)

@@ -64,7 +64,7 @@ class User(db.Model, UserMixin):
         return (
             Challenge.query
             .filter_by(user_id=self.id)
-            .order_by(Challenge.created_at.desc())
+            .order_by(Challenge.created_at.desc(), Challenge.id.desc())
             .first()
         )
 
@@ -83,6 +83,9 @@ class Challenge(db.Model):
         index=True,
     )
 
+    # Challenge metadata
+    challenge_type = db.Column(db.String(30), nullable=False)
+    difficulty = db.Column(db.String(30), nullable=False)
     mindset_type = db.Column(db.String(30), nullable=False)
     created_at = db.Column(db.DateTime, default=utc_now, nullable=False, index=True)
 
@@ -91,11 +94,25 @@ class Challenge(db.Model):
             "mindset_type IN ('Sage', 'Warrior', 'Demon')",
             name="valid_mindset_type",
         ),
+        db.CheckConstraint(
+            "challenge_type IN ('study', 'fitness')",
+            name="valid_challenge_type",
+        ),
+        db.CheckConstraint(
+            "difficulty IN ('easy', 'medium', 'hard')",
+            name="valid_challenge_difficulty",
+        ),
     )
 
     def __repr__(self):
-        return f"<Challenge {self.mindset_type}>"
-
+        return f"<Challenge {self.challenge_type} {self.mindset_type}>" 
+    
+    def __init__(self, **kwargs):
+        # Accept arbitrary kwargs and set them as attributes so callers
+        # (including tests and form-like constructions) can instantiate
+        # Challenge without hitting the declarative constructor TypeError.
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
 class Task(db.Model):
     """Daily user task that contributes to a stat category."""

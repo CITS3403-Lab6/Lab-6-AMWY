@@ -4,7 +4,7 @@
 
 {% block content %}
 <section class="card form-card">
-    <h1>⚔ Make The Oath ⚔</h1>
+    <h1>Make The Oath</h1>
     <p style="text-align: center; margin-bottom: 30px; color: #9ca3af; font-size: 0.9rem;">
         Begin your journey to becoming who you're proud of
     </p>
@@ -18,7 +18,7 @@
                 {{ form.username(class="form-control error") }}
                 <div class="error-message">
                     {% for error in form.username.errors %}
-                        <p>⚠ {{ error }}</p>
+                        <p>{{ error }}</p>
                     {% endfor %}
                 </div>
             {% else %}
@@ -31,8 +31,8 @@
             {% if form.email.errors %}
                 {{ form.email(class="form-control error") }}
                 <div class="error-message">
-                    {% for error in form.email.errors %}
-                        <p>⚠ {{ error }}</p>
+                        {% for error in form.email.errors %}
+                        <p>{{ error }}</p>
                     {% endfor %}
                 </div>
             {% else %}
@@ -45,8 +45,8 @@
             {% if form.password.errors %}
                 {{ form.password(class="form-control error") }}
                 <div class="error-message">
-                    {% for error in form.password.errors %}
-                        <p>⚠ {{ error }}</p>
+                        {% for error in form.password.errors %}
+                        <p>{{ error }}</p>
                     {% endfor %}
                 </div>
             {% else %}
@@ -59,8 +59,8 @@
             {% if form.confirm_password.errors %}
                 {{ form.confirm_password(class="form-control error") }}
                 <div class="error-message">
-                    {% for error in form.confirm_password.errors %}
-                        <p>⚠ {{ error }}</p>
+                        {% for error in form.confirm_password.errors %}
+                        <p>{{ error }}</p>
                     {% endfor %}
                 </div>
             {% else %}
@@ -71,8 +71,8 @@
         {{ form.submit(class="button button-primary", style="width: 100%; margin-top: 20px;") }}
     </form>
 
-    <p class="form-footer" style="margin-top: 30px;">
-        Already have an account? <a href="{{ url_for('main.login') }}">→ Welcome Back</a>
+        <p class="form-footer" style="margin-top: 30px;">
+        Already have an account? <a href="{{ url_for('main.login') }}">Welcome Back</a>
     </p>
 </section>
 {% endblock %}

@@ -98,12 +98,34 @@ def get_or_create_progress(user):
 
 
 def award_task_xp(user, task):
-    """Award XP for a completed task and update level."""
+    """Award XP for a completed task, update level, and stat XP.
+
+    The task's `stat_category` determines which per-stat XP field is incremented
+    in the user's `Progress` record (e.g. `INT` -> `intelligence_xp`).
+    """
     progress = get_or_create_progress(user)
 
     old_level = progress.level
+
+    # Global XP and level
     progress.xp += TASK_XP_REWARD
     progress.level = calculate_level_from_xp(progress.xp)
+
+    # Award stat-specific XP based on the task's stat_category
+    stat_map = {
+        "STR": "strength_xp",
+        "INT": "intelligence_xp",
+        "SPI": "spirituality_xp",
+        "VIT": "vitality_xp",
+        "CHA": "charisma_xp",
+    }
+
+    stat_key = getattr(task, "stat_category", None) or "VIT"
+    stat_attr = stat_map.get(stat_key, "vitality_xp")
+
+    # Ensure attribute exists and increment safely
+    current = getattr(progress, stat_attr, 0) or 0
+    setattr(progress, stat_attr, current + TASK_XP_REWARD)
 
     return progress.level > old_level
 
@@ -414,7 +436,7 @@ def get_accountability_partner_cards(user):
                 "hp": progress.hp,
                 "max_hp": progress.max_hp,
                 "current_challenge": (
-                    getattr(latest_challenge, "mindset_type", None)
+                    getattr(latest_challenge, "challenge_type", None)
                     if latest_challenge
                     else None
                 ),
