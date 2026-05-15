@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>HabitWise | Settings</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css') }}">
+  <script src="{{ url_for('static', filename='js/settings.js') }}" defer></script>
 </head>
 <body>
   <div class="page-bg"></div>
@@ -49,23 +49,62 @@
         </div>
       </section>
 
-      <form method="POST" action="{{ url_for('main.settings') }}">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <section class="content-grid">
+        <div class="column">
+          <article class="panel">
+            <p class="panel-kicker">ACCOUNT</p>
+            <h3 class="panel-heading">Profile details</h3>
 
-        <section class="content-grid">
+            <div class="info-grid">
+              <div class="info-box">
+                <p class="info-label">Username</p>
+                <p class="info-value">{{ current_user.username }}</p>
+              </div>
 
-          <div class="column">
-            <article class="panel">
-              <p class="panel-kicker">ACCOUNT</p>
-              <h3 class="panel-heading">Profile details</h3>
-              <div class="info-grid">
-                <div class="info-box">
-                  <p class="info-label">Username</p>
-                  <p class="info-value">{{ current_user.username }}</p>
+              <div class="info-box">
+                <p class="info-label">Email</p>
+                <p class="info-value">{{ current_user.email }}</p>
+              </div>
+
+              <div class="info-box">
+                <p class="info-label">Profile Visibility</p>
+                <p class="info-value">
+                  {{ "Public" if current_user.is_public else "Private" }}
+                </p>
+              </div>
+
+              <div class="info-box">
+                <p class="info-label">Member Since</p>
+                <p class="info-value">
+                  {{ current_user.created_at.strftime('%b %Y') }}
+                </p>
+              </div>
+            </div>
+
+            <div class="button-row">
+              <a href="{{ url_for('main.logout') }}" class="action-btn red">
+                Log Out
+              </a>
+            </div>
+          </article>
+
+          <article class="panel">
+            <p class="panel-kicker">NOTIFICATIONS</p>
+            <h3 class="panel-heading">Reminder settings</h3>
+
+            <div class="toggle-list">
+              <label class="toggle-row">
+                <div>
+                  <p class="toggle-title">Daily reminder</p>
+                  <p class="toggle-sub">Receive a reminder to complete your tasks.</p>
                 </div>
-                <div class="info-box">
-                  <p class="info-label">Email</p>
-                  <p class="info-value">{{ current_user.email }}</p>
+                <input id="notify-daily" class="toggle-input" type="checkbox">
+              </label>
+
+              <label class="toggle-row">
+                <div>
+                  <p class="toggle-title">Streak reminder</p>
+                  <p class="toggle-sub">Get reminded before your streak is at risk.</p>
                 </div>
                 <input id="notify-streak" class="toggle-input" type="checkbox">
               </label>
@@ -87,71 +126,10 @@
             <h3 class="panel-heading">Visibility controls</h3>
             <p class="panel-subheading">Privacy Settings</p>
 
-            <div class="toggle-list">
-              <label class="toggle-row">
-                <div>
-                  <p class="toggle-title">Share progress with partners</p>
-                  <p class="toggle-sub">
-                    Allow your accountability circle to view your progress.
-                    Currently: {{ "Public" if current_user.is_public else "Private" }}.
-                    Change this in the dashboard challenge form.
-                  </p>
-                </div>
-                <div class="info-box">
-                  <p class="info-label">Member Since</p>
-                  <p class="info-value">
-                    {{ current_user.created_at.strftime('%b %Y') }}
-                  </p>
-                </div>
-              </div>
-              <div class="button-row">
-                <a href="{{ url_for('main.logout') }}" class="action-btn red">
-                  Log Out
-                </a>
-              </div>
-            </article>
-
-            <article class="panel">
-              <p class="panel-kicker">NOTIFICATIONS</p>
-              <h3 class="panel-heading">Reminder settings</h3>
+            <form id="privacy-form" method="post" action="{{ url_for('main.settings') }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <div class="toggle-list">
-                <label class="toggle-row">
-                  <div>
-                    <p class="toggle-title">Daily reminder</p>
-                    <p class="toggle-sub">Receive a reminder to complete your tasks.</p>
-                  </div>
-                  <input id="notify-daily" name="notify_daily"
-                    class="toggle-input" type="checkbox"
-                    {{ "checked" if current_user.notify_daily else "" }}>
-                </label>
-                <label class="toggle-row">
-                  <div>
-                    <p class="toggle-title">Streak reminder</p>
-                    <p class="toggle-sub">Get reminded before your streak is at risk.</p>
-                  </div>
-                  <input id="notify-streak" name="notify_streak"
-                    class="toggle-input" type="checkbox"
-                    {{ "checked" if current_user.notify_streak else "" }}>
-                </label>
-                <label class="toggle-row">
-                  <div>
-                    <p class="toggle-title">Community updates</p>
-                    <p class="toggle-sub">Receive simple accountability partner updates.</p>
-                  </div>
-                  <input id="notify-community" name="notify_community"
-                    class="toggle-input" type="checkbox"
-                    {{ "checked" if current_user.notify_community else "" }}>
-                </label>
-              </div>
-            </article>
-          </div>
-
-          <div class="column">
-            <article class="panel">
-              <p class="panel-kicker">PRIVACY</p>
-              <h3 class="panel-heading">Visibility controls</h3>
-              <div class="toggle-list">
-                <label class="toggle-row">
+                <label class="toggle-row" for="privacy-toggle">
                   <div>
                     <p class="toggle-title">Share progress with partners</p>
                     <p class="toggle-sub">
@@ -159,10 +137,10 @@
                       Currently: {{ "Public" if current_user.is_public else "Private" }}.
                     </p>
                   </div>
-                  <input class="toggle-input" type="checkbox"
-                    name="is_public"
+                  <input id="privacy-toggle" name="is_public" class="toggle-input" type="checkbox"
                     {{ "checked" if current_user.is_public else "" }}>
                 </label>
+
                 <label class="toggle-row">
                   <div>
                     <p class="toggle-title">Show activity status</p>
@@ -170,40 +148,38 @@
                       Let others see whether you completed today's tasks.
                     </p>
                   </div>
-                  <input id="privacy-status" class="toggle-input" type="checkbox">
+                  <input id="privacy-status" class="toggle-input" type="checkbox" disabled>
                 </label>
               </div>
-            </article>
+            </form>
+          </article>
 
-            <article class="panel">
-              <p class="panel-kicker">CHALLENGE</p>
-              <h3 class="panel-heading">Challenge preferences</h3>
-              <div class="challenge-summary">
-                {% if current_user.latest_challenge() %}
-                  <p>
-                    <strong>Challenge type:</strong>
-                    {{ current_user.latest_challenge().mindset_type }}
-                  </p>
-                {% else %}
-                  <p style="color: var(--muted);">No challenge set yet.</p>
-                {% endif %}
-              </div>
-              <div class="button-row">
-                <a href="{{ url_for('main.challenge') }}" class="action-btn blue">
-                  Change Challenge
-                </a>
-              </div>
-              <p id="save-message" class="save-message"></p>
-            </article>
-          </div>
+          <article class="panel">
+            <p class="panel-kicker">CHALLENGE</p>
+            <h3 class="panel-heading">Challenge preferences</h3>
 
-        </section>
+            <div class="challenge-summary">
+              {% if current_user.latest_challenge() %}
+                <p>
+                  <strong>Challenge type:</strong>
+                  {{ current_user.latest_challenge().mindset_type }}
+                </p>
+              {% else %}
+                <p style="color: var(--muted);">No challenge set yet.</p>
+              {% endif %}
+            </div>
 
-        <div style="text-align: right; margin-top: 16px; padding: 0 0 16px;">
-          <button type="submit" class="action-btn green">Save Settings</button>
+            <div class="button-row">
+              <a href="{{ url_for('main.challenge') }}" class="action-btn blue">
+                Change Challenge
+              </a>
+            </div>
+
+            <p id="save-message" class="save-message"></p>
+          </article>
         </div>
+      </section>
 
-      </form>
     </main>
   </div>
 </body>
