@@ -127,6 +127,7 @@
             <p class="panel-subheading">Privacy Settings</p>
 
             <form id="privacy-form" method="post" action="{{ url_for('main.settings') }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <div class="toggle-list">
                 <label class="toggle-row" for="privacy-toggle">
                   <div>

@@ -161,6 +161,7 @@
                     {% if user.id != current_user.id %}
                       <div class="partner-actions">
                         <form method="post" action="{{ url_for('main.add_partner') }}">
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                           <input type="hidden" name="partner_identifier" value="{{ user.username }}">
                           <button type="submit" class="primary-btn">Add Partner</button>
                         </form>
@@ -212,6 +213,7 @@
                     </div>
                     <div class="partner-actions">
                       <form method="post" action="{{ url_for('main.remove_partner', partner_id=partner.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="action-btn red">Remove</button>
                       </form>
                     </div>
@@ -233,6 +235,7 @@
             <h3 class="panel-heading">Add accountability partner</h3>
 
             <form method="post" action="{{ url_for('main.add_partner') }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <label class="input-label" for="partner-identifier">Partner ID / Username</label>
               <input id="partner-identifier" class="text-input" name="partner_identifier" type="text"
                 placeholder="Enter username or email" required>
