@@ -1,4 +1,4 @@
-# to become the new difficulty constants
+# Mindset types with task completion thresholds
 VALID_MINDSET_TYPES = {
     "Sage": {
         "name": "Sage - Think & Reflect",
@@ -7,8 +7,8 @@ VALID_MINDSET_TYPES = {
     },
     "Warrior": {
         "name": "Warrior - Act & Execute",
-        "description": "Disciplined and driven. Must complete at least 75% of tasks.",
-        "min_completion_percentage": 75,
+        "description": "Disciplined and driven. Must complete at least 70% of tasks.",
+        "min_completion_percentage": 70,
     },
     "Demon": {
         "name": "Demon - Embrace Chaos",
@@ -76,7 +76,6 @@ CHARACTER_REVEAL_LEVELS = {
     },
 }
 
-VALID_STAT_CATEGORIES = ["STR", "INT", "SPI", "VIT", "CHA"]
 
 TASK_XP_REWARD = 10
 LEVEL_XP_MULTIPLIER = 100
@@ -87,21 +86,8 @@ MAX_USERNAME_LENGTH = 80
 MAX_EMAIL_LENGTH = 120
 MAX_PASSWORD_MIN_LENGTH = 6
 
-# HP / difficulty progression mechanism
+# HP / progress mechanism
 MAX_LEVEL = 100
 MAX_HP = 100
-DEFAULT_DIFFICULTY = "medium"
-
-DIFFICULTY_TARGETS = {
-    "easy": 50,
-    "medium": 70,
-    "hard": 90,
-}
 
 CHARACTER_REVEAL_INTERVAL = 10
-
-MAX_HP_PER_LEVEL = 10
-BASE_HP = 50
-
-PLACEHOLDER_MAX_HP = 100
-PLACEHOLDER_CURRENT_HP = 100

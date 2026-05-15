@@ -61,7 +61,7 @@ class User(db.Model, UserMixin):
         return (
             Challenge.query
             .filter_by(user_id=self.id)
-            .order_by(Challenge.created_at.desc())
+            .order_by(Challenge.created_at.desc(), Challenge.id.desc())
             .first()
         )
 
@@ -70,7 +70,7 @@ class User(db.Model, UserMixin):
 
 
 class Challenge(db.Model):
-    """A user's selected HabitWise difficulty."""
+    """A user's selected mindset challenge."""
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(
@@ -95,7 +95,7 @@ class Challenge(db.Model):
 
 
 class Task(db.Model):
-    """Daily user task that contributes to a stat category."""
+    """Daily user task."""
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(
@@ -106,21 +106,13 @@ class Task(db.Model):
     )
 
     title = db.Column(db.String(200), nullable=False)
-    stat_category = db.Column(db.String(10), nullable=False)
 
     completed = db.Column(db.Boolean, default=False, nullable=False, index=True)
     task_date = db.Column(db.Date, default=date.today, nullable=False, index=True)
     created_at = db.Column(db.DateTime, default=utc_now, nullable=False)
 
-    __table_args__ = (
-        db.CheckConstraint(
-            "stat_category IN ('STR', 'INT', 'SPI', 'VIT', 'CHA')",
-            name="valid_stat_category",
-        ),
-    )
-
     def __repr__(self):
-        return f"<Task {self.title} - {self.stat_category}>"
+        return f"<Task {self.title}>"
 
 
 class Progress(db.Model):
@@ -142,12 +134,6 @@ class Progress(db.Model):
 
     hp = db.Column(db.Integer, default=100, nullable=False)
     max_hp = db.Column(db.Integer, default=100, nullable=False)
-    
-    strength_xp = db.Column(db.Integer, default=0, nullable=False)
-    intelligence_xp = db.Column(db.Integer, default=0, nullable=False)
-    spirituality_xp = db.Column(db.Integer, default=0, nullable=False)
-    vitality_xp = db.Column(db.Integer, default=0, nullable=False)
-    charisma_xp = db.Column(db.Integer, default=0, nullable=False)
 
     updated_at = db.Column(
         db.DateTime,
@@ -163,11 +149,6 @@ class Progress(db.Model):
         db.CheckConstraint("streak >= 0", name="progress_streak_non_negative"),
         db.CheckConstraint("hp >= 0 AND hp <= max_hp", name="progress_hp_range"),
         db.CheckConstraint("max_hp > 0", name="progress_max_hp_positive"),
-        db.CheckConstraint("strength_xp >= 0", name="strength_xp_non_negative"),
-        db.CheckConstraint("intelligence_xp >= 0", name="intelligence_xp_non_negative"),
-        db.CheckConstraint("spirituality_xp >= 0", name="spirituality_xp_non_negative"),
-        db.CheckConstraint("vitality_xp >= 0", name="vitality_xp_non_negative"),
-        db.CheckConstraint("charisma_xp >= 0", name="charisma_xp_non_negative"),
     )
 
     def __repr__(self):

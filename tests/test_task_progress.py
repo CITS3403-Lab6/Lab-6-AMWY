@@ -6,7 +6,6 @@ def test_complete_task_updates_xp_and_stat(client, app, sample_user):
     task = Task(
         user_id=sample_user.id,
         title="Study for 30 minutes",
-        stat_category="INT",
     )
 
     with app.app_context():
@@ -36,4 +35,3 @@ def test_complete_task_updates_xp_and_stat(client, app, sample_user):
 
         assert completed_task.completed is True
         assert user.progress.xp == 10
-        assert user.progress.intelligence_xp == 10

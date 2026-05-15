@@ -33,6 +33,7 @@ body {
     background-repeat: no-repeat;
     image-rendering: pixelated;
     z-index: 10;
+    pointer-events: none;
     opacity: 0;
     animation: titleFade 4s ease-in-out forwards;
 }

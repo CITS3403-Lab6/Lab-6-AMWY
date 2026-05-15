@@ -47,7 +47,6 @@ def test_missing_progress_does_not_break_task_completion(client, app, sample_use
         task = Task(
             user_id=sample_user.id,
             title="Study with missing progress",
-            stat_category="INT",
         )
         db.session.add(task)
         db.session.commit()
@@ -69,7 +68,6 @@ def test_missing_progress_does_not_break_task_completion(client, app, sample_use
         assert user.progress is not None
         assert task.completed is True
         assert user.progress.xp == 10
-        assert user.progress.intelligence_xp == 10
 
 
 def test_user_cannot_complete_another_users_task_error_handled(client, app, sample_user):
@@ -85,7 +83,6 @@ def test_user_cannot_complete_another_users_task_error_handled(client, app, samp
         task = Task(
             user_id=other_user.id,
             title="Other user's task",
-            stat_category="INT",
         )
         db.session.add(task)
         db.session.commit()
@@ -113,7 +110,6 @@ def test_add_task_rejects_empty_title(client, sample_user):
         "/add-task",
         data={
             "title": "",
-            "stat_category": "INT",
         },
         follow_redirects=True,
     )

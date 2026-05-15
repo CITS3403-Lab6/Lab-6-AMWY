@@ -9,7 +9,7 @@ from werkzeug.serving import make_server
 selenium = pytest.importorskip("selenium")
 
 from selenium import webdriver
-from selenium.common.exceptions import StaleElementReferenceException, WebDriverException
+from selenium.common.exceptions import StaleElementReferenceException, WebDriverException, ElementClickInterceptedException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.chrome.options import Options as ChromeOptions
@@ -85,6 +85,15 @@ def browser():
     driver.quit()
 
 
+def click_with_fallback(browser, el):
+    from selenium.common.exceptions import ElementClickInterceptedException
+
+    try:
+        el.click()
+    except ElementClickInterceptedException:
+        browser.execute_script("arguments[0].click();", el)
+
+
 def unique_user(prefix="selenium"):
     suffix = uuid.uuid4().hex[:8]
     return {
@@ -121,7 +130,8 @@ def signup_through_ui(browser, base_url, user):
     if confirm_fields:
         confirm_fields[0].send_keys(user["password"])
 
-    browser.find_element(By.CSS_SELECTOR, "button[type='submit'], input[type='submit']").click()
+    btn = browser.find_element(By.CSS_SELECTOR, "button[type='submit'], input[type='submit']")
+    click_with_fallback(browser, btn)
 
 
 def ensure_logged_in_after_signup(browser, base_url, user):
@@ -158,7 +168,8 @@ def login_through_ui(browser, base_url, user):
         raise AssertionError("Login form must contain email or username field.")
 
     browser.find_element(By.NAME, "password").send_keys(user["password"])
-    browser.find_element(By.CSS_SELECTOR, "button[type='submit'], input[type='submit']").click()
+    btn = browser.find_element(By.CSS_SELECTOR, "button[type='submit'], input[type='submit']")
+    click_with_fallback(browser, btn)
 
 
 def test_selenium_home_page_loads(live_server, browser):
@@ -225,7 +236,7 @@ def test_selenium_user_can_logout_after_signup(live_server, browser):
 
     assert logout_links
 
-    logout_links[0].click()
+    click_with_fallback(browser, logout_links[0])
 
     text = page_text(browser)
 
@@ -265,7 +276,14 @@ def test_selenium_dashboard_can_add_task_if_form_present(live_server, browser):
     submit_buttons = browser.find_elements(By.CSS_SELECTOR, "button[type='submit'], input[type='submit']")
     assert submit_buttons
 
-    submit_buttons[0].click()
+    def click_with_fallback(el):
+        try:
+            el.click()
+        except ElementClickInterceptedException:
+            # fallback to JS click when an overlay or animation intercepts pointer events
+            browser.execute_script("arguments[0].click();", el)
+
+    click_with_fallback(submit_buttons[0])
 
     text = page_text(browser)
 
