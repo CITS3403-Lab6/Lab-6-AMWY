@@ -11,10 +11,9 @@ from app.constants import (
     LEVEL_XP_MULTIPLIER,
     MAX_HP,
     MAX_LEVEL,
-    MAX_REFLECTION_LENGTH,
     TASK_XP_REWARD,
 )
-from app.models import AccountabilityPartner, Progress, Reflection, Task, User
+from app.models import AccountabilityPartner, Progress, Task, User
 
 
 def _coerce_int(value, field_name, default=None):
@@ -276,25 +275,6 @@ def build_dashboard_data(user):
 def get_dashboard_data(user):
     """Compatibility wrapper for dashboard data."""
     return build_dashboard_data(user)
-
-
-def create_reflection(user, mood, note):
-    """Create a reflection entry."""
-    cleaned_note = note.strip() if note else ""
-
-    if len(cleaned_note) > MAX_REFLECTION_LENGTH:
-        raise ValueError("Reflection note is too long.")
-
-    reflection = Reflection(
-        user_id=user.id,
-        mood=mood,
-        note=cleaned_note,
-    )
-
-    db.session.add(reflection)
-    db.session.commit()
-
-    return reflection
 
 
 def get_public_users(exclude_user_id=None):

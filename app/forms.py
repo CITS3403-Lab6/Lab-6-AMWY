@@ -19,7 +19,6 @@ from wtforms.validators import (
 from app.constants import (
     MAX_EMAIL_LENGTH,
     MAX_PASSWORD_MIN_LENGTH,
-    MAX_REFLECTION_LENGTH,
     MAX_USERNAME_LENGTH,
     VALID_MINDSET_TYPES,
 )
@@ -103,32 +102,3 @@ class ChallengeForm(FlaskForm):
 
     is_public = BooleanField("Share progress publicly")
     submit = SubmitField("Start Challenge")
-
-#To remove feature
-class ReflectionForm(FlaskForm):
-    """Daily reflection form."""
-
-    mood = SelectField(
-        "Mood",
-        choices=[
-            ("great", "Great 😊"),
-            ("good", "Good 🙂"),
-            ("okay", "Okay 😐"),
-            ("bad", "Bad ☹️"),
-            ("terrible", "Terrible 😠"),
-        ],
-        validators=[Optional()],
-    )
-
-    note = TextAreaField(
-        "Reflection",
-        validators=[
-            Optional(),
-            Length(
-                max=MAX_REFLECTION_LENGTH,
-                message="Reflection must be under 1000 characters.",
-            ),
-        ],
-    )
-
-    submit = SubmitField("Save Reflection")

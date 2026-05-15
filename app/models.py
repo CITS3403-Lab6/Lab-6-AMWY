@@ -20,6 +20,10 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(255), nullable=False)
 
+    notify_daily = db.Column(db.Boolean, default=True, nullable=False)
+    notify_streak = db.Column(db.Boolean, default=True, nullable=False)
+    notify_community = db.Column(db.Boolean, default=True, nullable=False)
+
     is_public = db.Column(db.Boolean, default=True, nullable=False)
     created_at = db.Column(db.DateTime, default=utc_now, nullable=False)
 
@@ -41,13 +45,6 @@ class User(db.Model, UserMixin):
         "Progress",
         backref="user",
         uselist=False,
-        cascade="all, delete-orphan",
-    )
-
-    reflections = db.relationship(
-        "Reflection",
-        backref="user",
-        lazy=True,
         cascade="all, delete-orphan",
     )
 
@@ -173,25 +170,6 @@ class Progress(db.Model):
     def __repr__(self):
         return f"<Progress user_id={self.user_id} level={self.level} xp={self.xp}>"
 
-
-class Reflection(db.Model):
-    """A user's daily reflection entry."""
-
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(
-        db.Integer,
-        db.ForeignKey("user.id"),
-        nullable=False,
-        index=True,
-    )
-
-    mood = db.Column(db.String(50), nullable=True)
-    note = db.Column(db.Text, nullable=True)
-
-    created_at = db.Column(db.DateTime, default=utc_now, nullable=False, index=True)
-
-    def __repr__(self):
-        return f"<Reflection user_id={self.user_id} created_at={self.created_at}>"
 
 class AccountabilityPartner(db.Model):
     """A user-selected accountability partner relationship."""

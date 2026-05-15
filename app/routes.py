@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 
 from app import db
 from app.constants import MAX_TASK_TITLE_LENGTH, TASK_XP_REWARD
-from app.forms import ChallengeForm, LoginForm, ReflectionForm, SignupForm
+from app.forms import ChallengeForm, LoginForm, SignupForm
 from app.models import Challenge, Task, User
 from app.services import (
     add_accountability_partner,
@@ -14,7 +14,6 @@ from app.services import (
     build_dashboard_data,
     calculate_circle_score,
     complete_user_task,
-    create_reflection,
     get_accountability_partner_cards,
     get_or_create_progress,
     get_public_users,
@@ -106,7 +105,6 @@ def dashboard():
     progress = get_or_create_progress(current_user)
 
     challenge_form = ChallengeForm()
-    reflection_form = ReflectionForm()
 
     if challenge_form.validate_on_submit() and request.form.get("save_challenge"):
         try:
@@ -142,7 +140,6 @@ def dashboard():
     return render_template(
         "dashboard.html",
         challenge_form=challenge_form,
-        reflection_form=reflection_form,
         challenge=current_user.latest_challenge(),
         tasks=tasks,
         progress=progress,
@@ -232,35 +229,6 @@ def complete_task(task_id):
     return redirect(url_for("main.dashboard"))
 
 
-@main.route("/reflection", methods=["POST"])
-@login_required
-def reflection():
-    """Save a daily reflection."""
-    form = ReflectionForm()
-
-    if not form.validate_on_submit():
-        flash("Reflection was not saved because the form was invalid.", "error")
-        return redirect(url_for("main.dashboard"))
-
-    try:
-        create_reflection(
-            user=current_user,
-            mood=form.mood.data,
-            note=form.note.data,
-        )
-
-        flash("Reflection saved successfully.", "success")
-
-    except ValueError as error:
-        db.session.rollback()
-        flash(str(error), "error")
-    except Exception:
-        db.session.rollback()
-        flash("Could not save reflection. Please try again.", "error")
-
-    return redirect(url_for("main.dashboard"))
-
-
 @main.route("/community")
 @login_required
 def community():
@@ -301,6 +269,9 @@ def settings():
             "yes",
             "on",
         }
+        current_user.notify_daily = "notify_daily" in request.form
+        current_user.notify_streak = "notify_streak" in request.form
+        current_user.notify_community = "notify_community" in request.form
 
         try:
             db.session.commit()
