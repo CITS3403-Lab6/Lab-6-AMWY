@@ -221,3 +221,24 @@ class AccountabilityPartner(db.Model):
     def __repr__(self):
         return f"<AccountabilityPartner user={self.user_id} partner={self.partner_id}>"
 
+from sqlalchemy import event as _habitwise_event
+
+
+@_habitwise_event.listens_for(Challenge, "before_insert")
+def _habitwise_challenge_defaults_before_insert(mapper, connection, target):
+    """Fill safe challenge defaults only when fields are missing."""
+    if not getattr(target, "challenge_type", None):
+        target.challenge_type = "study"
+
+    if not getattr(target, "difficulty", None):
+        target.difficulty = "easy"
+
+    if not getattr(target, "mindset_type", None):
+        target.mindset_type = "Sage"
+
+
+@_habitwise_event.listens_for(Task, "before_insert")
+def _habitwise_task_defaults_before_insert(mapper, connection, target):
+    """Fill safe task defaults only when fields are missing."""
+    if not getattr(target, "stat_category", None):
+        target.stat_category = "INT"
