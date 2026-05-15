@@ -4,7 +4,7 @@
 
 {% block content %}
 <section class="card hero">
-    <h1>🎮 HabitWise 🎮</h1>
+    <h1>HabitWise</h1>
     <p>A Challenge-Based Self-Discipline Platform</p>
     <p style="font-size: 0.9rem; line-height: 2;">
         Make the oath. Face the monsters.<br>
@@ -14,16 +14,16 @@
     
     <div class="button-group" style="margin-top: 40px;">
         {% if current_user.is_authenticated %}
-            <a class="button button-primary" href="{{ url_for('main.dashboard') }}">→ Enter Your Dashboard</a>
+            <a class="button button-primary" href="{{ url_for('main.dashboard') }}">Enter Your Dashboard</a>
         {% else %}
-            <a class="button button-primary" href="{{ url_for('main.signup') }}">⚔ Make The Oath</a>
-            <a class="button button-secondary" href="{{ url_for('main.login') }}">→ Welcome Back</a>
+            <a class="button button-primary" href="{{ url_for('main.signup') }}">Make The Oath</a>
+            <a class="button button-secondary" href="{{ url_for('main.login') }}">Welcome Back</a>
         {% endif %}
     </div>
 </section>
 
 <section class="card" style="text-align: center;">
-    <h2>✨ How It Works ✨</h2>
+    <h2>How It Works</h2>
     <div class="card-grid">
         <div class="nes-container">
             <h3>1. Create Challenge</h3>
@@ -45,7 +45,7 @@
 </section>
 
 <section class="card" style="text-align: center;">
-    <h2>⚔ The Stat System ⚔</h2>
+    <h2>The Stat System</h2>
     <div class="card-grid">
         <div class="nes-container">
             <p><strong>STR</strong> - Strength<br>Physical & Discipline Tasks</p>
@@ -66,13 +66,13 @@
 </section>
 
 <section class="card" style="background: linear-gradient(135deg, #1f2937 0%, #111827 100%); border: 2px solid #22c55e; text-align: center;">
-    <h2>🏆 Ready to Level Up? 🏆</h2>
+    <h2>Ready to Level Up?</h2>
     <p style="font-size: 1rem; margin: 20px 0;">
         Your journey to becoming the person you're proud of starts here.
     </p>
     {% if not current_user.is_authenticated %}
         <div class="button-group">
-            <a class="button button-primary" href="{{ url_for('main.signup') }}">→ Start Now</a>
+            <a class="button button-primary" href="{{ url_for('main.signup') }}">Start Now</a>
         </div>
     {% else %}
         <p style="font-size: 0.9rem;">You're logged in! <a href="{{ url_for('main.dashboard') }}" style="color: #22c55e; text-decoration: underline;">Go to your dashboard</a></p>

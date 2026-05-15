@@ -32,7 +32,6 @@ def test_task_creation(app, sample_user):
     task = Task(
         user_id=sample_user.id,
         title="Study for 30 minutes",
-        stat_category="INT",
     )
 
     db.session.add(task)
@@ -48,8 +47,6 @@ def test_task_creation(app, sample_user):
 def test_challenge_creation(app, sample_user):
     challenge = Challenge(
         user_id=sample_user.id,
-        challenge_type="study",
-        difficulty="easy",
         mindset_type="Sage",
     )
 
@@ -59,7 +56,6 @@ def test_challenge_creation(app, sample_user):
     saved_challenge = Challenge.query.filter_by(user_id=sample_user.id).first()
 
     assert saved_challenge is not None
-    assert saved_challenge.challenge_type == "study"
     assert saved_challenge.mindset_type == "Sage"
 
 

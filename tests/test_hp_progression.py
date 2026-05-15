@@ -5,24 +5,24 @@ from app.services import (
     calculate_character_reveal_stage,
     calculate_completion_percentage,
     calculate_level_from_xp,
-    get_difficulty_target,
+    get_mindset_target,
 )
 
 
-def test_easy_difficulty_target_is_50():
-    assert get_difficulty_target("easy") == 50
+def test_sage_mindset_target_is_50():
+    assert get_mindset_target("Sage") == 50
 
 
-def test_medium_difficulty_target_is_70():
-    assert get_difficulty_target("medium") == 70
+def test_warrior_mindset_target_is_70():
+    assert get_mindset_target("Warrior") == 70
 
 
-def test_hard_difficulty_target_is_90():
-    assert get_difficulty_target("hard") == 90
+def test_demon_mindset_target_is_90():
+    assert get_mindset_target("Demon") == 90
 
 
-def test_unknown_difficulty_falls_back_to_medium():
-    assert get_difficulty_target("unknown") == 70
+def test_unknown_mindset_falls_back_to_sage():
+    assert get_mindset_target("Unknown") == 50
 
 
 def test_completion_percentage_calculates_correctly():
@@ -51,7 +51,7 @@ def test_meeting_daily_target_increases_streak_without_hp_loss():
     result = apply_daily_hp_result(
         progress=progress,
         completion_percentage=70,
-        difficulty="medium",
+        mindset_type="Warrior",
     )
 
     assert result["met_target"] is True
@@ -66,7 +66,7 @@ def test_missing_daily_target_reduces_hp_and_resets_streak():
     result = apply_daily_hp_result(
         progress=progress,
         completion_percentage=40,
-        difficulty="easy",
+        mindset_type="Sage",
     )
 
     assert result["met_target"] is False
@@ -82,7 +82,7 @@ def test_hp_never_goes_below_zero():
     result = apply_daily_hp_result(
         progress=progress,
         completion_percentage=0,
-        difficulty="hard",
+        mindset_type="Demon",
     )
 
     assert result["met_target"] is False
@@ -91,11 +91,11 @@ def test_hp_never_goes_below_zero():
     assert progress.streak == 0
 
 
-def test_difficulty_target_handles_case_and_spacing():
-    assert get_difficulty_target(" HARD ") == 90
-    assert get_difficulty_target(" Easy ") == 50
-    assert get_difficulty_target("") == 70
-    assert get_difficulty_target(None) == 70
+def test_mindset_target_handles_case():
+    assert get_mindset_target(" Demon ") == 90
+    assert get_mindset_target("sage") == 50
+    assert get_mindset_target("") == 50
+    assert get_mindset_target(None) == 50
 
 
 def test_completion_percentage_clamps_completed_above_total():
@@ -137,7 +137,7 @@ def test_apply_daily_hp_result_rejects_missing_progress():
         apply_daily_hp_result(
             progress=None,
             completion_percentage=50,
-            difficulty="easy",
+            mindset_type="Sage",
         )
 
 
@@ -147,7 +147,7 @@ def test_apply_daily_hp_result_clamps_completion_above_100():
     result = apply_daily_hp_result(
         progress=progress,
         completion_percentage=150,
-        difficulty="hard",
+        mindset_type="Demon",
     )
 
     assert result["met_target"] is True
@@ -162,7 +162,7 @@ def test_apply_daily_hp_result_clamps_completion_below_zero():
     result = apply_daily_hp_result(
         progress=progress,
         completion_percentage=-50,
-        difficulty="easy",
+        mindset_type="Sage",
     )
 
     assert result["met_target"] is False
@@ -178,7 +178,7 @@ def test_apply_daily_hp_result_repairs_missing_hp_values():
     result = apply_daily_hp_result(
         progress=progress,
         completion_percentage=80,
-        difficulty="hard",
+        mindset_type="Demon",
     )
 
     assert result["met_target"] is False
@@ -193,7 +193,7 @@ def test_apply_daily_hp_result_clamps_existing_hp_above_max_hp():
     result = apply_daily_hp_result(
         progress=progress,
         completion_percentage=100,
-        difficulty="hard",
+        mindset_type="Demon",
     )
 
     assert result["met_target"] is True
@@ -208,7 +208,7 @@ def test_apply_daily_hp_result_repairs_invalid_max_hp():
     result = apply_daily_hp_result(
         progress=progress,
         completion_percentage=100,
-        difficulty="easy",
+        mindset_type="Sage",
     )
 
     assert result["met_target"] is True

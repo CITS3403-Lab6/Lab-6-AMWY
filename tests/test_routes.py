@@ -63,7 +63,6 @@ def test_add_task_after_login(client, app, sample_user):
         "/add-task",
         data={
             "title": "Study for 30 minutes",
-            "stat_category": "INT",
         },
         follow_redirects=True,
     )
@@ -73,4 +72,4 @@ def test_add_task_after_login(client, app, sample_user):
     with app.app_context():
         task = Task.query.filter_by(title="Study for 30 minutes").first()
         assert task is not None
-        assert task.stat_category == "INT"
+        assert task.user_id == sample_user.id

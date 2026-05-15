@@ -162,9 +162,8 @@
                                 required
                                 style="min-height: 48px;"
                             >
-                            <input type="hidden" name="stat_category" value="VIT">
 
-                            <button class="btn btn-purple" type="submit" style="margin-top: 12px;">
+                            <button class="btn btn-purple" type="submit" style="margin-top: 12px; position: relative; z-index: 10;">
                                 Add Task
                             </button>
                         </form>
@@ -174,7 +173,7 @@
                                 {% for task in tasks %}
                                     <div class="task-item">
                                         <span>
-                                            {% if task.completed %}✅{% else %}⬜{% endif %}
+                                            {% if task.completed %}[x]{% else %}[ ]{% endif %}
                                             {{ task.title }}
                                         </span>
 
