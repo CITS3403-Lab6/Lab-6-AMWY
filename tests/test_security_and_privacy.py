@@ -30,7 +30,8 @@ def test_duplicate_signup_is_blocked(client, app):
         assert len(users) == 1
 
 
-def test_invalid_task_category_is_rejected(client, app, sample_user):
+def test_task_requires_title(client, app, sample_user):
+    """Test that tasks require a title to be created"""
     client.post(
         "/login",
         data={
@@ -43,8 +44,7 @@ def test_invalid_task_category_is_rejected(client, app, sample_user):
     response = client.post(
         "/add-task",
         data={
-            "title": "Invalid task",
-            "stat_category": "HACK",
+            "title": "",  # Empty title should be rejected by form validation
         },
         follow_redirects=True,
     )
@@ -52,8 +52,8 @@ def test_invalid_task_category_is_rejected(client, app, sample_user):
     assert response.status_code == 200
 
     with app.app_context():
-        task = Task.query.filter_by(title="Invalid task").first()
-        assert task is None
+        tasks = Task.query.filter_by(title="").all()
+        assert len(tasks) == 0
 
 
 def test_user_cannot_complete_another_users_task(client, app, sample_user):
@@ -69,7 +69,6 @@ def test_user_cannot_complete_another_users_task(client, app, sample_user):
         task = Task(
             user_id=other_user.id,
             title="Private task",
-            stat_category="INT",
         )
         db.session.add(task)
         db.session.commit()
