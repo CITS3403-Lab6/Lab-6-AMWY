@@ -108,3 +108,33 @@ BASE_HP = 50
 
 PLACEHOLDER_MAX_HP = 100
 PLACEHOLDER_CURRENT_HP = 100
+
+# Backward-compatible MVP constants used by backend tests, routes and templates.
+VALID_STAT_CATEGORIES = globals().get("VALID_STAT_CATEGORIES", {
+    "STR": "Strength",
+    "INT": "Intelligence",
+    "SPI": "Spirituality",
+    "VIT": "Vitality",
+    "CHA": "Charisma",
+})
+
+VALID_CHALLENGE_TYPES = globals().get("VALID_CHALLENGE_TYPES", {
+    "fitness": "Fitness",
+    "study": "Study",
+    "meditation": "Meditation",
+    "creativity": "Creativity",
+    "nutrition": "Nutrition",
+})
+
+VALID_DIFFICULTIES = globals().get("VALID_DIFFICULTIES", {
+    "easy": "Easy",
+    "medium": "Medium",
+    "hard": "Hard",
+})
+
+VALID_MINDSET_TYPES = globals().get("VALID_MINDSET_TYPES", {
+    "Sage": "Sage - Think & Reflect",
+    "Warrior": "Warrior - Act & Execute",
+    "Demon": "Demon - Embrace Chaos",
+})
+

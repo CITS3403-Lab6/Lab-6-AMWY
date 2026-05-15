@@ -262,10 +262,12 @@ def test_selenium_dashboard_can_add_task_if_form_present(live_server, browser):
 
     title_fields[0].send_keys("Selenium test task")
 
-    submit_buttons = browser.find_elements(By.CSS_SELECTOR, "button[type='submit'], input[type='submit']")
+    task_form = title_fields[0].find_element(By.XPATH, "./ancestor::form")
+    submit_buttons = task_form.find_elements(By.CSS_SELECTOR, "button[type='submit'], input[type='submit']")
     assert submit_buttons
 
-    submit_buttons[0].click()
+    browser.execute_script("arguments[0].scrollIntoView({block: 'center'});", submit_buttons[0])
+    browser.execute_script("arguments[0].click();", submit_buttons[0])
 
     text = page_text(browser)
 

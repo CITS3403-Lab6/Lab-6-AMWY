@@ -13,6 +13,8 @@
 </head>
 
 <body>
+<h2>Privacy Settings</h2>
+
   {% set challenge = current_user.latest_challenge() if current_user.latest_challenge is defined else None %}
   {% set challenge_name = challenge.mindset_type if challenge and challenge.mindset_type else "Not selected" %}
 

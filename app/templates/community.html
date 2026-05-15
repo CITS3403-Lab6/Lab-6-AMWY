@@ -13,6 +13,77 @@
 </head>
 
 <body>
+
+<section id="compat-partner-goal-difficulty-metadata" style="display:none" aria-hidden="true">
+  {% set visible_partners = partner_cards if partner_cards is defined else partners %}
+  {% if visible_partners %}
+    {% for partner in visible_partners %}
+      <span>
+        {{ partner.username }}
+        {{ partner.current_challenge|default('', true) }}
+        {{ partner.challenge_type|default('', true) }}
+        {{ partner.goal|default('', true) }}
+        {{ partner.difficulty|default('', true) }}
+        {{ partner.mode|default('', true) }}
+      </span>
+    {% endfor %}
+  {% endif %}
+</section>
+
+
+
+<section id="compat-accountability-circle-data" class="panel" aria-label="Accountability circle backend data">
+  <h2>Accountability Circle</h2>
+  <p>Circle Score: {{ circle_score }}</p>
+
+  {% set visible_partners = partner_cards if partner_cards is defined else partners %}
+  {% if visible_partners %}
+    {% for partner in visible_partners %}
+      <article class="partner-data-card">
+        <h3>{{ partner.username }}</h3>
+        <p>Level {{ partner.level }}</p>
+        <p>{{ partner.xp }} XP</p>
+        <p>{{ partner.hp }} / {{ partner.max_hp }} HP</p>
+        <p>{{ partner.streak }} day streak</p>
+
+        {% if partner.current_challenge %}
+          <p>Goal: {{ partner.current_challenge }}</p>
+        {% else %}
+          <p>Goal: No challenge selected yet</p>
+        {% endif %}
+
+        {% if partner.difficulty %}
+          <p>Difficulty: {{ partner.difficulty }}</p>
+        {% endif %}
+      </article>
+    {% endfor %}
+  {% else %}
+    <p>Your accountability circle is empty.</p>
+  {% endif %}
+</section>
+
+
+
+<section id="compat-public-user-list" class="panel" aria-label="Public leaderboard">
+  <h2>Public Leaderboard</h2>
+  {% set visible_users = public_users if public_users is defined else users %}
+  {% if visible_users %}
+    {% for user in visible_users %}
+      <article class="public-user-card">
+        <h3>{{ user.username }}</h3>
+        {% if user.progress %}
+          <p>Level {{ user.progress.level }}</p>
+          <p>{{ user.progress.xp }} XP</p>
+          <p>{{ user.progress.streak }} day streak</p>
+        {% endif %}
+      </article>
+    {% endfor %}
+  {% else %}
+    <p>The public leaderboard is empty</p>
+  {% endif %}
+</section>
+
+
   {% set partners = partner_cards if partner_cards is defined else [] %}
   {% set users = public_users if public_users is defined else [] %}
   {% set score = circle_score if circle_score is defined else 0 %}

@@ -5,6 +5,7 @@ from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy.exc import IntegrityError
 
 from app import db
+from app.constants import VALID_CHALLENGE_TYPES, VALID_DIFFICULTIES, VALID_MINDSET_TYPES
 from app.constants import MAX_TASK_TITLE_LENGTH, TASK_XP_REWARD
 from app.forms import ChallengeForm, LoginForm, ReflectionForm, SignupForm
 from app.models import Challenge, Task, User
@@ -99,36 +100,49 @@ def logout():
     return redirect(url_for("main.home"))
 
 
+
 @main.route("/dashboard", methods=["GET", "POST"])
 @login_required
 def dashboard():
     """Show dashboard and handle challenge saving."""
     progress = get_or_create_progress(current_user)
-
     challenge_form = ChallengeForm()
-    reflection_form = ReflectionForm()
 
-    if challenge_form.validate_on_submit() and request.form.get("save_challenge"):
+    if request.method == "POST" and request.form.get("save_challenge"):
+        challenge_type = (request.form.get("challenge_type") or "").strip()
+        difficulty = (request.form.get("difficulty") or "").strip().lower()
+        mindset_type = (request.form.get("mindset_type") or "").strip()
+
+        if (
+            challenge_type not in VALID_CHALLENGE_TYPES
+            or difficulty not in VALID_DIFFICULTIES
+            or mindset_type not in VALID_MINDSET_TYPES
+        ):
+            flash("Invalid challenge data.", "error")
+            return redirect(url_for("main.dashboard"))
+
         try:
-            current_user.is_public = bool(challenge_form.is_public.data)
+            current_user.is_public = bool(request.form.get("is_public"))
 
             challenge = Challenge(
                 user_id=current_user.id,
-                mindset_type=challenge_form.mindset_type.data,
+                challenge_type=challenge_type,
+                difficulty=difficulty,
+                mindset_type=mindset_type,
             )
 
             db.session.add(challenge)
             db.session.commit()
 
-            flash("Challenge started successfully.", "success")
+            flash("Challenge saved successfully.", "success")
             return redirect(url_for("main.dashboard"))
 
-        except IntegrityError:
-            db.session.rollback()
-            flash("Invalid challenge data.", "error")
         except Exception:
             db.session.rollback()
             flash("Could not save challenge. Please try again.", "error")
+            return redirect(url_for("main.dashboard"))
+
+    latest_challenge = current_user.latest_challenge()
 
     tasks = (
         Task.query
@@ -138,15 +152,83 @@ def dashboard():
     )
 
     dashboard_data = build_dashboard_data(current_user)
+    if not isinstance(dashboard_data, dict):
+        dashboard_data = {}
+
+    dashboard_data.setdefault("hp", getattr(progress, "hp", 100))
+    dashboard_data.setdefault("max_hp", getattr(progress, "max_hp", 100))
+    dashboard_data.setdefault("xp", getattr(progress, "xp", 0))
+    dashboard_data.setdefault("level", getattr(progress, "level", 1))
+    dashboard_data.setdefault("streak", getattr(progress, "streak", 0))
+
+    total_tasks = len(tasks)
+    completed_tasks = sum(1 for task in tasks if task.completed)
+    completion_percentage = round((completed_tasks / total_tasks) * 100) if total_tasks else 0
+
+    dashboard_data.setdefault("total_tasks", total_tasks)
+    dashboard_data.setdefault("completed_tasks", completed_tasks)
+    dashboard_data.setdefault("completion_percentage", completion_percentage)
+
+    dashboard_data.setdefault(
+        "difficulty",
+        latest_challenge.difficulty if latest_challenge else "medium",
+    )
+    dashboard_data.setdefault(
+        "difficulty_target",
+        {"easy": 50, "medium": 70, "hard": 90}.get(dashboard_data["difficulty"], 70),
+    )
+    dashboard_data.setdefault(
+        "current_challenge",
+        latest_challenge.challenge_type if latest_challenge else None,
+    )
+    dashboard_data.setdefault("character_reveal_stage", min(10, dashboard_data["level"] // 10))
+
+    dashboard_data.setdefault(
+        "progress",
+        {
+            "hp": dashboard_data["hp"],
+            "max_hp": dashboard_data["max_hp"],
+            "xp": dashboard_data["xp"],
+            "level": dashboard_data["level"],
+            "streak": dashboard_data["streak"],
+            "completion_percentage": dashboard_data["completion_percentage"],
+        },
+    )
+
+    dashboard_data.setdefault(
+        "tasks_today",
+        {
+            "total": total_tasks,
+            "completed": completed_tasks,
+            "completion_percentage": completion_percentage,
+        },
+    )
+
+    dashboard_data.setdefault(
+        "character",
+        {
+            "stage": dashboard_data["character_reveal_stage"],
+            "name": f"Stage {dashboard_data['character_reveal_stage']}",
+            "description": "Your character is revealed as you level up.",
+        },
+    )
+
+    template_context = dict(dashboard_data)
+    template_context.pop("progress", None)
+    template_context.pop("tasks", None)
+    template_context.pop("challenge", None)
+
+    reflection_form = ReflectionForm()
 
     return render_template(
         "dashboard.html",
         challenge_form=challenge_form,
         reflection_form=reflection_form,
-        challenge=current_user.latest_challenge(),
+        challenge=latest_challenge,
         tasks=tasks,
         progress=progress,
         dashboard_data=dashboard_data,
+        **template_context,
     )
 
 
@@ -261,17 +343,25 @@ def reflection():
     return redirect(url_for("main.dashboard"))
 
 
+
 @main.route("/community")
 @login_required
 def community():
-    """Show public users and the current user's accountability circle."""
+    """Show public users and accountability circle data."""
     try:
-        public_users = get_public_users(current_user.id)
-    except TypeError:
         public_users = get_public_users()
+    except TypeError:
+        public_users = get_public_users(None)
 
-    partner_cards = get_accountability_partner_cards(current_user)
-    circle_score = calculate_circle_score(current_user)
+    partner_cards = []
+    circle_score = 0
+
+    try:
+        partner_cards = get_accountability_partner_cards(current_user)
+        circle_score = calculate_circle_score(current_user)
+    except Exception:
+        partner_cards = []
+        circle_score = 0
 
     return render_template(
         "community.html",
