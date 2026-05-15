@@ -418,11 +418,8 @@ def get_accountability_partner_cards(user):
                     if latest_challenge
                     else None
                 ),
-                "difficulty": (
-                    getattr(latest_challenge, "difficulty", DEFAULT_DIFFICULTY)
-                    if latest_challenge
-                    else DEFAULT_DIFFICULTY
-                ),
+                
+                "difficulty": DEFAULT_DIFFICULTY,
             }
         )
 

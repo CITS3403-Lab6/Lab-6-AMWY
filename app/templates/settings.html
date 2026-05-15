@@ -8,14 +8,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="{{ url_for('static', filename='settings/settings.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css') }}">
 </head>
-
 <body>
-  {% set challenge = current_user.latest_challenge() if current_user.latest_challenge is defined else None %}
-  {% set challenge_name = challenge.mindset_type if challenge and challenge.mindset_type else "Not selected" %}
-
   <div class="page-bg"></div>
 
   <div class="settings-shell">
@@ -25,35 +20,32 @@
         <h1 class="brand-title">HabitWise</h1>
         <p class="brand-subtitle">Stay disciplined.</p>
       </div>
-
       <nav class="side-nav">
         <a class="nav-item" href="{{ url_for('main.dashboard') }}">Dashboard</a>
-        <a class="nav-item" href="{{ url_for('main.challenge_setup') }}">Challenges</a>
+        <a class="nav-item" href="{{ url_for('main.challenge') }}">Challenges</a>
         <a class="nav-item" href="{{ url_for('main.community') }}">Partners</a>
         <a class="nav-item active" href="{{ url_for('main.settings') }}">Settings</a>
-        <a class="nav-item" href="{{ url_for('main.logout') }}">Logout</a>
       </nav>
     </header>
 
     <main class="main-content">
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
       <section class="welcome-card">
         <div class="welcome-inner">
           <div>
             <p class="eyebrow">PREFERENCES</p>
-            <h2>Account settings</h2>
-            <p>Manage your account, privacy, and challenge preferences.</p>
+            <h2>{{ current_user.username }}'s settings</h2>
+            <p>Manage your account, notifications, privacy, and challenge preferences.</p>
           </div>
         </div>
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            <div style="margin-top: 16px;">
-              {% for category, message in messages %}
-                <p class="save-message">{{ message }}</p>
-              {% endfor %}
-            </div>
-          {% endif %}
-        {% endwith %}
       </section>
 
       <section class="content-grid">
@@ -74,26 +66,22 @@
               </div>
 
               <div class="info-box">
-                <p class="info-label">Current Challenge</p>
-                <p class="info-value">{{ challenge_name }}</p>
+                <p class="info-label">Profile Visibility</p>
+                <p class="info-value">
+                  {{ "Public" if current_user.is_public else "Private" }}
+                </p>
               </div>
 
               <div class="info-box">
-                <p class="info-label">Community Visibility</p>
-                {% if current_user.is_public %}
-                  <p class="info-value">Public</p>
-                {% else %}
-                  <p class="info-value">Private</p>
-                {% endif %}
+                <p class="info-label">Member Since</p>
+                <p class="info-value">
+                  {{ current_user.created_at.strftime('%b %Y') }}
+                </p>
               </div>
             </div>
 
             <div class="button-row">
-              <a class="action-btn purple" href="{{ url_for('main.challenge_setup') }}" style="text-decoration:none;">
-                Change Challenge
-              </a>
-
-              <a class="action-btn red" href="{{ url_for('main.logout') }}" style="text-decoration:none;">
+              <a href="{{ url_for('main.logout') }}" class="action-btn red">
                 Log Out
               </a>
             </div>
@@ -109,7 +97,7 @@
                   <p class="toggle-title">Daily reminder</p>
                   <p class="toggle-sub">Receive a reminder to complete your tasks.</p>
                 </div>
-                <input class="toggle-input" type="checkbox" disabled>
+                <input id="notify-daily" class="toggle-input" type="checkbox">
               </label>
 
               <label class="toggle-row">
@@ -117,7 +105,7 @@
                   <p class="toggle-title">Streak reminder</p>
                   <p class="toggle-sub">Get reminded before your streak is at risk.</p>
                 </div>
-                <input class="toggle-input" type="checkbox" disabled>
+                <input id="notify-streak" class="toggle-input" type="checkbox">
               </label>
 
               <label class="toggle-row">
@@ -125,11 +113,9 @@
                   <p class="toggle-title">Community updates</p>
                   <p class="toggle-sub">Receive simple accountability partner updates.</p>
                 </div>
-                <input class="toggle-input" type="checkbox" disabled>
+                <input id="notify-community" class="toggle-input" type="checkbox">
               </label>
             </div>
-
-            <p class="save-message">Notification toggles are display-only for the MVP.</p>
           </article>
         </div>
 
@@ -138,39 +124,30 @@
             <p class="panel-kicker">PRIVACY</p>
             <h3 class="panel-heading">Visibility controls</h3>
 
-            {% if current_user.is_public %}
-              <p class="toggle-sub" style="margin-bottom: 16px;">
-                Your progress is currently public. Other users can see your progress in the community page.
-              </p>
-            {% else %}
-              <p class="toggle-sub" style="margin-bottom: 16px;">
-                Your progress is currently private. Other users cannot see your progress in the community page.
-              </p>
-            {% endif %}
+            <div class="toggle-list">
+              <label class="toggle-row">
+                <div>
+                  <p class="toggle-title">Share progress with partners</p>
+                  <p class="toggle-sub">
+                    Allow your accountability circle to view your progress.
+                    Currently: {{ "Public" if current_user.is_public else "Private" }}.
+                    Change this in the dashboard challenge form.
+                  </p>
+                </div>
+                <input class="toggle-input" type="checkbox"
+                  {{ "checked" if current_user.is_public else "" }} disabled>
+              </label>
 
-            <form method="POST" action="{{ url_for('main.settings') }}">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-
-              <div class="toggle-list">
-                <label class="toggle-row">
-                  <div>
-                    <p class="toggle-title">Share progress with partners</p>
-                    <p class="toggle-sub">Allow your accountability circle to view your progress.</p>
-                  </div>
-
-                  <input
-                    name="is_public"
-                    class="toggle-input"
-                    type="checkbox"
-                    {% if current_user.is_public %}checked{% endif %}
-                  >
-                </label>
-              </div>
-
-              <button class="action-btn green" type="submit" style="margin-top: 18px;">
-                Save Privacy
-              </button>
-            </form>
+              <label class="toggle-row">
+                <div>
+                  <p class="toggle-title">Show activity status</p>
+                  <p class="toggle-sub">
+                    Let others see whether you completed today's tasks.
+                  </p>
+                </div>
+                <input id="privacy-status" class="toggle-input" type="checkbox">
+              </label>
+            </div>
           </article>
 
           <article class="panel">
@@ -178,33 +155,27 @@
             <h3 class="panel-heading">Challenge preferences</h3>
 
             <div class="challenge-summary">
-              <p>
-                <strong>Selected mode:</strong>
-                <span>{{ challenge_name }}</span>
-              </p>
-
-              <p>
-                <strong>Progress system:</strong>
-                <span>HP, XP, level, streak, and difficulty target</span>
-              </p>
+              {% if current_user.latest_challenge() %}
+                <p>
+                  <strong>Challenge type:</strong>
+                  {{ current_user.latest_challenge().mindset_type }}
+                </p>
+              {% else %}
+                <p style="color: var(--muted);">No challenge set yet.</p>
+              {% endif %}
             </div>
 
             <div class="button-row">
-              <a class="action-btn blue" href="{{ url_for('main.challenge_setup') }}" style="text-decoration:none;">
+              <a href="{{ url_for('main.challenge') }}" class="action-btn blue">
                 Change Challenge
-              </a>
-
-              <a class="action-btn purple" href="{{ url_for('main.dashboard') }}" style="text-decoration:none;">
-                Back to Dashboard
               </a>
             </div>
 
-            <p class="save-message">
-              HP, XP, level, and streak are managed from the dashboard.
-            </p>
+            <p id="save-message" class="save-message"></p>
           </article>
         </div>
       </section>
+
     </main>
   </div>
 </body>

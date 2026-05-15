@@ -152,10 +152,10 @@ def dashboard():
 
 @main.route("/challenge", methods=["GET"])
 @login_required
-def challenge_setup():
+def challenge():
     """Render challenge/difficulty setup page."""
     challenge_form = ChallengeForm()
-    return render_template("challenge_setup.html", challenge_form=challenge_form)
+    return render_template("challenge.html", challenge_form=challenge_form)
 
 
 @main.route("/add-task", methods=["POST"])

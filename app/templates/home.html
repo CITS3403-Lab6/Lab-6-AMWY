@@ -1,81 +1,170 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HabitWise | Discipline Starts Here</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/vendor/press-start-2p.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/vendor/nes.min.css') }}">
+  <script src="{{ url_for('static', filename='js/landing.js') }}" defer></script>
+</head>
 
-{% block title %}Home - HabitWise{% endblock %}
+<header class="topbar">
+  <div class="brand">HabitWise</div>
+  <nav class="nav-links">
+    <a href="#about">About</a>
+    <a href="#features">Features</a>
+    <a href="#habits">Habits</a>
+    <a href="#start">Start</a>
+  </nav>
+</header>
 
-{% block content %}
-<section class="card hero">
-    <h1>🎮 HabitWise 🎮</h1>
-    <p>A Challenge-Based Self-Discipline Platform</p>
-    <p style="font-size: 0.9rem; line-height: 2;">
-        Make the oath. Face the monsters.<br>
-        Build unbreakable habits without burning out.<br>
-        Turn your mindset into superpowers.
+<main>
+  <section class="hero">
+    <div class="hero-left">
+      <p class="hero-kicker">DISCIPLINE • CONSISTENCY • ACCOUNTABILITY</p>
+      <h1>Build a stronger life,<br>one day at a time.</h1>
+      <p class="hero-text">
+        HabitWise is a minimalist self-discipline platform for users who want
+        more structure, stronger routines, and real accountability.
+      </p>
+      <p class="hero-text">
+        Choose a habit, pick your difficulty, complete daily tasks, and
+        stay consistent through subtle RPG-style progression.
+      </p>
+      <div class="hero-pills">
+        <span>Plan your day</span>
+        <span>3 Difficulty Modes</span>
+        <span>Journey with Friends</span>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div class="hero-card">
+        <div class="hero-card-top">
+          <span class="pixel-dot"></span>
+          <span class="pixel-dot"></span>
+          <span class="pixel-dot"></span>
+        </div>
+        <div class="hero-art-wrap">
+          <img
+            src="{{ url_for('static', filename='img/backgrounds/origbig2.png') }}"
+            alt="Pixel art hero preview"
+            class="hero-art"
+          >
+        </div>
+        <div class="hero-card-bottom">
+          <div class="mini-stat">
+            <strong>Study</strong>
+            <span>Focus path</span>
+          </div>
+          <div class="mini-stat">
+            <strong>Exercise</strong>
+            <span>Strength path</span>
+          </div>
+          <div class="mini-stat">
+            <strong>Self-Control</strong>
+            <span>Discipline path</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="about" class="content-section about-section">
+    <div class="section-heading-wrap">
+      <p class="section-label">INTRO</p>
+      <h2>What is HabitWise?</h2>
+    </div>
+    <div class="about-grid">
+      <div class="about-main">
+        <p>
+          HabitWise is not just another cluttered habit tracker. It is a
+          challenge-based platform built to help users make meaningful
+          lifestyle changes through structure, simplicity, and accountability.
+        </p>
+      </div>
+      <div class="about-side">
+        <div class="about-chip">Build routines</div>
+        <div class="about-chip">Daily accountability</div>
+        <div class="about-chip">Subtle RPG feedback</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" class="content-section features-section">
+    <div class="section-heading-wrap">
+      <p class="section-label">FEATURES</p>
+      <h2>Core Features</h2>
+    </div>
+    <p class="section-subtext">
+      The platform focuses on the most important tools users need to stay on
+      track without feeling overwhelmed.
     </p>
-    
-    <div class="button-group" style="margin-top: 40px;">
+    <div class="card-grid">
+      <article class="info-card card-orange">
+        <h3>Accountability Circle</h3>
+        <p>Party up with friends to track each other's progress.</p>
+      </article>
+      <article class="info-card card-blue">
+        <h3>Daily Tracking</h3>
+        <p>Keep up with daily tasks, streaks, and overall progress.</p>
+      </article>
+      <article class="info-card card-green">
+        <h3>Difficulty Modes</h3>
+        <p>Select from Sage, Warrior, or Demon modes.</p>
+      </article>
+    </div>
+    <div class="flow-strip">
+      <div class="flow-box">Choose a difficulty</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">Track each day</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">Stay accountable</div>
+    </div>
+  </section>
+
+  <section id="habits" class="content-section habits-section">
+    <div class="section-heading-wrap">
+      <p class="section-label">HABITS</p>
+      <h2>HabitWise guides...</h2>
+    </div>
+    <div class="habits-grid">
+      <article class="habits-card">
+        <span class="habits-tag">01</span>
+        <h3>Study</h3>
+        <p>Improve focus and academic consistency through structured routines.</p>
+      </article>
+      <article class="habits-card">
+        <span class="habits-tag">02</span>
+        <h3>Exercise</h3>
+        <p>Build a stronger fitness routine with sustainable difficulty.</p>
+      </article>
+      <article class="habits-card">
+        <span class="habits-tag">03</span>
+        <h3>Self-Control</h3>
+        <p>Reduce unhealthy habits through disciplined routines and tracking.</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="start" class="content-section cta-section">
+    <div class="cta-box">
+      <p class="section-label light-label">BEGIN</p>
+      <h2>Start Your Journey</h2>
+      <p>
+        Choose a habit, commit to the process, and begin building a
+        lifestyle you can actually maintain.
+      </p>
+      <div class="cta-buttons">
         {% if current_user.is_authenticated %}
-            <a class="button button-primary" href="{{ url_for('main.dashboard') }}">→ Enter Your Dashboard</a>
+          <a href="{{ url_for('main.dashboard') }}" class="nes-btn is-warning">→ Your Dashboard</a>
         {% else %}
-            <a class="button button-primary" href="{{ url_for('main.signup') }}">⚔ Make The Oath</a>
-            <a class="button button-secondary" href="{{ url_for('main.login') }}">→ Welcome Back</a>
+          <a href="{{ url_for('main.signup') }}" class="nes-btn is-warning">Get Started</a>
+          <a href="{{ url_for('main.login') }}" class="nes-btn">Already a Member</a>
         {% endif %}
+      </div>
     </div>
-</section>
-
-<section class="card" style="text-align: center;">
-    <h2>✨ How It Works ✨</h2>
-    <div class="card-grid">
-        <div class="nes-container">
-            <h3>1. Create Challenge</h3>
-            <p>Choose your challenge type, difficulty, and mindset.</p>
-        </div>
-        <div class="nes-container">
-            <h3>2. Set Mindset</h3>
-            <p>Pick Sage (Think), Warrior (Act), or Demon (Chaos).</p>
-        </div>
-        <div class="nes-container">
-            <h3>3. Complete Tasks</h3>
-            <p>Earn XP in Strength, Intelligence, Spirituality, Vitality, Charisma.</p>
-        </div>
-        <div class="nes-container">
-            <h3>4. Level Up</h3>
-            <p>Track your progress and climb the ranks.</p>
-        </div>
-    </div>
-</section>
-
-<section class="card" style="text-align: center;">
-    <h2>⚔ The Stat System ⚔</h2>
-    <div class="card-grid">
-        <div class="nes-container">
-            <p><strong>STR</strong> - Strength<br>Physical & Discipline Tasks</p>
-        </div>
-        <div class="nes-container">
-            <p><strong>INT</strong> - Intelligence<br>Learning & Mental Tasks</p>
-        </div>
-        <div class="nes-container">
-            <p><strong>SPI</strong> - Spirituality<br>Meditation & Reflection</p>
-        </div>
-        <div class="nes-container">
-            <p><strong>VIT</strong> - Vitality<br>Health & Energy Tasks</p>
-        </div>
-        <div class="nes-container">
-            <p><strong>CHA</strong> - Charisma<br>Social & Communication</p>
-        </div>
-    </div>
-</section>
-
-<section class="card" style="background: linear-gradient(135deg, #1f2937 0%, #111827 100%); border: 2px solid #22c55e; text-align: center;">
-    <h2>🏆 Ready to Level Up? 🏆</h2>
-    <p style="font-size: 1rem; margin: 20px 0;">
-        Your journey to becoming the person you're proud of starts here.
-    </p>
-    {% if not current_user.is_authenticated %}
-        <div class="button-group">
-            <a class="button button-primary" href="{{ url_for('main.signup') }}">→ Start Now</a>
-        </div>
-    {% else %}
-        <p style="font-size: 0.9rem;">You're logged in! <a href="{{ url_for('main.dashboard') }}" style="color: #22c55e; text-decoration: underline;">Go to your dashboard</a></p>
-    {% endif %}
-</section>
-{% endblock %}
+  </section>
+</main>
