@@ -95,6 +95,28 @@ nav {
     align-items: center;
 }
 
+.nav-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    object-fit: cover;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+.nav-avatar-initials {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: inline-grid;
+    place-items: center;
+    background: #374151;
+    color: #d1d5db;
+    font-weight: 700;
+    margin-right: 8px;
+    font-size: 0.85rem;
+}
+
 nav a {
     color: #d1d5db;
     text-decoration: none;
