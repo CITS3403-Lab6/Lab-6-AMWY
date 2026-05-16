@@ -87,6 +87,7 @@ def login():
             next_page = request.args.get("next")
             return redirect(next_page or url_for("main.dashboard"))
 
+        form.password.errors.append("Incorrect username or password.")
         flash("Invalid username or password.", "error")
 
     return render_template("login.html", form=form)

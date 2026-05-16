@@ -72,6 +72,40 @@ body {
   backdrop-filter: blur(2px);
 }
 
+.auth-messages {
+  margin: 0 0 16px;
+}
+
+.auth-message {
+  margin: 0 0 10px;
+  padding: 12px 14px;
+  border: 2px solid #111;
+  font-family: inherit;
+  font-size: 0.55rem;
+  line-height: 1.7;
+  background: #fff8e1;
+  color: #1f2937;
+}
+
+.auth-message:last-child {
+  margin-bottom: 0;
+}
+
+.auth-message-success {
+  background: #dcfce7;
+  border-color: #16a34a;
+}
+
+.auth-message-error {
+  background: #fee2e2;
+  border-color: #dc2626;
+}
+
+.auth-message-info {
+  background: #dbeafe;
+  border-color: #2563eb;
+}
+
 .screen-subtitle {
   font-size: 0.55rem;
   line-height: 1.7;
