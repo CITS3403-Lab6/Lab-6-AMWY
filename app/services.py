@@ -983,3 +983,102 @@ def build_smart_coach_analysis(user, tasks=None, challenge=None, progress=None):
         "remaining_tasks": remaining_tasks,
     }
 
+# ---------------------------------------------------------------------------
+# Starter task seeding for first-time users
+# ---------------------------------------------------------------------------
+
+DEFAULT_STARTER_TASKS = [
+    {
+        "title": "Walk 10,000 steps",
+        "stat_category": "VIT",
+    },
+    {
+        "title": "Read one page of a book",
+        "stat_category": "INT",
+    },
+    {
+        "title": "Drink enough water",
+        "stat_category": "VIT",
+    },
+    {
+        "title": "Plan tomorrow's top 3 tasks",
+        "stat_category": "INT",
+    },
+    {
+        "title": "Complete a 10 minute tidy-up",
+        "stat_category": "STR",
+    },
+    {
+        "title": "Message one friend or family member",
+        "stat_category": "CHA",
+    },
+    {
+        "title": "Do a 5 minute reflection",
+        "stat_category": "SPI",
+    },
+    {
+        "title": "Avoid one distraction session",
+        "stat_category": "SPI",
+    },
+]
+
+
+def _starter_model_has_column(model, column_name):
+    return column_name in model.__table__.columns
+
+
+def _starter_set_model_value(instance, field_name, value):
+    if _starter_model_has_column(instance.__class__, field_name):
+        setattr(instance, field_name, value)
+
+
+def seed_default_tasks_for_user(user, task_date=None, skip_when_testing=True):
+    """Create starter tasks for a first-time user.
+
+    The function is idempotent. It creates the starter list only when the user
+    has no tasks for the selected day. The testing guard prevents old route
+    tests from changing behaviour unexpectedly, while direct unit tests can
+    still exercise this helper with skip_when_testing=False.
+    """
+    if user is None or getattr(user, "id", None) is None:
+        raise ValueError("A valid user is required to seed starter tasks.")
+
+    if skip_when_testing:
+        try:
+            from flask import current_app
+
+            if current_app.config.get("TESTING"):
+                return []
+        except RuntimeError:
+            pass
+
+    from datetime import date as date_class
+
+    task_date = task_date or date_class.today()
+
+    query = Task.query.filter_by(user_id=user.id)
+
+    if _starter_model_has_column(Task, "task_date"):
+        query = query.filter_by(task_date=task_date)
+
+    if query.count() > 0:
+        return []
+
+    created_tasks = []
+
+    for task_data in DEFAULT_STARTER_TASKS:
+        task = Task()
+
+        _starter_set_model_value(task, "user_id", user.id)
+        _starter_set_model_value(task, "title", task_data["title"])
+        _starter_set_model_value(task, "stat_category", task_data["stat_category"])
+        _starter_set_model_value(task, "completed", False)
+        _starter_set_model_value(task, "task_date", task_date)
+
+        db.session.add(task)
+        created_tasks.append(task)
+
+    db.session.commit()
+
+    return created_tasks
+

@@ -688,3 +688,19 @@ body {
   }
 }
 
+/* Starter-task dashboard list refinement */
+.task-list {
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 8px;
+  scrollbar-width: thin;
+}
+
+.task-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.task-list::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+}
+

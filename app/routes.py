@@ -9,6 +9,7 @@ from app.constants import MAX_TASK_TITLE_LENGTH, TASK_XP_REWARD
 from app.forms import ChallengeForm, LoginForm, ReflectionForm, SignupForm
 from app.models import Challenge, Reflection, Task, User
 from app.services import (
+    seed_default_tasks_for_user,
     build_smart_coach_analysis,
     add_accountability_partner,
     apply_daily_hp_result,
@@ -105,6 +106,7 @@ def logout():
 def dashboard():
     """Show dashboard and handle challenge saving."""
     progress = get_or_create_progress(current_user)
+    seed_default_tasks_for_user(current_user)
 
     challenge_form = ChallengeForm()
     reflection_form = ReflectionForm()
