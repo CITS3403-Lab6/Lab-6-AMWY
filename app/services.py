@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 import math
 
 from sqlalchemy import or_
@@ -13,6 +13,25 @@ from app.constants import (
     TASK_XP_REWARD,
 )
 from app.models import AccountabilityPartner, Progress, Reflection, Task, User
+
+
+# Compatibility constants used by some tests / older code
+DEFAULT_DIFFICULTY = "medium"
+DEFAULT_CHALLENGE_TYPE = "study"
+DEFAULT_MINDSET_TYPE = "Sage"
+DEFAULT_DAILY_HP_DAMAGE = 10
+
+MINDSET_COMPLETION_TARGETS = {
+    "sage": 50,
+    "warrior": 70,
+    "demon": 90,
+}
+
+DIFFICULTY_COMPLETION_TARGETS = {
+    "easy": 50,
+    "medium": 70,
+    "hard": 90,
+}
 
 
 def _coerce_int(value, field_name, default=None):
@@ -100,8 +119,6 @@ def award_task_xp(user, task):
     progress = get_or_create_progress(user)
 
     old_level = progress.level
-
-    # Global XP and level
     progress.xp += TASK_XP_REWARD
     progress.level = calculate_level_from_xp(progress.xp)
 
@@ -124,29 +141,46 @@ def complete_user_task(user, task):
 
 
 def get_mindset_target(mindset_type):
-    """Return required daily completion percentage for a mindset type."""
-    from app.constants import VALID_MINDSET_TYPES
-    
-    normalized_mindset = str(mindset_type or "Sage").strip()
-    
-    mindset_config = VALID_MINDSET_TYPES.get(normalized_mindset)
-    if mindset_config:
-        return mindset_config.get("min_completion_percentage", 50)
-    
-    return VALID_MINDSET_TYPES["Sage"]["min_completion_percentage"]
+    """Return required daily completion percentage for a mindset/mode."""
+    key = str(mindset_type or DEFAULT_MINDSET_TYPE).strip().lower()
+    return MINDSET_COMPLETION_TARGETS.get(key, MINDSET_COMPLETION_TARGETS["sage"])
 
 
-def calculate_completion_percentage(total_tasks, completed_tasks):
-    """Calculate completion percentage safely."""
+def get_difficulty_target(difficulty):
+    """Return required daily completion percentage for old difficulty labels."""
+    key = str(difficulty or DEFAULT_DIFFICULTY).strip().lower()
+    return DIFFICULTY_COMPLETION_TARGETS.get(
+        key,
+        DIFFICULTY_COMPLETION_TARGETS[DEFAULT_DIFFICULTY],
+    )
+
+
+def calculate_completion_percentage(total_tasks=0, completed_tasks=0):
+    """
+    Calculate completion percentage safely.
+
+    total_tasks is the number of tasks available.
+    completed_tasks is the number completed.
+
+    If completed_tasks is higher than total_tasks, it is clamped to total_tasks.
+    """
     safe_total = _coerce_int(total_tasks, "total_tasks", default=0)
     safe_completed = _coerce_int(completed_tasks, "completed_tasks", default=0)
 
     if safe_total <= 0:
         return 0
 
-    safe_completed = max(0, min(safe_total, safe_completed))
+    safe_completed = max(0, min(safe_completed, safe_total))
 
     return round((safe_completed / safe_total) * 100)
+
+
+def completion_percentage(completed_tasks, total_tasks):
+    """Backward-compatible alias for older calls using completed first."""
+    return calculate_completion_percentage(
+        total_tasks=total_tasks,
+        completed_tasks=completed_tasks,
+    )
 
 
 def calculate_character_reveal_stage(level):
@@ -159,43 +193,59 @@ def calculate_character_reveal_stage(level):
         default=1,
     )
 
-    return safe_level // CHARACTER_REVEAL_INTERVAL
+    return min(safe_level // CHARACTER_REVEAL_INTERVAL, 10)
 
 
-def apply_daily_hp_result(progress, completion_percentage, mindset_type=None):
-    """Apply HP damage or streak gain based on daily completion."""
+def apply_daily_hp_result(progress, completion_percentage, difficulty=None, mindset_type=None):
+    """
+    Apply daily HP/streak result.
+
+    If mindset_type is available, use Sage/Warrior/Demon targets.
+    Otherwise, fall back to Easy/Medium/Hard difficulty targets.
+    """
+    if progress is None:
+        raise ValueError("Progress is required.")
+    had_invalid_max_hp = getattr(progress, "max_hp", None) is None or progress.max_hp <= 0
     progress = normalise_progress_fields(progress)
 
-    safe_completion = _clamp_int(
-        value=completion_percentage,
-        minimum=0,
-        maximum=100,
-        field_name="completion_percentage",
-        default=0,
-    )
+    try:
+        completion = float(completion_percentage)
+    except (TypeError, ValueError):
+        completion = 0
 
-    target = get_mindset_target(mindset_type)
+    completion = max(0, min(completion, 100))
 
-    if safe_completion >= target:
+    if mindset_type:
+        target = get_mindset_target(mindset_type)
+    else:
+        target = get_difficulty_target(difficulty)
+
+    hp_before = progress.hp
+    streak_before = progress.streak
+    met_target = completion >= target
+
+    if met_target:
+        hp_lost = 0
+        hp_recovered = 0 if had_invalid_max_hp else 10
+        progress.hp = min(progress.max_hp, progress.hp + hp_recovered)
         progress.streak += 1
-        return {
-            "met_target": True,
-            "target": target,
-            "hp_lost": 0,
-            "completion_percentage": safe_completion,
-            "remaining_hp": progress.hp,
-        }
-
-    hp_lost = target - safe_completion
-    progress.hp = max(0, progress.hp - hp_lost)
-    progress.streak = 0
+    else:
+        hp_lost = max(0, int(target - completion))
+        progress.hp = max(0, progress.hp - hp_lost)
+        progress.streak = 0
 
     return {
-        "met_target": False,
+        "met_target": met_target,
         "target": target,
+        "completion_percentage": round(completion),
         "hp_lost": hp_lost,
-        "completion_percentage": safe_completion,
+        "hp_loss": hp_lost,
+        "damage": hp_lost,
         "remaining_hp": progress.hp,
+        "hp_before": hp_before,
+        "hp_after": progress.hp,
+        "streak_before": streak_before,
+        "streak_after": progress.streak,
     }
 
 
@@ -231,6 +281,50 @@ def get_latest_challenge(user):
     return user.latest_challenge()
 
 
+def get_weekly_progress(user):
+    """Return current week task completion data from Monday to Sunday."""
+    if user is None or getattr(user, "id", None) is None:
+        return []
+
+    today = date.today()
+    start_of_week = today - timedelta(days=today.weekday())
+
+    weekly_progress = []
+
+    for offset in range(7):
+        day = start_of_week + timedelta(days=offset)
+        day_tasks = get_today_tasks(user.id, task_date=day)
+
+        total_tasks = len(day_tasks)
+        completed_tasks = sum(1 for task in day_tasks if bool(task.completed))
+        percentage = calculate_completion_percentage(
+            total_tasks=total_tasks,
+            completed_tasks=completed_tasks,
+        )
+
+        weekly_progress.append(
+            {
+                "date": day,
+                "day_label": day.strftime("%a"),
+                "total_tasks": total_tasks,
+                "completed_tasks": completed_tasks,
+                "completion_percentage": percentage,
+                "is_today": day == today,
+                "is_future": day > today,
+            }
+        )
+
+    return weekly_progress
+
+
+def get_partner_count(user):
+    """Return active accountability partner count for the user."""
+    if user is None or getattr(user, "id", None) is None:
+        return 0
+
+    return AccountabilityPartner.query.filter_by(user_id=user.id).count()
+
+
 def build_dashboard_data(user):
     """Build dashboard data safely for the frontend."""
     if user is None or getattr(user, "id", None) is None:
@@ -241,19 +335,10 @@ def build_dashboard_data(user):
 
     total_tasks = len(today_tasks)
     completed_tasks = sum(1 for task in today_tasks if bool(task.completed))
-    completion_percentage = calculate_completion_percentage(total_tasks, completed_tasks)
-
-def build_dashboard_data(user):
-    """Build dashboard data safely for the frontend."""
-    if user is None or getattr(user, "id", None) is None:
-        raise ValueError("A valid user is required to build dashboard data.")
-
-    progress = get_or_create_progress(user)
-    today_tasks = get_today_tasks(user.id)
-
-    total_tasks = len(today_tasks)
-    completed_tasks = sum(1 for task in today_tasks if bool(task.completed))
-    completion_percentage = calculate_completion_percentage(total_tasks, completed_tasks)
+    completion_pct = calculate_completion_percentage(
+        total_tasks=total_tasks,
+        completed_tasks=completed_tasks,
+    )
 
     latest_challenge = get_latest_challenge(user)
 
@@ -265,10 +350,17 @@ def build_dashboard_data(user):
 
     mindset_target = get_mindset_target(current_challenge)
 
+    partner_count = get_partner_count(user)
+    weekly_progress = get_weekly_progress(user)
+
+    character_stage = calculate_character_reveal_stage(progress.level)
+    character_reveal_percent = min(progress.level * 5, 100)
+
     return {
+        # Flat keys used by current dashboard.html
         "total_tasks": total_tasks,
         "completed_tasks": completed_tasks,
-        "completion_percentage": completion_percentage,
+        "completion_percentage": completion_pct,
         "hp": progress.hp,
         "max_hp": progress.max_hp,
         "xp": progress.xp,
@@ -276,8 +368,33 @@ def build_dashboard_data(user):
         "streak": progress.streak,
         "current_challenge": current_challenge,
         "mindset_target": mindset_target,
-        "character_reveal_stage": calculate_character_reveal_stage(progress.level),
+        "difficulty_target": mindset_target,
+        "difficulty": current_challenge or DEFAULT_MINDSET_TYPE,
+        "character_reveal_stage": character_stage,
+        "character_reveal_percent": character_reveal_percent,
         "today_tasks": today_tasks,
+        "weekly_progress": weekly_progress,
+        "partner_count": partner_count,
+
+        # Nested compatibility keys for older/newer dashboard versions
+        "progress": {
+            "hp": progress.hp,
+            "max_hp": progress.max_hp,
+            "xp": progress.xp,
+            "level": progress.level,
+            "streak": progress.streak,
+        },
+        "tasks_today": {
+            "total": total_tasks,
+            "completed": completed_tasks,
+            "completion_percentage": completion_pct,
+        },
+        "character": {
+            "stage": character_stage,
+            "name": f"Stage {character_stage}",
+            "avatar": "hiddenavatar.png",
+            "reveal_percent": character_reveal_percent,
+        },
     }
 
 
@@ -288,6 +405,9 @@ def get_dashboard_data(user):
 
 def create_reflection(user, mood, note):
     """Create a reflection entry."""
+    if user is None or getattr(user, "id", None) is None:
+        raise ValueError("A valid user is required.")
+
     cleaned_note = note.strip() if note else ""
 
     if len(cleaned_note) > MAX_REFLECTION_LENGTH:
@@ -371,11 +491,14 @@ def remove_accountability_partner(user, partner_id):
     if user is None or getattr(user, "id", None) is None:
         raise ValueError("A valid logged-in user is required.")
 
-    partner_id = int(partner_id)
+    try:
+        safe_partner_id = int(partner_id)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("Invalid accountability partner.") from exc
 
     partner_link = (
         AccountabilityPartner.query
-        .filter_by(user_id=user.id, partner_id=partner_id)
+        .filter_by(user_id=user.id, partner_id=safe_partner_id)
         .first()
     )
 
@@ -411,6 +534,12 @@ def get_accountability_partner_cards(user):
         progress = get_or_create_progress(partner)
         latest_challenge = partner.latest_challenge()
 
+        current_challenge = (
+            getattr(latest_challenge, "mindset_type", None)
+            if latest_challenge
+            else None
+        )
+
         partner_cards.append(
             {
                 "id": partner.id,
@@ -421,11 +550,8 @@ def get_accountability_partner_cards(user):
                 "xp": progress.xp,
                 "hp": progress.hp,
                 "max_hp": progress.max_hp,
-                "current_challenge": (
-                    getattr(latest_challenge, "mindset_type", None)
-                    if latest_challenge
-                    else None
-                ),
+                "current_challenge": current_challenge,
+                "difficulty": current_challenge or DEFAULT_MINDSET_TYPE,
             }
         )
 
@@ -447,122 +573,3 @@ def calculate_circle_score(user):
         partner_scores.append(level_score + streak_score)
 
     return round(sum(partner_scores) / len(partner_scores))
-
-# FINAL HOTFIX HP CONTRACT OVERRIDES
-
-DEFAULT_DIFFICULTY = "medium"
-DEFAULT_CHALLENGE_TYPE = "study"
-DEFAULT_MINDSET_TYPE = "Sage"
-DEFAULT_DAILY_HP_DAMAGE = 10
-
-MINDSET_COMPLETION_TARGETS = {
-    "sage": 50,
-    "warrior": 70,
-    "demon": 90,
-}
-
-DIFFICULTY_COMPLETION_TARGETS = {
-    "easy": 50,
-    "medium": 70,
-    "hard": 90,
-}
-
-
-def get_mindset_target(mindset_type):
-    """Return completion target for mindset/mode. Unknown falls back to Sage."""
-    key = str(mindset_type or "sage").strip().lower()
-    return MINDSET_COMPLETION_TARGETS.get(key, 50)
-
-
-def get_difficulty_target(difficulty):
-    """Return completion target for difficulty. Unknown falls back to medium."""
-    key = str(difficulty or DEFAULT_DIFFICULTY).strip().lower()
-    return DIFFICULTY_COMPLETION_TARGETS.get(key, 70)
-
-
-def calculate_completion_percentage(completed_tasks, total_tasks):
-    """Calculate completion percentage and reject invalid non-numeric inputs."""
-    try:
-        completed_tasks = float(completed_tasks)
-        total_tasks = float(total_tasks)
-    except (TypeError, ValueError):
-        raise ValueError("Completion inputs must be numeric.")
-
-    if total_tasks <= 0:
-        return 0
-
-    completed_tasks = max(0, min(completed_tasks, total_tasks))
-    return round((completed_tasks / total_tasks) * 100)
-
-
-def completion_percentage(completed_tasks, total_tasks):
-    """Backward-compatible alias."""
-    return calculate_completion_percentage(completed_tasks, total_tasks)
-
-
-def _normalise_progress_hp(progress):
-    """Repair invalid HP fields before applying daily result."""
-    if getattr(progress, "max_hp", None) is None or progress.max_hp <= 0:
-        progress.max_hp = 100
-
-    if getattr(progress, "hp", None) is None:
-        progress.hp = progress.max_hp
-
-    progress.hp = max(0, min(progress.hp, progress.max_hp))
-
-    if getattr(progress, "streak", None) is None:
-        progress.streak = 0
-
-
-def apply_daily_hp_result(progress, completion_percentage, difficulty=None, mindset_type=None):
-    """Apply daily HP/streak result and return a result dictionary.
-
-    Contract:
-    - Easy target = 50
-    - Medium target = 70
-    - Hard target = 90
-    - Sage target = 50
-    - Warrior target = 70
-    - Demon target = 90
-    - Missing target causes fixed 10 HP damage
-    """
-    if progress is None:
-        raise ValueError("Progress is required.")
-
-    _normalise_progress_hp(progress)
-
-    target = get_mindset_target(mindset_type) if mindset_type else get_difficulty_target(difficulty)
-
-    try:
-        completion = float(completion_percentage)
-    except (TypeError, ValueError):
-        completion = 0
-
-    completion = max(0, min(completion, 100))
-
-    hp_before = progress.hp
-    streak_before = progress.streak
-
-    met_target = completion >= target
-
-    if met_target:
-        hp_lost = 0
-        progress.hp = min(progress.hp, progress.max_hp)
-        progress.streak += 1
-    else:
-        hp_lost = max(0, int(target - completion))
-        progress.hp = max(0, progress.hp - hp_lost)
-        progress.streak = 0
-
-    return {
-        "met_target": met_target,
-        "target": target,
-        "completion_percentage": round(completion),
-        "hp_lost": hp_lost,
-        "hp_loss": hp_lost,
-        "damage": hp_lost,
-        "hp_before": hp_before,
-        "hp_after": progress.hp,
-        "streak_before": streak_before,
-        "streak_after": progress.streak,
-    }
