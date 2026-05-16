@@ -502,3 +502,40 @@ def remove_partner(partner_id):
         flash("Could not remove accountability partner. Please try again.", "error")
 
     return redirect(url_for("main.community"))
+
+@main.before_app_request
+def update_current_user_last_seen():
+    """Track lightweight last-seen activity for authenticated users."""
+    if not current_user.is_authenticated:
+        return
+
+    if not hasattr(current_user, "last_seen_at"):
+        return
+
+    try:
+        from datetime import datetime, timezone
+
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
+        last_seen = current_user.last_seen_at
+
+        if last_seen is None or (now - last_seen).total_seconds() >= 60:
+            current_user.last_seen_at = now
+            db.session.add(current_user)
+            db.session.commit()
+    except Exception:
+        db.session.rollback()
+
+
+@main.route("/settings/activity-visibility", methods=["POST"])
+@login_required
+def update_activity_visibility():
+    """Update whether the user's online/activity status is visible."""
+    activity_visibility = request.form.get("activity_visibility")
+
+    if activity_visibility in {"online", "hidden"} and hasattr(current_user, "show_activity_status"):
+        current_user.show_activity_status = activity_visibility == "online"
+        db.session.add(current_user)
+        db.session.commit()
+
+    return redirect(url_for("main.settings"))
+

@@ -75,7 +75,7 @@
 
               <div class="party-slot" data-member="{{ loop.index }}">
                 <div class="slot-label">
-                  <p class="slot-name">{{ partner.username }}</p>
+                  <p class="slot-name">{{ partner.username }} {% if partner.show_activity_status %}<span class="activity-dot online" title="Activity visible"></span>{% else %}<span class="activity-dot hidden" title="Hidden mode"></span>{% endif %}</p>
                   <p class="slot-stats">Streak: {{ partner.streak }} days</p>
                 </div>
 
@@ -155,7 +155,7 @@
 
                       <div class="partner-info">
                         <div class="name-row">
-                          <h4>{{ user.username }}</h4>
+                          <h4>{{ user.username }} {% if user.show_activity_status %}<span class="activity-dot online" title="Activity visible"></span>{% else %}<span class="activity-dot hidden" title="Hidden mode"></span>{% endif %}</h4>
 
                           {% if user.progress %}
                             <span class="status-badge complete">
@@ -177,7 +177,7 @@
                     <div class="partner-actions">
                       <form method="post" action="{{ url_for('main.add_partner') }}">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <input type="hidden" name="partner_identifier" value="{{ user.username }}">
+                        <input type="hidden" name="partner_identifier" value="{{ user.username }} {% if user.show_activity_status %}<span class="activity-dot online" title="Activity visible"></span>{% else %}<span class="activity-dot hidden" title="Hidden mode"></span>{% endif %}">
                         <button type="submit" class="primary-btn">Add Partner</button>
                       </form>
                     </div>
@@ -215,7 +215,7 @@
 
                       <div class="partner-info">
                         <div class="name-row">
-                          <h4>{{ partner.username }}</h4>
+                          <h4>{{ partner.username }} {% if partner.show_activity_status %}<span class="activity-dot online" title="Activity visible"></span>{% else %}<span class="activity-dot hidden" title="Hidden mode"></span>{% endif %}</h4>
 
                           {% if partner.current_challenge %}
                             <span class="status-badge support">
