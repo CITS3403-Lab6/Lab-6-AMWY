@@ -6,6 +6,24 @@ body {
   overflow-x: hidden;
 }
 
+.section-highlight {
+  position: relative;
+  z-index: 2;
+  animation: outlineFade 1.2s ease-out;
+}
+
+@keyframes outlineFade {
+  0% {
+    outline: 0px solid transparent;
+  }
+  50% {
+    outline: 6px solid #00e5ff; /* CYAN BLUE */
+  }
+  100% {
+    outline: 0px solid transparent;
+  }
+}
+
 .topbar {
   position: absolute;
   top: 0;
@@ -43,7 +61,7 @@ body {
   padding: 130px 40px 70px;
   box-sizing: border-box;
   display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
+  grid-template-columns: 1fr 1.2fr;
   gap: 34px;
   align-items: center;
   background:
@@ -110,7 +128,7 @@ body {
 
 .hero-card {
   width: 100%;
-  max-width: 540px;
+  max-width: 720px;
   background: linear-gradient(180deg, #fff1db 0%, #ffd6ae 100%);
   border: 4px solid #172033;
   box-shadow: 10px 10px 0 rgba(23, 32, 51, 0.22);
@@ -142,7 +160,7 @@ body {
 .hero-art {
   display: block;
   width: 100%;
-  max-width: 340px;
+  max-width: 500px;
   margin: 0 auto;
   image-rendering: pixelated;
   border: 4px solid #172033;
