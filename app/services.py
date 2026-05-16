@@ -574,66 +574,471 @@ def calculate_circle_score(user):
 
     return round(sum(partner_scores) / len(partner_scores))
 
+# ---------------------------------------------------------------------------
+# HabitWise Oracle AI
+# ---------------------------------------------------------------------------
+# A deterministic, backend-driven AI-style coach.
+# It reads existing user/task/challenge/progress data and returns a structured
+# insight dictionary. It does not call external APIs and does not write to DB.
+
+ORACLE_ARCHETYPES = {
+    "sage": {
+        "name": "Sage",
+        "tone_class": "sage",
+        "fallback_target": 50,
+        "voice": "calm, reflective and strategic",
+    },
+    "warrior": {
+        "name": "Warrior",
+        "tone_class": "warrior",
+        "fallback_target": 70,
+        "voice": "direct, disciplined and action-focused",
+    },
+    "demon": {
+        "name": "Demon",
+        "tone_class": "demon",
+        "fallback_target": 90,
+        "voice": "intense, ambitious and high-pressure",
+    },
+}
+
+ORACLE_DIFFICULTY_TARGETS = {
+    "easy": 50,
+    "medium": 70,
+    "hard": 90,
+}
+
+ORACLE_LORE_LINES = {
+    "Sage": {
+        "complete": "The Sage closes the scroll. Today’s lesson has been honoured.",
+        "on_track": "The Sage sees a steady current: your rhythm is forming before the day ends.",
+        "at_risk": "The Sage senses drifting focus. The path is still open, but it needs intention.",
+        "critical": "The Sage warns that the flame is dim. One deliberate action can still protect the day.",
+    },
+    "Warrior": {
+        "complete": "The Warrior marks the field as cleared. Discipline has answered the call.",
+        "on_track": "The Warrior is advancing. Momentum is present, but the mission is not finished.",
+        "at_risk": "The Warrior is losing ground. Regain control with one immediate strike.",
+        "critical": "The Warrior is under siege. Drop the noise and move before the day is lost.",
+    },
+    "Demon": {
+        "complete": "The Demon smiles at the ruins of completed quests. The standard was met.",
+        "on_track": "The Demon is still hunting. You have momentum, but hunger must become action.",
+        "at_risk": "The Demon rejects weak progress. The gap is visible; close it.",
+        "critical": "The Demon is starving. Comfort is winning unless you attack the next task now.",
+    },
+}
+
+
+def _oracle_get(obj, *names, default=None):
+    if obj is None:
+        return default
+
+    for name in names:
+        if isinstance(obj, dict) and name in obj:
+            value = obj.get(name)
+            return default if value is None else value
+
+        value = getattr(obj, name, None)
+        if value is not None:
+            return value
+
+    return default
+
+
+def _oracle_as_int(value, default=0):
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def _oracle_as_bool(value):
+    if isinstance(value, bool):
+        return value
+
+    if value is None:
+        return False
+
+    if isinstance(value, str):
+        return value.strip().lower() in {"true", "1", "yes", "y", "on", "complete", "completed"}
+
+    return bool(value)
+
+
+def _oracle_percent(completed, total):
+    if total <= 0:
+        return 0
+
+    return round((completed / total) * 100, 1)
+
+
+def _oracle_period(hour):
+    if hour < 6:
+        return "late night"
+    if hour < 12:
+        return "morning"
+    if hour < 17:
+        return "afternoon"
+    if hour < 21:
+        return "evening"
+    return "night"
+
+
+def _oracle_detect_archetype(challenge):
+    raw = _oracle_get(
+        challenge,
+        "mindset_type",
+        "mode",
+        "archetype",
+        "character_type",
+        "challenge_type",
+        "goal",
+        default="Sage",
+    )
+
+    raw_text = str(raw).strip().lower()
+
+    if "demon" in raw_text or "chaos" in raw_text or "intense" in raw_text:
+        return "Demon"
+
+    if "warrior" in raw_text or "action" in raw_text or "discipline" in raw_text:
+        return "Warrior"
+
+    return "Sage"
+
+
+def _oracle_detect_goal(challenge):
+    goal = _oracle_get(
+        challenge,
+        "challenge_type",
+        "goal",
+        "name",
+        "title",
+        default="daily growth",
+    )
+
+    return str(goal).replace("_", " ").title()
+
+
+def _oracle_detect_target(challenge, archetype):
+    difficulty = _oracle_get(challenge, "difficulty", "tier", "challenge_level", default=None)
+
+    if difficulty:
+        target = ORACLE_DIFFICULTY_TARGETS.get(str(difficulty).strip().lower())
+
+        if target is not None:
+            return target
+
+    archetype_key = archetype.lower()
+
+    return ORACLE_ARCHETYPES.get(archetype_key, ORACLE_ARCHETYPES["sage"])["fallback_target"]
+
+
+def _oracle_status(completion_percentage, target, completed, total, hp):
+    if total == 0:
+        return "empty"
+
+    if completed == total:
+        return "complete"
+
+    if completion_percentage >= target:
+        return "on_track"
+
+    if hp <= 30 or completion_percentage < max(15, target * 0.35):
+        return "critical"
+
+    return "at_risk"
+
+
+def _oracle_task_title(task):
+    title = _oracle_get(task, "title", "name", "description", default="Unnamed task")
+
+    return str(title).strip() or "Unnamed task"
+
+
+def _oracle_task_completed(task):
+    return _oracle_as_bool(
+        _oracle_get(task, "completed", "done", "is_complete", "is_done", default=False)
+    )
+
+
+def _oracle_rank_remaining_tasks(tasks):
+    remaining = []
+
+    for task in tasks:
+        if not _oracle_task_completed(task):
+            remaining.append(_oracle_task_title(task))
+
+    return remaining[:3]
+
+
+def _oracle_build_summary(archetype, goal, completed, total, pct, target, hp, max_hp, streak, level, period):
+    if total == 0:
+        return (
+            f"The {archetype} has no quests to read yet. Add tasks to begin today’s {goal.lower()} run."
+        )
+
+    return (
+        f"The {archetype} reads your {period}: {completed}/{total} quests complete "
+        f"({pct}%). Your target is {target}%, HP is {hp}/{max_hp}, "
+        f"streak is {streak}, and level is {level}."
+    )
+
+
+def _oracle_build_recommendation(archetype, status, target, pct, remaining_tasks):
+    if status == "empty":
+        return "Add 3 clear quests for today so the Oracle can guide your run."
+
+    if status == "complete":
+        return "Your daily board is cleared. Do not overload the day; plan tomorrow with intention."
+
+    if status == "on_track":
+        if remaining_tasks:
+            return f"You are above target. Finish “{remaining_tasks[0]}” next to secure the day cleanly."
+        return "You are above target. Keep the pace steady and avoid adding unnecessary noise."
+
+    if status == "critical":
+        if archetype == "Demon":
+            return "You are far below standard. Pick the hardest remaining quest and attack it now."
+        if archetype == "Warrior":
+            return "The day is slipping. Start one remaining quest immediately and rebuild momentum."
+        return "Focus is fading. Choose one small quest and complete it before thinking about the rest."
+
+    if remaining_tasks:
+        return f"You are below the {target}% target. Complete “{remaining_tasks[0]}” to move back toward safety."
+
+    return f"You are below the {target}% target. Complete one task now to protect HP and streak."
+
+
+def _oracle_build_next_actions(status, archetype, remaining_tasks, pct, target, period):
+    if status == "complete":
+        return [
+            "Log one reflection about what worked today.",
+            "Prepare tomorrow’s first quest before closing the app.",
+            "Stop adding extra tasks just to chase numbers.",
+        ]
+
+    if status == "empty":
+        return [
+            "Add one health quest.",
+            "Add one learning or work quest.",
+            "Add one reflection or social quest.",
+        ]
+
+    chosen = remaining_tasks[:3]
+
+    while len(chosen) < 3:
+        if len(chosen) == 0:
+            chosen.append("Complete the smallest remaining quest first.")
+        elif len(chosen) == 1:
+            chosen.append(f"Push completion from {pct}% closer to the {target}% target.")
+        else:
+            chosen.append(f"Review progress again before the end of the {period}.")
+
+    if archetype == "Demon" and status in {"critical", "at_risk"}:
+        chosen[0] = f"Attack this first: {chosen[0]}"
+
+    if archetype == "Warrior" and status in {"critical", "at_risk"}:
+        chosen[0] = f"Start immediately: {chosen[0]}"
+
+    if archetype == "Sage" and status in {"critical", "at_risk"}:
+        chosen[0] = f"Choose calmly and finish: {chosen[0]}"
+
+    return chosen[:3]
+
+
+def _oracle_confidence(total, completed, challenge, progress):
+    score = 50
+
+    if total > 0:
+        score += 20
+
+    if completed > 0:
+        score += 10
+
+    if challenge is not None:
+        score += 10
+
+    if progress is not None:
+        score += 10
+
+    return min(score, 100)
+
+
+def build_smart_coach_analysis(user, tasks=None, challenge=None, progress=None):
+    """Build a deterministic AI-style daily coach analysis.
+
+    This is intentionally not an external LLM call. It behaves like a mini AI
+    coach by combining real app signals into a structured recommendation.
+    """
+    from datetime import datetime
+
+    task_list = list(tasks or [])
+
+    if progress is None:
+        progress = _oracle_get(user, "progress", default=None)
+
+    if challenge is None:
+        try:
+            latest_challenge = getattr(user, "latest_challenge", None)
+
+            if callable(latest_challenge):
+                challenge = latest_challenge()
+            else:
+                challenge = latest_challenge
+
+        except Exception:
+            challenge = None
+
+    now = datetime.now()
+    period = _oracle_period(now.hour)
+
+    archetype = _oracle_detect_archetype(challenge)
+    goal = _oracle_detect_goal(challenge)
+    target = _oracle_detect_target(challenge, archetype)
+
+    completed = sum(1 for task in task_list if _oracle_task_completed(task))
+    total = len(task_list)
+    pct = _oracle_percent(completed, total)
+
+    hp = _oracle_as_int(_oracle_get(progress, "hp", default=_oracle_get(user, "hp", default=100)), 100)
+    max_hp = _oracle_as_int(_oracle_get(progress, "max_hp", default=_oracle_get(user, "max_hp", default=100)), 100)
+    xp = _oracle_as_int(_oracle_get(progress, "xp", default=_oracle_get(user, "xp", default=0)), 0)
+    level = _oracle_as_int(_oracle_get(progress, "level", default=_oracle_get(user, "level", default=1)), 1)
+    streak = _oracle_as_int(_oracle_get(progress, "streak", default=_oracle_get(user, "streak", default=0)), 0)
+
+    hp = max(0, hp)
+    max_hp = max(1, max_hp)
+
+    status = _oracle_status(pct, target, completed, total, hp)
+    remaining_tasks = _oracle_rank_remaining_tasks(task_list)
+
+    title_map = {
+        "Sage": "HabitWise Oracle: Sage Reading",
+        "Warrior": "HabitWise Oracle: Warrior Briefing",
+        "Demon": "HabitWise Oracle: Demon Audit",
+    }
+
+    title = title_map.get(archetype, "HabitWise Oracle")
+    lore = ORACLE_LORE_LINES.get(archetype, ORACLE_LORE_LINES["Sage"]).get(status)
+
+    if lore is None:
+        lore = ORACLE_LORE_LINES.get(archetype, ORACLE_LORE_LINES["Sage"])["on_track"]
+
+    summary = _oracle_build_summary(
+        archetype=archetype,
+        goal=goal,
+        completed=completed,
+        total=total,
+        pct=pct,
+        target=target,
+        hp=hp,
+        max_hp=max_hp,
+        streak=streak,
+        level=level,
+        period=period,
+    )
+
+    recommendation = _oracle_build_recommendation(
+        archetype=archetype,
+        status=status,
+        target=target,
+        pct=pct,
+        remaining_tasks=remaining_tasks,
+    )
+
+    next_actions = _oracle_build_next_actions(
+        status=status,
+        archetype=archetype,
+        remaining_tasks=remaining_tasks,
+        pct=pct,
+        target=target,
+        period=period,
+    )
+
+    confidence = _oracle_confidence(total, completed, challenge, progress)
+
+    return {
+        "title": title,
+        "archetype": archetype,
+        "goal": goal,
+        "status": status,
+        "summary": summary,
+        "lore": lore,
+        "recommendation": recommendation,
+        "next_actions": next_actions,
+        "tone_class": archetype.lower(),
+        "completed": completed,
+        "total": total,
+        "pct": pct,
+        "target": target,
+        "hp": hp,
+        "max_hp": max_hp,
+        "xp": xp,
+        "level": level,
+        "streak": streak,
+        "period": period,
+        "confidence": confidence,
+        "remaining_tasks": remaining_tasks,
+    }
+
+# ---------------------------------------------------------------------------
+# Starter task seeding for first-time users
+# ---------------------------------------------------------------------------
+
 DEFAULT_STARTER_TASKS = [
     {
         "title": "Walk 10,000 steps",
-        "description": "Complete a walk or active movement goal for the day.",
         "stat_category": "VIT",
     },
     {
         "title": "Read one page of a book",
-        "description": "Read at least one page to build a small learning habit.",
         "stat_category": "INT",
     },
     {
         "title": "Drink enough water",
-        "description": "Stay hydrated and track your basic wellness routine.",
         "stat_category": "VIT",
     },
     {
         "title": "Plan tomorrow's top 3 tasks",
-        "description": "Write down three important tasks for tomorrow.",
         "stat_category": "INT",
     },
     {
         "title": "Complete a 10 minute tidy-up",
-        "description": "Clean or organise one small area around you.",
         "stat_category": "STR",
     },
     {
         "title": "Message one friend or family member",
-        "description": "Keep your social connection active today.",
         "stat_category": "CHA",
     },
     {
         "title": "Do a 5 minute reflection",
-        "description": "Think about what went well and what can improve.",
         "stat_category": "SPI",
     },
     {
         "title": "Avoid one distraction session",
-        "description": "Skip one unnecessary scroll or distraction block.",
         "stat_category": "SPI",
     },
 ]
 
 
-def _model_has_column(model, column_name):
+def _starter_model_has_column(model, column_name):
     return column_name in model.__table__.columns
 
 
-def _set_model_value(instance, field_name, value):
-    if _model_has_column(instance.__class__, field_name):
+def _starter_set_model_value(instance, field_name, value):
+    if _starter_model_has_column(instance.__class__, field_name):
         setattr(instance, field_name, value)
 
 
 def seed_default_tasks_for_user(user, task_date=None, skip_when_testing=True):
-    """Create starter tasks for a new user when they first open the dashboard.
+    """Create starter tasks for a first-time user.
 
-    The function is idempotent. It only creates starter tasks when the user has
-    no tasks for the selected date. In automated tests it returns without
-    seeding unless skip_when_testing=False is passed, so old tests that expect
-    an empty task list stay stable.
+    The function is idempotent. It creates the starter list only when the user
+    has no tasks for the selected day. The testing guard prevents old route
+    tests from changing behaviour unexpectedly, while direct unit tests can
+    still exercise this helper with skip_when_testing=False.
     """
     if user is None or getattr(user, "id", None) is None:
         raise ValueError("A valid user is required to seed starter tasks.")
@@ -653,7 +1058,7 @@ def seed_default_tasks_for_user(user, task_date=None, skip_when_testing=True):
 
     query = Task.query.filter_by(user_id=user.id)
 
-    if _model_has_column(Task, "task_date"):
+    if _starter_model_has_column(Task, "task_date"):
         query = query.filter_by(task_date=task_date)
 
     if query.count() > 0:
@@ -664,12 +1069,11 @@ def seed_default_tasks_for_user(user, task_date=None, skip_when_testing=True):
     for task_data in DEFAULT_STARTER_TASKS:
         task = Task()
 
-        _set_model_value(task, "user_id", user.id)
-        _set_model_value(task, "title", task_data["title"])
-        _set_model_value(task, "description", task_data["description"])
-        _set_model_value(task, "stat_category", task_data["stat_category"])
-        _set_model_value(task, "completed", False)
-        _set_model_value(task, "task_date", task_date)
+        _starter_set_model_value(task, "user_id", user.id)
+        _starter_set_model_value(task, "title", task_data["title"])
+        _starter_set_model_value(task, "stat_category", task_data["stat_category"])
+        _starter_set_model_value(task, "completed", False)
+        _starter_set_model_value(task, "task_date", task_date)
 
         db.session.add(task)
         created_tasks.append(task)

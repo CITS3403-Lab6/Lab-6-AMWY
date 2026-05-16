@@ -3,12 +3,7 @@ from datetime import date
 from werkzeug.security import generate_password_hash
 
 from app import create_app, db
-from app.models import Challenge, Progress, Task, User
-
-try:
-    from app.models import AccountabilityPartner
-except ImportError:
-    AccountabilityPartner = None
+from app.models import AccountabilityPartner, Challenge, Progress, Task, User
 
 
 DEMO_PASSWORD = "Password123!"
@@ -16,7 +11,6 @@ DEMO_PASSWORD = "Password123!"
 DEMO_USERS = [
     {
         "username": "demo_public",
-        "display_name": "Jack Wilson",
         "email": "demo_public@example.com",
         "is_public": True,
         "hp": 92,
@@ -38,7 +32,6 @@ DEMO_USERS = [
     },
     {
         "username": "demo_private",
-        "display_name": "Sophie Taylor",
         "email": "demo_private@example.com",
         "is_public": False,
         "hp": 64,
@@ -57,7 +50,6 @@ DEMO_USERS = [
     },
     {
         "username": "will_campbell",
-        "display_name": "Will Campbell",
         "email": "will.campbell@example.com",
         "is_public": True,
         "hp": 78,
@@ -77,7 +69,6 @@ DEMO_USERS = [
     },
     {
         "username": "emily_clarke",
-        "display_name": "Emily Clarke",
         "email": "emily.clarke@example.com",
         "is_public": True,
         "hp": 100,
@@ -98,7 +89,6 @@ DEMO_USERS = [
     },
     {
         "username": "noah_nguyen",
-        "display_name": "Noah Nguyen",
         "email": "noah.nguyen@example.com",
         "is_public": True,
         "hp": 88,
@@ -118,7 +108,6 @@ DEMO_USERS = [
     },
     {
         "username": "mia_anderson",
-        "display_name": "Mia Anderson",
         "email": "mia.anderson@example.com",
         "is_public": True,
         "hp": 95,
@@ -223,7 +212,6 @@ def create_demo_user(user_data):
 
     set_user_password(user, DEMO_PASSWORD)
     set_if_supported(user, "is_public", user_data["is_public"])
-    set_if_supported(user, "display_name", user_data["display_name"])
 
     db.session.add(user)
     db.session.flush()
@@ -284,8 +272,7 @@ def main():
         print("")
         print("Demo login details:")
         for user in users:
-            label = getattr(user, "display_name", None) or user.username
-            print(f"- {label}: {user.email} / {DEMO_PASSWORD}")
+            print(f"- {user.username}: {user.email} / {DEMO_PASSWORD}")
 
 
 if __name__ == "__main__":
