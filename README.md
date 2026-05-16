@@ -1,193 +1,111 @@
 # HabitWise - Mindset-Based Habit Tracking
 
-HabitWise is a gamified habit-tracking web application that combines personal development with community accountability. Users select mindset archetypes (Sage, Warrior, or Demon) to frame their daily challenges, earn XP and level up, and optionally share their progress with a public community.
+HabitWise is a gamified habit-tracking web application that helps users build discipline through daily tasks, HP/XP progression, mindset-based challenges, reflections, and community accountability.
 
-## MVP Features
+Users can create an account, select a mindset mode, manage daily tasks, earn XP, protect their HP, build streaks, reveal a character through level progress, and optionally share their progress with public community members.
 
-### Core Features
-- **User Authentication**: Secure signup and login with password hashing and CSRF protection
-- **Mindset-Based Challenges**: Select from three challenge types (Sage, Warrior, Demon) that align with different personas and goals
-- **Daily Task Management**: Create and track daily tasks with completion status
-- **Progress Tracking**: HP and XP system with levels and streaks
-- **Dashboard**: Personalized view of current challenge, tasks, progress, and stats
+---
 
-### Community & Accountability
-- **Public Profiles**: Optional public profile sharing to build accountability
-- **Community Discovery**: Browse other users' public profiles and achievements
-- **Accountability Partners**: Connect with other users for mutual support
-- **Reflection Mechanism**: Write daily reflections on progress toward goals
+## Group Members
 
-### Privacy & Security
-- **Privacy Controls**: Toggle public/private profile visibility
-- **CSRF Protection**: All forms protected against cross-site request forgery
-- **Secure Password Storage**: Passwords hashed using Werkzeug security
+| UWA ID   | Name         | GitHub Username |
+|--------  |------        |-----------------|
+| 24261709 | Yuvraj Singh | yuvraj-sk |
+| 24160091 | Advay Katoch | kotchadon |
+| 24830144 | Woojin Song  | wjin2006 |
+| 24239793 | Michael Kartika | mrdudman |
 
-### Gamification
-- **HP/XP System**: Gain XP from tasks, lose HP from missed daily challenges
-- **Streaks**: Track consecutive days of challenge engagement
-- **Levels**: Progression based on accumulated XP
-- **Character Archetypes**: Three mindset types with distinct mechanics
 
-## Quick Start
 
-### Prerequisites
-- Python 3.9 or higher
-- pip (Python package manager)
-- Git
+---
 
-### Installation
+## Main Features
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd Lab-6-AMWY
-   ```
+### Authentication
+- User signup, login, and logout
+- Passwords stored securely using hashed passwords
+- Protected dashboard, settings, and community pages
 
-2. **Create a virtual environment** (optional but recommended)
-   ```bash
-   python -m venv venv
-   source venv/Scripts/activate  # On Windows
-   # or
-   source venv/bin/activate       # On macOS/Linux
-   ```
+### Dashboard
+- Add and complete daily tasks
+- Earn XP when tasks are completed
+- Level up based on accumulated XP
+- View HP, XP, level, streak, daily target, and completion percentage
+- View weekly progress calculated from task completion
+- Character reveal progress based on user level
+- Save daily reflections
+- View recent previous reflections
 
-3. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
+### Mindset Challenge System
+Users can choose one of three mindset modes:
 
-4. **Initialize the database** (creates tables and loads demo users)
-   ```bash
-   python init_db.py
-   ```
+| Mode | Daily Target | Description |
+|------|--------------|-------------|
+| Sage | 50% | Balanced and sustainable |
+| Warrior | 70% | Disciplined and consistent |
+| Demon | 90% | High-intensity challenge mode |
 
-5. **Run the application**
-   ```bash
-   python run.py
-   ```
+The selected mode controls the daily completion percentage required to avoid HP loss.
 
-   The application will be available at `http://localhost:5000`
+### HP, XP, Level, and Streaks
+- Completing tasks gives XP
+- XP increases user level
+- Character reveal progresses with level
+- Evaluating the day compares task completion against the selected daily target
+- Meeting the daily target increases streak
+- Missing the daily target reduces HP and resets streak
 
-### Useful Commands
+### Community and Accountability
+- Users can make their profile public or private
+- Public users appear in the community page
+- Private users are hidden from community discovery
+- Users can add/remove public users as accountability partners
+- Partner cards show progress information such as streak, level, XP, HP, and current mode
 
-**Reset the database** (clears all data and reinitializes with demo users)
-```bash
-python init_db.py
-```
+### Privacy and Security
+- Public/private profile visibility setting
+- CSRF protection on POST forms
+- Secure password hashing
+- Flask configuration separated from application logic
 
-**Run the test suite** (all tests)
-```bash
-pytest
-```
-
-**Run specific test file**
-```bash
-pytest tests/test_authentication_flow.py
-```
-
-**Run tests with verbose output**
-```bash
-pytest -v
-```
-
-**Run tests and generate coverage report**
-```bash
-pytest --cov=app
-```
-
-## Demo Accounts
-
-The database initializes with three demo accounts for testing. Use these credentials to explore the application:
-
-| Username | Email | Password | Profile Type | Challenge |
-|----------|-------|----------|--------------|-----------|
-| `demo_public` | demo_public@example.com | `Password123!` | Public | Study (Medium) |
-| `demo_private` | demo_private@example.com | `Password123!` | Private | Fitness (Easy) |
-| `demo_partner` | demo_partner@example.com | `Password123!` | Public | Creativity (Hard) |
-
-**Note**: These accounts are recreated when you run `python init_db.py`, so any modifications will be lost.
-
-## Project Structure
-
-```
-├── app/                          # Application package
-│   ├── __init__.py              # App factory and extensions
-│   ├── config.py                # Configuration settings
-│   ├── constants.py             # Application constants
-│   ├── forms.py                 # WTForms forms
-│   ├── models.py                # SQLAlchemy models
-│   ├── routes.py                # Flask route handlers
-│   ├── services.py              # Business logic
-│   ├── templates/               # HTML templates
-│   └── instance/                # Instance-specific files (DB)
-├── static/                       # Static assets
-│   ├── css/                      # Stylesheets
-│   ├── js/                       # JavaScript files
-│   └── img/                      # Images and sprites
-├── tests/                        # Test suite
-├── init_db.py                    # Database initialization script
-├── run.py                        # Application entry point
-├── requirements.txt              # Python dependencies
-├── pytest.ini                    # Pytest configuration
-└── README.md                     # This file
-```
+---
 
 ## Technology Stack
 
-- **Backend**: Flask 2.3.3, SQLAlchemy 3.0.5
-- **Authentication**: Flask-Login 0.6.3
-- **Forms**: Flask-WTF 1.3.0, WTForms 3.0.1
-- **Database**: SQLite (configured in Flask-SQLAlchemy)
-- **Testing**: Pytest 7.4.0, Selenium 4.11.2
-- **Security**: Werkzeug 2.3.7, CSRF protection
+- HTML
+- CSS
+- JavaScript
+- Flask
+- Jinja templates
+- Flask-Login
+- Flask-WTF / WTForms
+- Flask-SQLAlchemy
+- SQLite
+- Pytest
+- Selenium
 
-## Troubleshooting
+---
 
-### Database Issues
-If you encounter database errors, reset the database:
-```bash
-rm instance/habitwise.db  # Remove old database
-python init_db.py         # Reinitialize with fresh data
-```
+## Project Structure
 
-### Port Already in Use
-If port 5000 is already in use, modify [app/run.py](app/run.py) or set the Flask port:
-```bash
-set FLASK_ENV=development  # Windows
-set FLASK_PORT=5001
-python run.py
-```
-
-### Missing Dependencies
-Reinstall all dependencies:
-```bash
-pip install -r requirements.txt --force-reinstall
-```
-
-## Development Notes
-
-- The application runs in debug mode by default (enables auto-reload and interactive debugger)
-- Demo data is created automatically when `init_db.py` is run
-- All database files are stored in the `instance/` directory
-- Static files are served from the `static/` directory
-
-## Testing
-
-The test suite covers:
-- Authentication and security (CSRF protection, password hashing)
-- User model functionality
-- Route handlers and views
-- Community features (accountability partners, public profiles)
-- Privacy settings
-- Task and progress mechanics
-- Error handling
-
-Run the full test suite:
-```bash
-pytest
-```
-
-For detailed test results:
-```bash
-pytest -v --tb=short
-```
+```text
+Lab-6-AMWY/
+├── app/
+│   ├── __init__.py          # Flask app factory and extensions
+│   ├── config.py            # App configuration
+│   ├── constants.py         # Shared constants and game rules
+│   ├── forms.py             # Flask-WTF forms
+│   ├── models.py            # SQLAlchemy database models
+│   ├── routes.py            # Flask route handlers
+│   ├── services.py          # Business logic
+│   └── templates/           # Jinja HTML templates
+├── static/
+│   ├── css/                 # CSS files
+│   ├── js/                  # JavaScript files
+│   └── img/                 # Images and visual assets
+├── tests/                   # Unit and Selenium tests
+├── init_db.py               # Database reset and demo data script
+├── run.py                   # Application runner
+├── requirements.txt         # Python dependencies
+├── pytest.ini               # Pytest configuration
+└── README.md
