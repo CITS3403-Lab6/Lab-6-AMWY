@@ -551,3 +551,37 @@ body {
     align-items: flex-start;
   }
 }
+
+.task-list,
+.tasks-list,
+.daily-task-list,
+.dashboard-task-list,
+.quest-list,
+#task-list,
+[data-task-list] {
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 8px;
+  scrollbar-width: thin;
+}
+
+.task-list::-webkit-scrollbar,
+.tasks-list::-webkit-scrollbar,
+.daily-task-list::-webkit-scrollbar,
+.dashboard-task-list::-webkit-scrollbar,
+.quest-list::-webkit-scrollbar,
+#task-list::-webkit-scrollbar,
+[data-task-list]::-webkit-scrollbar {
+  width: 8px;
+}
+
+.task-list::-webkit-scrollbar-thumb,
+.tasks-list::-webkit-scrollbar-thumb,
+.daily-task-list::-webkit-scrollbar-thumb,
+.dashboard-task-list::-webkit-scrollbar-thumb,
+.quest-list::-webkit-scrollbar-thumb,
+#task-list::-webkit-scrollbar-thumb,
+[data-task-list]::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+}
+

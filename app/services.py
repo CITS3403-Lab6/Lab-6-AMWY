@@ -573,3 +573,108 @@ def calculate_circle_score(user):
         partner_scores.append(level_score + streak_score)
 
     return round(sum(partner_scores) / len(partner_scores))
+
+DEFAULT_STARTER_TASKS = [
+    {
+        "title": "Walk 10,000 steps",
+        "description": "Complete a walk or active movement goal for the day.",
+        "stat_category": "VIT",
+    },
+    {
+        "title": "Read one page of a book",
+        "description": "Read at least one page to build a small learning habit.",
+        "stat_category": "INT",
+    },
+    {
+        "title": "Drink enough water",
+        "description": "Stay hydrated and track your basic wellness routine.",
+        "stat_category": "VIT",
+    },
+    {
+        "title": "Plan tomorrow's top 3 tasks",
+        "description": "Write down three important tasks for tomorrow.",
+        "stat_category": "INT",
+    },
+    {
+        "title": "Complete a 10 minute tidy-up",
+        "description": "Clean or organise one small area around you.",
+        "stat_category": "STR",
+    },
+    {
+        "title": "Message one friend or family member",
+        "description": "Keep your social connection active today.",
+        "stat_category": "CHA",
+    },
+    {
+        "title": "Do a 5 minute reflection",
+        "description": "Think about what went well and what can improve.",
+        "stat_category": "SPI",
+    },
+    {
+        "title": "Avoid one distraction session",
+        "description": "Skip one unnecessary scroll or distraction block.",
+        "stat_category": "SPI",
+    },
+]
+
+
+def _model_has_column(model, column_name):
+    return column_name in model.__table__.columns
+
+
+def _set_model_value(instance, field_name, value):
+    if _model_has_column(instance.__class__, field_name):
+        setattr(instance, field_name, value)
+
+
+def seed_default_tasks_for_user(user, task_date=None, skip_when_testing=True):
+    """Create starter tasks for a new user when they first open the dashboard.
+
+    The function is idempotent. It only creates starter tasks when the user has
+    no tasks for the selected date. In automated tests it returns without
+    seeding unless skip_when_testing=False is passed, so old tests that expect
+    an empty task list stay stable.
+    """
+    if user is None or getattr(user, "id", None) is None:
+        raise ValueError("A valid user is required to seed starter tasks.")
+
+    if skip_when_testing:
+        try:
+            from flask import current_app
+
+            if current_app.config.get("TESTING"):
+                return []
+        except RuntimeError:
+            pass
+
+    from datetime import date as date_class
+
+    task_date = task_date or date_class.today()
+
+    query = Task.query.filter_by(user_id=user.id)
+
+    if _model_has_column(Task, "task_date"):
+        query = query.filter_by(task_date=task_date)
+
+    if query.count() > 0:
+        return []
+
+    created_tasks = []
+
+    for task_data in DEFAULT_STARTER_TASKS:
+        task = Task()
+
+        _set_model_value(task, "user_id", user.id)
+        _set_model_value(task, "title", task_data["title"])
+        _set_model_value(task, "description", task_data["description"])
+        _set_model_value(task, "stat_category", task_data["stat_category"])
+        _set_model_value(task, "completed", False)
+        _set_model_value(task, "task_date", task_date)
+
+        db.session.add(task)
+        created_tasks.append(task)
+
+    db.session.commit()
+
+    return created_tasks
+

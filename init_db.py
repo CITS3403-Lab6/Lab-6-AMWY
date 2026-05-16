@@ -5,63 +5,145 @@ from werkzeug.security import generate_password_hash
 from app import create_app, db
 from app.models import Challenge, Progress, Task, User
 
+try:
+    from app.models import AccountabilityPartner
+except ImportError:
+    AccountabilityPartner = None
+
 
 DEMO_PASSWORD = "Password123!"
 
 DEMO_USERS = [
     {
         "username": "demo_public",
+        "display_name": "Jack Wilson",
         "email": "demo_public@example.com",
         "is_public": True,
-        "hp": 90,
+        "hp": 92,
         "max_hp": 100,
-        "xp": 250,
-        "level": 3,
-        "streak": 5,
+        "xp": 840,
+        "level": 8,
+        "streak": 12,
         "challenge_type": "study",
         "difficulty": "medium",
         "mindset_type": "Sage",
         "tasks": [
-            ("Complete one focused study session", "INT", True),
-            ("Review HabitWise progress", "VIT", True),
-            ("Plan tomorrow's tasks", "SPI", False),
+            ("Review lecture notes", "INT", True),
+            ("Read one page of a book", "INT", True),
+            ("Plan tomorrow's top 3 tasks", "SPI", True),
+            ("Avoid one distraction session", "SPI", False),
+            ("Drink enough water", "VIT", True),
+            ("Message one mate", "CHA", False),
         ],
     },
     {
         "username": "demo_private",
+        "display_name": "Sophie Taylor",
         "email": "demo_private@example.com",
         "is_public": False,
-        "hp": 75,
+        "hp": 64,
         "max_hp": 100,
-        "xp": 120,
-        "level": 2,
-        "streak": 2,
+        "xp": 310,
+        "level": 4,
+        "streak": 3,
+        "challenge_type": "meditation",
+        "difficulty": "easy",
+        "mindset_type": "Sage",
+        "tasks": [
+            ("Do a 5 minute reflection", "SPI", True),
+            ("Meditate for five minutes", "SPI", False),
+            ("Plan tomorrow's top 3 tasks", "INT", True),
+        ],
+    },
+    {
+        "username": "will_campbell",
+        "display_name": "Will Campbell",
+        "email": "will.campbell@example.com",
+        "is_public": True,
+        "hp": 78,
+        "max_hp": 100,
+        "xp": 430,
+        "level": 5,
+        "streak": 6,
         "challenge_type": "fitness",
         "difficulty": "easy",
         "mindset_type": "Warrior",
         "tasks": [
-            ("Go for a short walk", "VIT", True),
-            ("Stretch for ten minutes", "VIT", False),
+            ("Walk 10,000 steps", "VIT", True),
+            ("Stretch for ten minutes", "VIT", True),
+            ("Prepare a healthy meal", "STR", False),
+            ("Complete a 10 minute tidy-up", "STR", True),
         ],
     },
     {
-        "username": "demo_partner",
-        "email": "demo_partner@example.com",
+        "username": "emily_clarke",
+        "display_name": "Emily Clarke",
+        "email": "emily.clarke@example.com",
         "is_public": True,
         "hp": 100,
         "max_hp": 100,
-        "xp": 520,
-        "level": 6,
-        "streak": 9,
+        "xp": 1250,
+        "level": 13,
+        "streak": 21,
         "challenge_type": "creativity",
         "difficulty": "hard",
         "mindset_type": "Demon",
         "tasks": [
-            ("Work on a creative project", "CHA", True),
+            ("Work on creative project", "CHA", True),
             ("Complete daily review", "SPI", True),
-            ("Share progress publicly", "CHA", True),
+            ("Share progress update", "CHA", True),
+            ("Sketch one idea", "INT", True),
+            ("Avoid one distraction session", "SPI", True),
         ],
     },
+    {
+        "username": "noah_nguyen",
+        "display_name": "Noah Nguyen",
+        "email": "noah.nguyen@example.com",
+        "is_public": True,
+        "hp": 88,
+        "max_hp": 100,
+        "xp": 670,
+        "level": 7,
+        "streak": 9,
+        "challenge_type": "nutrition",
+        "difficulty": "medium",
+        "mindset_type": "Sage",
+        "tasks": [
+            ("Drink enough water", "VIT", True),
+            ("Prepare a balanced meal", "VIT", True),
+            ("Read one page of a book", "INT", False),
+            ("Do a 5 minute reflection", "SPI", True),
+        ],
+    },
+    {
+        "username": "mia_anderson",
+        "display_name": "Mia Anderson",
+        "email": "mia.anderson@example.com",
+        "is_public": True,
+        "hp": 95,
+        "max_hp": 100,
+        "xp": 980,
+        "level": 10,
+        "streak": 15,
+        "challenge_type": "study",
+        "difficulty": "hard",
+        "mindset_type": "Warrior",
+        "tasks": [
+            ("Finish assignment draft", "INT", True),
+            ("Review feedback notes", "INT", True),
+            ("Message group project team", "CHA", True),
+            ("Take a short walk", "VIT", False),
+        ],
+    },
+]
+
+
+PARTNER_LINKS = [
+    ("demo_public", "will_campbell"),
+    ("demo_public", "emily_clarke"),
+    ("demo_public", "noah_nguyen"),
+    ("demo_public", "mia_anderson"),
 ]
 
 
@@ -88,26 +170,18 @@ def set_user_password(user, password):
 def create_progress(user, user_data):
     progress = Progress()
 
-    if has_column(Progress, "user_id"):
-        progress.user_id = user.id
-    elif hasattr(progress, "user"):
-        progress.user = user
+    set_if_supported(progress, "user_id", user.id)
+    set_if_supported(progress, "hp", user_data["hp"])
+    set_if_supported(progress, "max_hp", user_data["max_hp"])
+    set_if_supported(progress, "xp", user_data["xp"])
+    set_if_supported(progress, "level", user_data["level"])
+    set_if_supported(progress, "streak", user_data["streak"])
 
-    defaults = {
-        "hp": user_data["hp"],
-        "max_hp": user_data["max_hp"],
-        "xp": user_data["xp"],
-        "level": user_data["level"],
-        "streak": user_data["streak"],
-        "strength_xp": 20,
-        "intelligence_xp": 40,
-        "spirituality_xp": 15,
-        "vitality_xp": 25,
-        "charisma_xp": 30,
-    }
-
-    for field, value in defaults.items():
-        set_if_supported(progress, field, value)
+    set_if_supported(progress, "strength_xp", 90)
+    set_if_supported(progress, "intelligence_xp", 140)
+    set_if_supported(progress, "spirituality_xp", 110)
+    set_if_supported(progress, "vitality_xp", 130)
+    set_if_supported(progress, "charisma_xp", 100)
 
     db.session.add(progress)
     return progress
@@ -116,9 +190,7 @@ def create_progress(user, user_data):
 def create_challenge(user, user_data):
     challenge = Challenge()
 
-    if has_column(Challenge, "user_id"):
-        challenge.user_id = user.id
-
+    set_if_supported(challenge, "user_id", user.id)
     set_if_supported(challenge, "challenge_type", user_data["challenge_type"])
     set_if_supported(challenge, "difficulty", user_data["difficulty"])
     set_if_supported(challenge, "mindset_type", user_data["mindset_type"])
@@ -133,9 +205,7 @@ def create_tasks(user, user_data):
     for title, stat_category, completed in user_data["tasks"]:
         task = Task()
 
-        if has_column(Task, "user_id"):
-            task.user_id = user.id
-
+        set_if_supported(task, "user_id", user.id)
         set_if_supported(task, "title", title)
         set_if_supported(task, "description", title)
         set_if_supported(task, "stat_category", stat_category)
@@ -153,6 +223,7 @@ def create_demo_user(user_data):
 
     set_user_password(user, DEMO_PASSWORD)
     set_if_supported(user, "is_public", user_data["is_public"])
+    set_if_supported(user, "display_name", user_data["display_name"])
 
     db.session.add(user)
     db.session.flush()
@@ -164,26 +235,43 @@ def create_demo_user(user_data):
     return user
 
 
-def seed_demo_data(reset_database=True):
-    """Create clean demo data for final testing.
+def create_partner_links(users_by_username):
+    if AccountabilityPartner is None:
+        return
 
-    reset_database=True intentionally rebuilds the local demo database so stale
-    SQLite schemas from earlier development branches do not break init_db.py.
-    """
+    for user_username, partner_username in PARTNER_LINKS:
+        user = users_by_username.get(user_username)
+        partner = users_by_username.get(partner_username)
+
+        if user is None or partner is None:
+            continue
+
+        link = AccountabilityPartner()
+
+        set_if_supported(link, "user_id", user.id)
+        set_if_supported(link, "partner_id", partner.id)
+
+        db.session.add(link)
+
+
+def seed_demo_data(reset_database=True):
     if reset_database:
         db.drop_all()
         db.create_all()
     else:
         db.create_all()
 
-    created_users = []
+    users_by_username = {}
 
     for user_data in DEMO_USERS:
-        created_users.append(create_demo_user(user_data))
+        user = create_demo_user(user_data)
+        users_by_username[user.username] = user
+
+    create_partner_links(users_by_username)
 
     db.session.commit()
 
-    return created_users
+    return list(users_by_username.values())
 
 
 def main():
@@ -192,11 +280,12 @@ def main():
     with app.app_context():
         users = seed_demo_data(reset_database=True)
 
-        print("Database initialised with demo data.")
+        print("Database initialised with realistic demo data.")
         print("")
         print("Demo login details:")
         for user in users:
-            print(f"- {user.email} / {DEMO_PASSWORD}")
+            label = getattr(user, "display_name", None) or user.username
+            print(f"- {label}: {user.email} / {DEMO_PASSWORD}")
 
 
 if __name__ == "__main__":
