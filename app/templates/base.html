@@ -22,7 +22,25 @@
                     <a href="{{ url_for('main.challenge') }}">Challenge</a>
                     <a href="{{ url_for('main.community') }}">Community</a>
                     <a href="{{ url_for('main.settings') }}">Settings</a>
-                    <span style="color: #9ca3af;">{{ current_user.username }}</span>
+                                        {% set mode = current_user.current_challenge if current_user.current_challenge else "Unknown" %}
+                                        {% set mode_lower = mode | lower %}
+
+                                        {% if mode_lower == "warrior" %}
+                                            {% set icon_file = "img/icons/warrior.png" %}
+                                        {% elif mode_lower == "sage" %}
+                                            {% set icon_file = "img/icons/sage.png" %}
+                                        {% elif mode_lower == "demon" %}
+                                            {% set icon_file = "img/icons/demon.png" %}
+                                        {% else %}
+                                            {% set icon_file = "img/icons/Shadow.png" %}
+                                        {% endif %}
+
+                                                                                {% if mode_lower in ['warrior','sage','demon'] %}
+                                                                                    <img class="nav-avatar" src="{{ url_for('static', filename=icon_file) }}" alt="{{ mode }}">
+                                                                                {% else %}
+                                                                                    <span class="nav-avatar-initials">{{ current_user.username[0] | upper }}</span>
+                                                                                {% endif %}
+                                                                                <span style="color: #9ca3af;">{{ current_user.username }}</span>
                     <a href="{{ url_for('main.logout') }}" style="color: #ef4444;">Logout</a>
                 {% else %}
                     <a href="{{ url_for('main.home') }}">Home</a>
