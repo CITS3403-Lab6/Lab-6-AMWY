@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from app import db
 from app.constants import MAX_TASK_TITLE_LENGTH, TASK_XP_REWARD
 from app.forms import ChallengeForm, LoginForm, ReflectionForm, SignupForm
-from app.models import Challenge, Task, User
+from app.models import Challenge, Reflection, Task, User
 from app.services import (
     add_accountability_partner,
     apply_daily_hp_result,
@@ -137,6 +137,14 @@ def dashboard():
         .all()
     )
 
+    recent_reflections = (
+        Reflection.query
+        .filter_by(user_id=current_user.id)
+        .order_by(Reflection.created_at.desc())
+        .limit(5)
+        .all()
+    )
+
     dashboard_data = build_dashboard_data(current_user)
 
     return render_template(
@@ -147,6 +155,7 @@ def dashboard():
         tasks=tasks,
         progress=progress,
         dashboard_data=dashboard_data,
+        recent_reflections=recent_reflections,
     )
 
 
@@ -263,12 +272,20 @@ def reflection():
 @login_required
 def community():
     """Show public users and the current user's accountability circle."""
-    # Include public users in the leaderboard (including the current user
-    # when they have a public profile) so the UI shows all public profiles.
-    public_users = get_public_users()
-
     partner_cards = get_accountability_partner_cards(current_user)
     circle_score = calculate_circle_score(current_user)
+
+    partner_ids = {
+        partner.get("id")
+        for partner in partner_cards
+        if partner.get("id") is not None
+    }
+
+    public_users = [
+        user
+        for user in get_public_users()
+        if user.id != current_user.id and user.id not in partner_ids
+    ]
 
     return render_template(
         "community.html",
@@ -335,7 +352,11 @@ def evaluate_day():
 
     total_tasks = len(tasks)
     completed_tasks = sum(1 for task in tasks if task.completed)
-    completion_percentage = round((completed_tasks / total_tasks) * 100) if total_tasks else 0
+    completion_percentage = (
+        round((completed_tasks / total_tasks) * 100)
+        if total_tasks
+        else 0
+    )
 
     latest_challenge = current_user.latest_challenge()
 
@@ -378,7 +399,6 @@ def evaluate_day():
         flash("Daily target missed. HP reduced.", "warning")
 
     return redirect(url_for("main.dashboard"))
-
 
 
 @main.route("/community/add-partner", methods=["POST"])

@@ -1,25 +1,33 @@
-{% set dashboard_data = dashboard_data if dashboard_data is defined and dashboard_data else {} %}
+{% set data = dashboard_data if dashboard_data is defined and dashboard_data else {} %}
 
-{% if dashboard_data.progress is defined %}
-  {% set progress_data = dashboard_data.progress %}
-{% elif progress is defined %}
-  {% set progress_data = progress %}
+{% set hp = data.get("hp", 100) %}
+{% set max_hp = data.get("max_hp", 100) %}
+
+{% if max_hp %}
+  {% set hp_percent = ((hp / max_hp) * 100)|round(0) %}
 {% else %}
-  {% set progress_data = namespace(level=1, xp=0, hp=100, max_hp=100, streak=0, completion_percentage=0, difficulty_target=70) %}
+  {% set hp_percent = 0 %}
 {% endif %}
 
-{% if dashboard_data.tasks_today is defined %}
-  {% set tasks_today_data = dashboard_data.tasks_today %}
-{% else %}
-  {% set tasks_today_data = namespace(total=total_tasks|default(0), completed=completed_tasks|default(0), completion_percentage=completion_percentage|default(0)) %}
+{% set level = data.get("level", 1) %}
+{% set xp = data.get("xp", 0) %}
+{% set streak = data.get("streak", 0) %}
+
+{% set total_tasks = data.get("total_tasks", 0) %}
+{% set completed_tasks = data.get("completed_tasks", 0) %}
+{% set completion = data.get("completion_percentage", 0) %}
+
+{% set daily_target = data.get("mindset_target", data.get("difficulty_target", 70)) %}
+{% set character_stage = data.get("character_reveal_stage", 0) %}
+{% set partner_count = data.get("partner_count", 0) %}
+{% set weekly_progress = data.get("weekly_progress", []) %}
+
+{% set challenge_name = data.get("current_challenge", None) %}
+{% if not challenge_name and challenge %}
+  {% set challenge_name = challenge.mindset_type if challenge.mindset_type is defined else "Sage" %}
 {% endif %}
 
-{% if dashboard_data.character is defined %}
-  {% set character_data = dashboard_data.character %}
-{% else %}
-  {% set character_data = namespace(name="Stage 0", stage=0, avatar="hiddenavatar.png") %}
-{% endif %}
-\n<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -29,21 +37,24 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 
   <script>
-    window.CHARACTER_STAGE = {{ dashboard_data.character_reveal_stage }};
-    window.HP_CURRENT = {{ dashboard_data.hp }};
-    window.HP_MAX = {{ dashboard_data.max_hp }};
-    window.COMPLETION_PCT = {{ dashboard_data.completion_percentage }};
+    window.CHARACTER_STAGE = {{ character_stage|int }};
+    window.CHARACTER_REVEAL_PERCENT = {{ data.get("character_reveal_percent", level * 5)|int }};
+    window.HP_CURRENT = {{ hp|int }};
+    window.HP_MAX = {{ max_hp|int }};
+    window.COMPLETION_PCT = {{ completion|int }};
   </script>
+
   <script src="{{ url_for('static', filename='js/dashboard.js') }}" defer></script>
 </head>
-<body>\n
-<div id="compat-dashboard-controls" style="position: absolute; left: 1rem; top: 1rem; z-index: 9999;">
-  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-  <a id="compat-logout-link" href="{{ url_for('main.logout') }}">Logout</a>
-</div>
+
+<body>
+  <div id="compat-dashboard-controls" style="position: absolute; left: -9999px; top: -9999px;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  </div>
 
   <div class="app-shell">
     <header class="header">
@@ -52,11 +63,13 @@
         <h1 class="brand-title">HabitWise</h1>
         <p class="brand-subtitle">Stay disciplined.</p>
       </div>
+
       <nav class="side-nav">
         <a class="nav-item active" href="{{ url_for('main.dashboard') }}">Dashboard</a>
         <a class="nav-item" href="{{ url_for('main.challenge') }}">Challenges</a>
         <a class="nav-item" href="{{ url_for('main.community') }}">Partners</a>
         <a class="nav-item" href="{{ url_for('main.settings') }}">Settings</a>
+        <a id="compat-logout-link" class="nav-item" href="{{ url_for('main.logout') }}">Logout</a>
       </nav>
     </header>
 
@@ -73,51 +86,57 @@
       <section class="welcome-card">
         <div>
           <h2>Welcome back, {{ current_user.username }}</h2>
-          <p>Stay disciplined, finish your daily tasks, and keep your streak alive.</p>
+          <p>Complete today’s tasks, protect your HP, and keep your streak alive.</p>
         </div>
       </section>
 
       <section class="hero-grid">
         <article class="panel character-panel">
           <p class="mini-label">Current Character</p>
+
           <div class="character-box">
             <div class="avatar-reveal-container">
-              <img class="avatar-img"
-                src="{{ url_for('static', filename='/img/avatar/hiddenavatar.png') }}"
-                alt="Character">
+              <img
+                class="avatar-img"
+                src="{{ url_for('static', filename='img/avatar/hiddenavatar.png') }}"
+                alt="Character"
+              >
               <div class="avatar-mask" id="avatar-mask"></div>
             </div>
           </div>
+
           <p class="mini-text" id="avatar-level-text">
-            Stage {{ dashboard_data.character_reveal_stage }} — Keep going!
+            Stage {{ character_stage }} — Level {{ level }}
           </p>
         </article>
 
         <article class="panel hp-level-panel">
           <p class="mini-label">HP</p>
-          <h3 id="hp-value">{{ dashboard_data.hp }} / {{ dashboard_data.max_hp }}</h3>
+          <h3 id="hp-value">{{ hp }} / {{ max_hp }}</h3>
+
           <div class="progress-bar">
-            <div id="hp-fill" class="progress-fill hp-fill"></div>
+            <div id="hp-fill" class="progress-fill hp-fill" style="width: {{ hp_percent }}%;"></div>
           </div>
+
           <p class="mini-label" style="margin-top: 18px;">Level</p>
-          <h3>Level {{ dashboard_data.level }}</h3>
-          <span class="mini-text">
-            {{ challenge.mindset_type if challenge else '—' }}
-          </span>
+          <h3>Level {{ level }}</h3>
+          <span class="mini-text">{{ xp }} XP</span>
         </article>
 
         <article class="panel goal-panel">
           <p class="mini-label">Today's Goal</p>
+
           <h3>
-            <span id="goal-count">
-              {{ dashboard_data.completed_tasks }} / {{ dashboard_data.total_tasks }}
-            </span> tasks completed
+            <span id="goal-count">{{ completed_tasks }} / {{ total_tasks }}</span>
+            tasks completed
           </h3>
+
           <div class="progress-bar">
-            <div id="main-progress" class="progress-fill"></div>
+            <div id="main-progress" class="progress-fill" style="width: {{ completion }}%;"></div>
           </div>
+
           <p id="main-progress-text" class="mini-text">
-            {{ dashboard_data.completion_percentage }}% complete
+            {{ completion }}% complete
           </p>
         </article>
       </section>
@@ -125,26 +144,26 @@
       <section class="metric-grid">
         <article class="metric-card metric-orange">
           <p class="metric-label">Current Streak</p>
-          <h3>{{ dashboard_data.streak }} Days</h3>
-          <span>Keep it up!</span>
+          <h3>{{ streak }} Days</h3>
+          <span>Updated when you evaluate the day.</span>
         </article>
 
         <article class="metric-card metric-blue">
-          <p class="metric-label">Difficulty</p>
-          <h3>{{ challenge.mindset_type if challenge else '—' }}</h3>
-          <span>Stay strong!</span>
+          <p class="metric-label">Current Mode</p>
+          <h3>{{ challenge_name if challenge_name else "Not set" }}</h3>
+          <span>Sage, Warrior, or Demon.</span>
         </article>
 
         <article class="metric-card metric-green">
           <p class="metric-label">Daily Target</p>
-          <h3>{{ dashboard_data.difficulty_target }}%</h3>
-          <span>Complete to avoid HP loss</span>
+          <h3>{{ daily_target }}%</h3>
+          <span>Complete this much to avoid HP loss.</span>
         </article>
 
         <article class="metric-card metric-purple">
-        <p class="metric-label">Partners</p>
-        <h3>3 Active</h3>
-        <span>You're not alone.</span>
+          <p class="metric-label">Partners</p>
+          <h3>{{ partner_count }} Active</h3>
+          <span>Your accountability circle.</span>
         </article>
       </section>
 
@@ -152,17 +171,23 @@
         <div class="column">
           <article class="panel task-panel">
             <h3 class="panel-heading">Today's Tasks</h3>
+
             <div class="task-list">
               {% for task in tasks %}
                 <div class="task-item">
-                  <input type="checkbox" class="task-check"
-                    {{ "checked" if task.completed else "" }} disabled>
+                  <input
+                    type="checkbox"
+                    class="task-check"
+                    {% if task.completed %}checked{% endif %}
+                    disabled
+                  >
+
                   <span>{{ task.title }}</span>
+
                   {% if not task.completed %}
-                    <form method="POST"
-                      action="{{ url_for('main.complete_task', task_id=task.id) }}">
-                      {{ reflection_form.hidden_tag() }}
-                      <button type="submit" class="btn btn-green">Complete</button>
+                    <form method="POST" action="{{ url_for('main.complete_task', task_id=task.id) }}">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <button type="submit" class="btn btn-green small-btn">Complete</button>
                     </form>
                   {% endif %}
                 </div>
@@ -170,18 +195,27 @@
                 <p style="color: var(--muted);">No tasks yet. Add one below.</p>
               {% endfor %}
             </div>
+
             <p id="task-summary" class="task-summary">
-              {{ dashboard_data.completed_tasks }} / {{ dashboard_data.total_tasks }} tasks complete
+              {{ completed_tasks }} of {{ total_tasks }} tasks complete
             </p>
           </article>
 
           <article class="panel">
             <h3 class="panel-heading">Add Task</h3>
+
             <form method="POST" action="{{ url_for('main.add_task') }}">
-              {{ challenge_form.hidden_tag() }}
-              <input type="text" name="title" class="journal-box"
-                placeholder="e.g. Study for 30 minutes" required
-                style="min-height: 50px; margin-bottom: 12px;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+              <input
+                type="text"
+                name="title"
+                class="journal-box"
+                placeholder="e.g. Study for 30 minutes"
+                required
+                style="min-height: 50px; margin-bottom: 12px;"
+              >
+
               <button type="submit" class="btn btn-purple" style="width: 100%;">
                 Add Task
               </button>
@@ -192,73 +226,119 @@
         <div class="column">
           <article class="panel progress-panel">
             <h3 class="panel-heading">Weekly Progress</h3>
+
             <div class="week-list">
-              <div class="week-row">
-                <span>Mon</span>
-                <div class="week-track"><div class="week-fill w80"></div></div>
-                <span>—</span>
-              </div>
-              <div class="week-row">
-                <span>Tue</span>
-                <div class="week-track"><div class="week-fill w60"></div></div>
-                <span>—</span>
-              </div>
-              <div class="week-row">
-                <span>Wed</span>
-                <div class="week-track"><div class="week-fill w70"></div></div>
-                <span>—</span>
-              </div>
-              <div class="week-row">
-                <span>Thu</span>
-                <div class="week-track"><div class="week-fill w50"></div></div>
-                <span>—</span>
-              </div>
-              <div class="week-row">
-                <span>Fri</span>
-                <div class="week-track"><div class="week-fill w80"></div></div>
-                <span>—</span>
-              </div>
-              <div class="week-row">
-                <span>Sat</span>
-                <div class="week-track"><div class="week-fill w90"></div></div>
-                <span>—</span>
-              </div>
-              <div class="week-row">
-                <span>Sun</span>
-                <div class="week-track"><div class="week-fill w40"></div></div>
-                <span>—</span>
-              </div>
+              {% if weekly_progress %}
+                {% for day in weekly_progress %}
+                  <div class="week-row">
+                    <span>
+                      {% if day.is_today %}
+                        Today
+                      {% else %}
+                        {{ day.day_label }}
+                      {% endif %}
+                    </span>
+
+                    <div class="week-track">
+                      <div
+                        class="week-fill"
+                        style="width: {{ day.completion_percentage }}%;"
+                      ></div>
+                    </div>
+
+                    <span>{{ day.completion_percentage }}%</span>
+                  </div>
+                {% endfor %}
+              {% else %}
+                <p style="color: var(--muted);">No weekly progress available yet.</p>
+              {% endif %}
             </div>
+
             <p style="color: var(--muted); font-size: 0.85rem; margin-top: 12px;">
-              Weekly history coming soon.
+              Weekly progress is calculated from tasks created this week.
             </p>
           </article>
 
           <article class="panel mode-panel">
             <h3 class="panel-heading">Mode Details</h3>
+
             <p class="mode-name">
-              {{ challenge.mindset_type if challenge else '—' }}
+              {{ challenge_name if challenge_name else "No mode set" }}
             </p>
+
             <p class="mode-text">
-              {% if challenge %}
-              {{ challenge.mindset_type }} mode.  
-                Daily target: {{ dashboard_data.difficulty_target }}% completion.
+              {% if challenge_name %}
+                {{ challenge_name }} mode requires {{ daily_target }}% daily completion to avoid HP loss.
               {% else %}
-                No challenge set yet. Set one in the challenge panel.
+                No mode selected yet. Choose a mode from the Challenge page.
               {% endif %}
             </p>
+
+            <div style="margin-top: 18px;">
+              <a href="{{ url_for('main.challenge') }}" class="btn btn-purple" style="display: inline-block; text-decoration: none;">
+                Change Mode
+              </a>
+            </div>
+          </article>
+
+          <article class="panel progress-panel">
+            <h3 class="panel-heading">Evaluate Today</h3>
+
+            <p class="mini-text">
+              This checks your completion against your daily target. If you meet the target,
+              your streak increases. If you miss it, you lose HP.
+            </p>
+
+            <form method="POST" action="{{ url_for('main.evaluate_day') }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+              <button type="submit" class="btn btn-yellow" style="margin-top: 14px; width: 100%;">
+                Evaluate Today
+              </button>
+            </form>
           </article>
         </div>
 
         <div class="column">
           <article class="panel partners-panel">
             <h3 class="panel-heading">Accountability Circle</h3>
+
+            <div class="partner-card">
+              <div>
+                <p class="partner-name">Active Partners</p>
+                <p class="partner-info">{{ partner_count }} people in your circle</p>
+              </div>
+            </div>
+
             <p style="color: var(--muted); font-size: 0.9rem;">
-              Partner tracking coming soon. Visit
-              <a href="{{ url_for('main.community') }}"
-                style="color: #8b5cf6;">Community</a>
-              to see public progress.
+              Visit
+              <a href="{{ url_for('main.community') }}" style="color: #8b5cf6;">
+                Community
+              </a>
+              to add or remove accountability partners.
             </p>
+          </article>
+
+          <article class="panel">
+            <h3 class="panel-heading">Reflection</h3>
+
+            <form method="POST" action="{{ url_for('main.reflection') }}">
+              {{ reflection_form.hidden_tag() }}
+
+              {% if reflection_form.mood is defined %}
+                <label class="mini-label">Mood</label>
+                {{ reflection_form.mood(class="journal-box", style="min-height: 44px; margin-bottom: 12px;") }}
+              {% endif %}
+
+              {% if reflection_form.note is defined %}
+                <label class="mini-label">Note</label>
+                {{ reflection_form.note(class="journal-box", placeholder="Write a short reflection...") }}
+              {% endif %}
+
+              <button type="submit" class="btn btn-green" style="margin-top: 14px; width: 100%;">
+                Save Reflection
+              </button>
+            </form>
           </article>
         </div>
       </section>

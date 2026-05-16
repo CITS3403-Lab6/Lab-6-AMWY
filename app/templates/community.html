@@ -10,7 +10,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/community.css') }}">
 </head>
+
 <body>
+  {% set public_list = public_users if public_users is defined else users if users is defined else [] %}
+  {% set partner_list = partners if partners is defined else partner_cards if partner_cards is defined else [] %}
+  {% set partner_ids = partner_list | map(attribute="id") | list %}
+
   <div class="page-bg"></div>
 
   <div class="community-shell">
@@ -20,11 +25,13 @@
         <h1 class="brand-title">HabitWise</h1>
         <p class="brand-subtitle">Stay disciplined.</p>
       </div>
+
       <nav class="side-nav">
         <a class="nav-item" href="{{ url_for('main.dashboard') }}">Dashboard</a>
         <a class="nav-item" href="{{ url_for('main.challenge') }}">Challenges</a>
         <a class="nav-item active" href="{{ url_for('main.community') }}">Partners</a>
         <a class="nav-item" href="{{ url_for('main.settings') }}">Settings</a>
+        <a class="nav-item" href="{{ url_for('main.logout') }}">Logout</a>
       </nav>
     </header>
 
@@ -50,49 +57,54 @@
         <div class="party-bg">
           <div class="party-slots">
 
-            <div class="party-slot" data-member="1">
-              <div class="slot-label">
-                <p class="slot-name">Wooji</p>
-                <p class="slot-stats">Streak: 12 days</p>
-              </div>
-              <img class="weapon-img"
-                src="{{ url_for('static', filename='img/icons/warrior.png') }}"
-                alt="Warrior">
-              <p class="slot-mode">Warrior</p>
-            </div>
+            {% set shown_partners = partner_list[:4] %}
 
-            <div class="party-slot" data-member="2">
-              <div class="slot-label">
-                <p class="slot-name">Alex</p>
-                <p class="slot-stats">Streak: 9 days</p>
-              </div>
-              <img class="weapon-img"
-                src="{{ url_for('static', filename='img/icons/sage.png') }}"
-                alt="Sage">
-              <p class="slot-mode">Sage</p>
-            </div>
+            {% for partner in shown_partners %}
+              {% set mode = partner.current_challenge if partner.current_challenge else "Unknown" %}
+              {% set mode_lower = mode | lower %}
 
-            <div class="party-slot" data-member="3">
-              <div class="slot-label">
-                <p class="slot-name">Mia</p>
-                <p class="slot-stats">Streak: 4 days</p>
-              </div>
-              <img class="weapon-img"
-                src="{{ url_for('static', filename='img/icons/demon.png') }}"
-                alt="Demon">
-              <p class="slot-mode">Demon</p>
-            </div>
+              {% if mode_lower == "warrior" %}
+                {% set icon_file = "img/icons/warrior.png" %}
+              {% elif mode_lower == "sage" %}
+                {% set icon_file = "img/icons/sage.png" %}
+              {% elif mode_lower == "demon" %}
+                {% set icon_file = "img/icons/demon.png" %}
+              {% else %}
+                {% set icon_file = "img/icons/Shadow.png" %}
+              {% endif %}
 
-            <div class="party-slot empty" data-member="4">
-              <div class="slot-label">
-                <p class="slot-name">Empty</p>
-                <p class="slot-stats">Awaiting member</p>
+              <div class="party-slot" data-member="{{ loop.index }}">
+                <div class="slot-label">
+                  <p class="slot-name">{{ partner.username }}</p>
+                  <p class="slot-stats">Streak: {{ partner.streak }} days</p>
+                </div>
+
+                <img
+                  class="weapon-img"
+                  src="{{ url_for('static', filename=icon_file) }}"
+                  alt="{{ mode }}"
+                >
+
+                <p class="slot-mode">{{ mode | upper }}</p>
               </div>
-              <img class="weapon-img"
-                src="{{ url_for('static', filename='img/icons/Shadow.png') }}"
-                alt="Empty slot">
-              <p class="slot-mode">—</p>
-            </div>
+            {% endfor %}
+
+            {% for empty_slot in range(4 - shown_partners|length) %}
+              <div class="party-slot empty" data-member="empty-{{ loop.index }}">
+                <div class="slot-label">
+                  <p class="slot-name">Empty</p>
+                  <p class="slot-stats">Awaiting member</p>
+                </div>
+
+                <img
+                  class="weapon-img"
+                  src="{{ url_for('static', filename='img/icons/Shadow.png') }}"
+                  alt="Empty slot"
+                >
+
+                <p class="slot-mode">—</p>
+              </div>
+            {% endfor %}
 
           </div>
         </div>
@@ -101,20 +113,20 @@
       <section class="summary-grid">
         <article class="summary-card card-purple">
           <p class="summary-label">Public Members</p>
-          <h3>{{ public_users | length }}</h3>
+          <h3>{{ public_list | length }}</h3>
           <span>People sharing progress</span>
         </article>
 
         <article class="summary-card card-green">
           <p class="summary-label">Accountability Circle</p>
-          <h3>{{ partners | length }}</h3>
+          <h3>{{ partner_list | length }}</h3>
           <span>Active partner links</span>
         </article>
 
         <article class="summary-card card-blue">
           <p class="summary-label">Your Status</p>
           <h3>{{ "Public" if current_user.is_public else "Private" }}</h3>
-          <span>Set in dashboard challenge form</span>
+          <span>Controlled from Settings</span>
         </article>
       </section>
 
@@ -123,57 +135,63 @@
           <article class="panel">
             <div class="panel-heading-row">
               <div>
-                <p class="panel-kicker">PARTNERS</p>
-                <h3 class="panel-heading">Your accountability circle</h3>
+                <p class="panel-kicker">PUBLIC MEMBERS</p>
+                <h3 class="panel-heading">Add accountability partners</h3>
               </div>
             </div>
 
             <div class="partner-list">
-              {% if public_users %}
-                {% for user in public_users %}
+              {% set add_state = namespace(has_available=false) %}
+
+              {% for user in public_list %}
+                {% if user.id != current_user.id and user.id not in partner_ids %}
+                  {% set add_state.has_available = true %}
+
                   <div class="partner-card">
                     <div class="partner-main">
                       <div class="avatar avatar-purple">
                         {{ user.username[0] | upper }}
                       </div>
+
                       <div class="partner-info">
                         <div class="name-row">
                           <h4>{{ user.username }}</h4>
+
                           {% if user.progress %}
                             <span class="status-badge complete">
                               Level {{ user.progress.level }}
                             </span>
                           {% endif %}
-                          {% if user.id == current_user.id %}
-                            <span class="status-badge support">You</span>
-                          {% endif %}
                         </div>
+
                         {% if user.progress %}
                           <p class="partner-meta">
-                            Streak: {{ user.progress.streak }} days •
-                            XP: {{ user.progress.xp }}
+                            Streak: {{ user.progress.streak }} days • XP: {{ user.progress.xp }}
                           </p>
                         {% else %}
                           <p class="partner-meta">Just joined the quest!</p>
                         {% endif %}
                       </div>
                     </div>
-                    {% if user.id != current_user.id %}
-                      <div class="partner-actions">
-                        <form method="post" action="{{ url_for('main.add_partner') }}">
-                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                          <input type="hidden" name="partner_identifier" value="{{ user.username }}">
-                          <button type="submit" class="primary-btn">Add Partner</button>
-                        </form>
-                      </div>
-                    {% endif %}
+
+                    <div class="partner-actions">
+                      <form method="post" action="{{ url_for('main.add_partner') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="partner_identifier" value="{{ user.username }}">
+                        <button type="submit" class="primary-btn">Add Partner</button>
+                      </form>
+                    </div>
                   </div>
-                {% endfor %}
-              {% else %}
+                {% endif %}
+              {% endfor %}
+
+              {% if not add_state.has_available %}
                 <div class="empty-state">
-                  <p class="partner-text">The public leaderboard is empty.</p>
-                  <p class="partner-meta">Be the first to share your progress in Settings.</p>
-                </div>
+                <p class="partner-text">The public leaderboard is empty.</p>
+                  <p class="partner-meta">
+                      No available public users to add. Users already in your circle are shown below.
+                  </p>
+                  </div>
               {% endif %}
             </div>
           </article>
@@ -187,30 +205,35 @@
             </div>
 
             <div class="partner-list">
-              {% if partners %}
-                {% for partner in partners %}
+              {% if partner_list %}
+                {% for partner in partner_list %}
                   <div class="partner-card">
                     <div class="partner-main">
                       <div class="avatar avatar-green">
                         {{ partner.username[0] | upper }}
                       </div>
+
                       <div class="partner-info">
                         <div class="name-row">
                           <h4>{{ partner.username }}</h4>
+
                           {% if partner.current_challenge %}
                             <span class="status-badge support">
                               {{ partner.current_challenge }}
                             </span>
                           {% endif %}
                         </div>
+
                         <p class="partner-meta">
                           Streak: {{ partner.streak }} days • Level {{ partner.level }} • XP {{ partner.xp }}
                         </p>
+
                         <p class="partner-text">
                           HP {{ partner.hp }}/{{ partner.max_hp }}
                         </p>
                       </div>
                     </div>
+
                     <div class="partner-actions">
                       <form method="post" action="{{ url_for('main.remove_partner', partner_id=partner.id) }}">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -232,17 +255,30 @@
         <div class="right-column">
           <article class="panel invite-panel">
             <p class="panel-kicker">INVITE</p>
-            <h3 class="panel-heading">Add accountability partner</h3>
+            <h3 class="panel-heading">Add by username or email</h3>
 
             <form method="post" action="{{ url_for('main.add_partner') }}">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <label class="input-label" for="partner-identifier">Partner ID / Username</label>
-              <input id="partner-identifier" class="text-input" name="partner_identifier" type="text"
-                placeholder="Enter username or email" required>
+
+              <label class="input-label" for="partner-identifier">
+                Partner username or email
+              </label>
+
+              <input
+                id="partner-identifier"
+                class="text-input"
+                name="partner_identifier"
+                type="text"
+                placeholder="Enter username or email"
+                required
+              >
 
               <button type="submit" class="primary-btn">Add Partner</button>
             </form>
-            <p class="invite-status">Only public users can be added to your accountability circle.</p>
+
+            <p class="invite-status">
+              Only public users can be added to your accountability circle.
+            </p>
           </article>
         </div>
       </section>
