@@ -107,6 +107,8 @@ def logout():
 def dashboard():
     """Show dashboard and handle challenge saving."""
     progress = get_or_create_progress(current_user)
+
+    # Adds starter/default tasks only when needed.
     seed_default_tasks_for_user(current_user)
 
     challenge_form = ChallengeForm()
@@ -150,23 +152,22 @@ def dashboard():
     )
 
     dashboard_data = build_dashboard_data(current_user)
-    # HabitWise Oracle dashboard analysis
-    try:
-        oracle_tasks = tasks if "tasks" in locals() else []
-        oracle_progress = progress if "progress" in locals() else getattr(current_user, "progress", None)
 
-        if "challenge" in locals():
-            oracle_challenge = challenge
-        else:
-            latest_challenge_fn = getattr(current_user, "latest_challenge", None)
-            oracle_challenge = latest_challenge_fn() if callable(latest_challenge_fn) else None
+    try:
+        latest_challenge_fn = getattr(current_user, "latest_challenge", None)
+        oracle_challenge = (
+            latest_challenge_fn()
+            if callable(latest_challenge_fn)
+            else None
+        )
 
         smart_coach = build_smart_coach_analysis(
             user=current_user,
-            tasks=oracle_tasks,
+            tasks=tasks,
             challenge=oracle_challenge,
-            progress=oracle_progress,
+            progress=progress,
         )
+
     except Exception:
         smart_coach = {
             "title": "HabitWise Oracle",
@@ -195,10 +196,6 @@ def dashboard():
             "confidence": 40,
             "remaining_tasks": [],
         }
-
-
-
-
 
     return render_template(
         "dashboard.html",
@@ -503,6 +500,7 @@ def remove_partner(partner_id):
 
     return redirect(url_for("main.community"))
 
+
 @main.before_app_request
 def update_current_user_last_seen():
     """Track lightweight last-seen activity for authenticated users."""
@@ -522,6 +520,7 @@ def update_current_user_last_seen():
             current_user.last_seen_at = now
             db.session.add(current_user)
             db.session.commit()
+
     except Exception:
         db.session.rollback()
 
@@ -532,10 +531,22 @@ def update_activity_visibility():
     """Update whether the user's online/activity status is visible."""
     activity_visibility = request.form.get("activity_visibility")
 
-    if activity_visibility in {"online", "hidden"} and hasattr(current_user, "show_activity_status"):
+    if activity_visibility not in {"online", "hidden"}:
+        flash("Invalid activity visibility setting.", "error")
+        return redirect(url_for("main.settings"))
+
+    try:
         current_user.show_activity_status = activity_visibility == "online"
         db.session.add(current_user)
         db.session.commit()
 
-    return redirect(url_for("main.settings"))
+        if current_user.show_activity_status:
+            flash("Online status is now visible.", "success")
+        else:
+            flash("Online status is now hidden.", "success")
 
+    except Exception:
+        db.session.rollback()
+        flash("Could not update activity visibility.", "error")
+
+    return redirect(url_for("main.settings"))
