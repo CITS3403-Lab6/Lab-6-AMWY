@@ -9,6 +9,8 @@ from app.constants import MAX_TASK_TITLE_LENGTH, TASK_XP_REWARD
 from app.forms import ChallengeForm, LoginForm, ReflectionForm, SignupForm
 from app.models import Challenge, Reflection, Task, User
 from app.services import (
+    seed_default_tasks_for_user,
+    build_smart_coach_analysis,
     add_accountability_partner,
     apply_daily_hp_result,
     build_dashboard_data,
@@ -85,6 +87,7 @@ def login():
             next_page = request.args.get("next")
             return redirect(next_page or url_for("main.dashboard"))
 
+        form.password.errors.append("Incorrect username or password.")
         flash("Invalid username or password.", "error")
 
     return render_template("login.html", form=form)
@@ -104,6 +107,7 @@ def logout():
 def dashboard():
     """Show dashboard and handle challenge saving."""
     progress = get_or_create_progress(current_user)
+    seed_default_tasks_for_user(current_user)
 
     challenge_form = ChallengeForm()
     reflection_form = ReflectionForm()
@@ -146,9 +150,59 @@ def dashboard():
     )
 
     dashboard_data = build_dashboard_data(current_user)
+    # HabitWise Oracle dashboard analysis
+    try:
+        oracle_tasks = tasks if "tasks" in locals() else []
+        oracle_progress = progress if "progress" in locals() else getattr(current_user, "progress", None)
+
+        if "challenge" in locals():
+            oracle_challenge = challenge
+        else:
+            latest_challenge_fn = getattr(current_user, "latest_challenge", None)
+            oracle_challenge = latest_challenge_fn() if callable(latest_challenge_fn) else None
+
+        smart_coach = build_smart_coach_analysis(
+            user=current_user,
+            tasks=oracle_tasks,
+            challenge=oracle_challenge,
+            progress=oracle_progress,
+        )
+    except Exception:
+        smart_coach = {
+            "title": "HabitWise Oracle",
+            "archetype": "Sage",
+            "goal": "Daily Growth",
+            "status": "empty",
+            "summary": "The Oracle is waiting for enough quest data to read your day.",
+            "lore": "The scroll is quiet, but the path is still open.",
+            "recommendation": "Add or complete a task to unlock a stronger reading.",
+            "next_actions": [
+                "Add one clear task.",
+                "Complete one small quest.",
+                "Return to the Oracle after progress is made.",
+            ],
+            "tone_class": "sage",
+            "completed": 0,
+            "total": 0,
+            "pct": 0,
+            "target": 50,
+            "hp": 100,
+            "max_hp": 100,
+            "xp": 0,
+            "level": 1,
+            "streak": 0,
+            "period": "day",
+            "confidence": 40,
+            "remaining_tasks": [],
+        }
+
+
+
+
 
     return render_template(
         "dashboard.html",
+        smart_coach=smart_coach,
         challenge_form=challenge_form,
         reflection_form=reflection_form,
         challenge=current_user.latest_challenge(),
@@ -448,3 +502,40 @@ def remove_partner(partner_id):
         flash("Could not remove accountability partner. Please try again.", "error")
 
     return redirect(url_for("main.community"))
+
+@main.before_app_request
+def update_current_user_last_seen():
+    """Track lightweight last-seen activity for authenticated users."""
+    if not current_user.is_authenticated:
+        return
+
+    if not hasattr(current_user, "last_seen_at"):
+        return
+
+    try:
+        from datetime import datetime, timezone
+
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
+        last_seen = current_user.last_seen_at
+
+        if last_seen is None or (now - last_seen).total_seconds() >= 60:
+            current_user.last_seen_at = now
+            db.session.add(current_user)
+            db.session.commit()
+    except Exception:
+        db.session.rollback()
+
+
+@main.route("/settings/activity-visibility", methods=["POST"])
+@login_required
+def update_activity_visibility():
+    """Update whether the user's online/activity status is visible."""
+    activity_visibility = request.form.get("activity_visibility")
+
+    if activity_visibility in {"online", "hidden"} and hasattr(current_user, "show_activity_status"):
+        current_user.show_activity_status = activity_visibility == "online"
+        db.session.add(current_user)
+        db.session.commit()
+
+    return redirect(url_for("main.settings"))
+

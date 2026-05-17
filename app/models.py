@@ -21,6 +21,8 @@ class User(db.Model, UserMixin):
     password_hash = db.Column(db.String(255), nullable=False)
 
     is_public = db.Column(db.Boolean, default=True, nullable=False)
+    show_activity_status = db.Column(db.Boolean, nullable=False, default=True)
+    last_seen_at = db.Column(db.DateTime, nullable=True, index=True)
     created_at = db.Column(db.DateTime, default=utc_now, nullable=False)
 
     challenges = db.relationship(

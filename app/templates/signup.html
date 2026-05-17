@@ -27,6 +27,16 @@
         <h2>Create Account</h2>
         <p class="screen-subtitle">Begin the path with discipline and intention.</p>
 
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="auth-messages" role="alert" aria-live="polite">
+              {% for category, message in messages %}
+                <p class="auth-message auth-message-{{ category }}">{{ message }}</p>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
         <label for="signup-username">Username</label>
         {{ form.username(id="signup-username", class="nes-input", placeholder="Enter Username") }}
         {% for error in form.username.errors %}

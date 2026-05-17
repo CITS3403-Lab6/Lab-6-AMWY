@@ -49,4 +49,50 @@ def create_app(config_name="development"):
     with app.app_context():
         db.create_all()
 
+
+    _apply_security_config(app)
+    _register_security_headers(app)
+
     return app
+
+# ---------------------------------------------------------------------------
+# Security hardening
+# ---------------------------------------------------------------------------
+
+def _apply_security_config(app):
+    """Apply safe session/cookie security defaults.
+
+    These settings do not change user flows, but they make browser-side session
+    handling safer by default.
+    """
+    app.config["SESSION_COOKIE_HTTPONLY"] = True
+    app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+    app.config["REMEMBER_COOKIE_HTTPONLY"] = True
+    app.config["REMEMBER_COOKIE_SAMESITE"] = "Lax"
+
+
+def _register_security_headers(app):
+    """Register basic browser security headers for every response."""
+    if getattr(app, "_habitwise_security_headers_registered", False):
+        return
+
+    app._habitwise_security_headers_registered = True
+
+    @app.after_request
+    def add_security_headers(response):
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("X-Frame-Options", "DENY")
+        response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+        response.headers.setdefault(
+            "Permissions-Policy",
+            "camera=(), microphone=(), geolocation=()",
+        )
+
+        # Prevent sensitive HTML pages being stored in browser/shared caches.
+        content_type = response.headers.get("Content-Type", "")
+        if content_type.startswith("text/html"):
+            response.headers.setdefault("Cache-Control", "no-store")
+            response.headers.setdefault("Pragma", "no-cache")
+
+        return response
+
