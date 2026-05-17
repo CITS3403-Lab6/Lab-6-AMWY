@@ -67,9 +67,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const revealValue = Number(window.CHARACTER_REVEAL_PERCENT);
 
-  const revealPercent = Number.isFinite(revealValue)
+  const rawRevealPercent = Number.isFinite(revealValue)
     ? Math.max(0, Math.min(100, revealValue))
     : Math.max(0, Math.min(100, stage * 10));
+
+  const revealPercent = rawRevealPercent > 0
+    ? Math.max(15, rawRevealPercent)
+    : 0;
 
   const mask = document.getElementById("avatar-mask");
   const levelText = document.getElementById("avatar-level-text");
@@ -83,14 +87,12 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   if (levelText) {
-    const currentLevel = Math.max(1, Math.round(revealPercent / 5));
-
     if (revealPercent >= 100) {
-      levelText.textContent = `Level ${currentLevel} — Fully revealed!`;
-    } else {
-      levelText.textContent = `Level ${currentLevel} — ${revealPercent}% revealed`;
-    }
+    levelText.textContent = "Unmasked Stage — Fully revealed!";
+  } else {
+    levelText.textContent = `Unmasked Stage — ${revealPercent}% revealed`;
   }
+}
 
   if (window.SHOW_DIALOGUE && typeof startDialogue === "function") {
     startDialogue(window.USERNAME);
