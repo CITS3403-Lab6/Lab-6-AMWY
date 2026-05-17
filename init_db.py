@@ -13,6 +13,7 @@ DEMO_USERS = [
         "username": "demo_public",
         "email": "demo_public@example.com",
         "is_public": True,
+        "show_activity_status": True,
         "hp": 92,
         "max_hp": 100,
         "xp": 840,
@@ -34,6 +35,7 @@ DEMO_USERS = [
         "username": "demo_private",
         "email": "demo_private@example.com",
         "is_public": False,
+        "show_activity_status": False,
         "hp": 64,
         "max_hp": 100,
         "xp": 310,
@@ -52,6 +54,7 @@ DEMO_USERS = [
         "username": "will_campbell",
         "email": "will.campbell@example.com",
         "is_public": True,
+        "show_activity_status": True,
         "hp": 78,
         "max_hp": 100,
         "xp": 430,
@@ -71,6 +74,7 @@ DEMO_USERS = [
         "username": "emily_clarke",
         "email": "emily.clarke@example.com",
         "is_public": True,
+        "show_activity_status": True,
         "hp": 100,
         "max_hp": 100,
         "xp": 1250,
@@ -91,6 +95,7 @@ DEMO_USERS = [
         "username": "noah_nguyen",
         "email": "noah.nguyen@example.com",
         "is_public": True,
+        "show_activity_status": True,
         "hp": 88,
         "max_hp": 100,
         "xp": 670,
@@ -110,6 +115,7 @@ DEMO_USERS = [
         "username": "mia_anderson",
         "email": "mia.anderson@example.com",
         "is_public": True,
+        "show_activity_status": True,
         "hp": 95,
         "max_hp": 100,
         "xp": 980,
@@ -212,6 +218,7 @@ def create_demo_user(user_data):
 
     set_user_password(user, DEMO_PASSWORD)
     set_if_supported(user, "is_public", user_data["is_public"])
+    set_if_supported(user, "show_activity_status", user_data.get("show_activity_status", True))
 
     db.session.add(user)
     db.session.flush()
