@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css') }}">
   <script src="{{ url_for('static', filename='js/settings.js') }}" defer></script>
 </head>
+
 <body>
   <div class="page-bg"></div>
 
@@ -21,6 +22,7 @@
         <h1 class="brand-title">HabitWise</h1>
         <p class="brand-subtitle">Stay disciplined.</p>
       </div>
+
       <nav class="side-nav">
         <a class="nav-item" href="{{ url_for('main.dashboard') }}">Dashboard</a>
         <a class="nav-item" href="{{ url_for('main.challenge') }}">Challenges</a>
@@ -88,38 +90,6 @@
             </div>
           </article>
 
-          <article class="panel">
-            <p class="panel-kicker">NOTIFICATIONS</p>
-            <h3 class="panel-heading">Reminder settings</h3>
-
-            <div class="toggle-list">
-              <label class="toggle-row">
-                <div>
-                  <p class="toggle-title">Daily reminder</p>
-                  <p class="toggle-sub">Receive a reminder to complete your tasks.</p>
-                </div>
-                <input id="notify-daily" class="toggle-input" type="checkbox">
-              </label>
-
-              <label class="toggle-row">
-                <div>
-                  <p class="toggle-title">Streak reminder</p>
-                  <p class="toggle-sub">Get reminded before your streak is at risk.</p>
-                </div>
-                <input id="notify-streak" class="toggle-input" type="checkbox">
-              </label>
-
-              <label class="toggle-row">
-                <div>
-                  <p class="toggle-title">Community updates</p>
-                  <p class="toggle-sub">Receive simple accountability partner updates.</p>
-                </div>
-                <input id="notify-community" class="toggle-input" type="checkbox">
-              </label>
-            </div>
-          </article>
-        </div>
-
         <div class="column">
           <article class="panel">
             <p class="panel-kicker">PRIVACY</p>
@@ -128,51 +98,68 @@
 
             <form id="privacy-form" method="post" action="{{ url_for('main.settings') }}">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
               <div class="toggle-list">
                 <label class="toggle-row" for="privacy-toggle">
                   <div>
-                    <p class="toggle-title">Share progress with partners</p>
+                    <p class="toggle-title">Community visibility</p>
                     <p class="toggle-sub">
-                      Allow your accountability circle to view your progress.
+                      Allow other users to find and add you as an accountability partner.
                       Currently: {{ "Public" if current_user.is_public else "Private" }}.
                     </p>
                   </div>
-                  <input id="privacy-toggle" name="is_public" class="toggle-input" type="checkbox"
-                    {{ "checked" if current_user.is_public else "" }}>
+
+                  <input
+                    id="privacy-toggle"
+                    name="is_public"
+                    class="toggle-input"
+                    type="checkbox"
+                    {{ "checked" if current_user.is_public else "" }}
+                    onchange="this.form.submit()"
+                  >
                 </label>
-
-                
-              <form id="activity-visibility-form" class="activity-visibility-form" method="post" action="{{ url_for('main.update_activity_visibility') }}">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-
-                <label class="activity-visibility-card" for="activity-visibility">
-                  <div>
-                    <p class="toggle-title">Activity visibility</p>
-                    <p class="toggle-sub">
-                      Choose whether others can see your online/activity status.
-                    </p>
-                  </div>
-
-                  <select id="activity-visibility" name="activity_visibility" class="activity-select" onchange="this.form.submit()">
-                    <option value="online" {% if current_user.show_activity_status %}selected{% endif %}>
-                      Show online status
-                    </option>
-                    <option value="hidden" {% if not current_user.show_activity_status %}selected{% endif %}>
-                      Hidden mode
-                    </option>
-                  </select>
-                </label>
-
-                <p class="activity-helper">
-                  {% if current_user.show_activity_status %}
-                    Your online dot can be shown to public members and accountability partners.
-                  {% else %}
-                    Hidden mode is on. You can still use the app, but others will not see your activity status.
-                  {% endif %}
-                </p>
-              </form>
-
               </div>
+            </form>
+
+            <form
+              id="activity-visibility-form"
+              class="activity-visibility-form"
+              method="post"
+              action="{{ url_for('main.update_activity_visibility') }}"
+            >
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+              <label class="activity-visibility-card" for="activity-visibility">
+                <div>
+                  <p class="toggle-title">Activity visibility</p>
+                  <p class="toggle-sub">
+                    Choose whether others can see your online/activity status.
+                  </p>
+                </div>
+
+                <select
+                  id="activity-visibility"
+                  name="activity_visibility"
+                  class="activity-select"
+                  onchange="this.form.submit()"
+                >
+                  <option value="online" {% if current_user.show_activity_status %}selected{% endif %}>
+                    Show online status
+                  </option>
+
+                  <option value="hidden" {% if not current_user.show_activity_status %}selected{% endif %}>
+                    Hidden mode
+                  </option>
+                </select>
+              </label>
+
+              <p class="activity-helper">
+                {% if current_user.show_activity_status %}
+                  Your online dot can be shown to public members and accountability partners.
+                {% else %}
+                  Hidden mode is on. You can still use the app, but others will not see your activity status.
+                {% endif %}
+              </p>
             </form>
           </article>
 
