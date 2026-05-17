@@ -609,3 +609,24 @@ body {
     font-size: 1.5rem;
   }
 }
+
+.activity-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-left: 8px;
+  margin-top: 0;
+  border-radius: 999px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.activity-dot.online {
+  background: #4ade80;
+  box-shadow: 0 0 8px rgba(74, 222, 128, 0.85);
+}
+
+.activity-dot.hidden {
+  background: #64748b;
+  box-shadow: 0 0 6px rgba(100, 116, 139, 0.65);
+}

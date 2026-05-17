@@ -75,7 +75,14 @@
 
               <div class="party-slot" data-member="{{ loop.index }}">
                 <div class="slot-label">
-                  <p class="slot-name">{{ partner.username }} {% if partner.show_activity_status %}<span class="activity-dot online" title="Activity visible"></span>{% else %}<span class="activity-dot hidden" title="Hidden mode"></span>{% endif %}</p>
+                  <p class="slot-name">
+                    {{ partner.username }}
+                    {% if partner.show_activity_status %}
+                      <span class="activity-dot online" title="Activity visible"></span>
+                    {% else %}
+                      <span class="activity-dot hidden" title="Hidden mode"></span>
+                    {% endif %}
+                  </p>
                   <p class="slot-stats">Streak: {{ partner.streak }} days</p>
                 </div>
 
@@ -147,23 +154,24 @@
                 {% if user.id != current_user.id and user.id not in partner_ids %}
                   {% set add_state.has_available = true %}
 
+                  {% set user_challenge = user.latest_challenge() if user.latest_challenge is defined else none %}
+                  {% set mode = user_challenge.mindset_type if user_challenge else "Unknown" %}
+                  {% set mode_lower = mode | lower %}
+
+                  {% if mode_lower == "warrior" %}
+                    {% set icon_file = "img/icons/warrior.png" %}
+                  {% elif mode_lower == "sage" %}
+                    {% set icon_file = "img/icons/sage.png" %}
+                  {% elif mode_lower == "demon" %}
+                    {% set icon_file = "img/icons/demon.png" %}
+                  {% else %}
+                    {% set icon_file = "img/icons/Shadow.png" %}
+                  {% endif %}
+
                   <div class="partner-card">
                     <div class="partner-main">
-                      {% set mode = user.current_challenge if user.current_challenge else "Unknown" %}
-                      {% set mode_lower = mode | lower %}
-
-                      {% if mode_lower == "warrior" %}
-                        {% set icon_file = "img/icons/warrior.png" %}
-                      {% elif mode_lower == "sage" %}
-                        {% set icon_file = "img/icons/sage.png" %}
-                      {% elif mode_lower == "demon" %}
-                        {% set icon_file = "img/icons/demon.png" %}
-                      {% else %}
-                        {% set icon_file = "img/icons/Shadow.png" %}
-                      {% endif %}
-
                       <div class="avatar avatar-purple">
-                        {% if mode_lower in ['warrior','sage','demon'] %}
+                        {% if mode_lower in ["warrior", "sage", "demon"] %}
                           <img class="avatar-img" src="{{ url_for('static', filename=icon_file) }}" alt="{{ mode }}">
                         {% else %}
                           {{ user.username[0] | upper }}
@@ -172,7 +180,14 @@
 
                       <div class="partner-info">
                         <div class="name-row">
-                          <h4>{{ user.username }} {% if user.show_activity_status %}<span class="activity-dot online" title="Activity visible"></span>{% else %}<span class="activity-dot hidden" title="Hidden mode"></span>{% endif %}</h4>
+                          <h4>
+                            {{ user.username }}
+                            {% if user.show_activity_status %}
+                              <span class="activity-dot online" title="Activity visible"></span>
+                            {% else %}
+                              <span class="activity-dot hidden" title="Hidden mode"></span>
+                            {% endif %}
+                          </h4>
 
                           {% if user.progress %}
                             <span class="status-badge complete">
@@ -194,7 +209,7 @@
                     <div class="partner-actions">
                       <form method="post" action="{{ url_for('main.add_partner') }}">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <input type="hidden" name="partner_identifier" value="{{ user.username }} {% if user.show_activity_status %}<span class="activity-dot online" title="Activity visible"></span>{% else %}<span class="activity-dot hidden" title="Hidden mode"></span>{% endif %}">
+                        <input type="hidden" name="partner_identifier" value="{{ user.username }}">
                         <button type="submit" class="primary-btn">Add Partner</button>
                       </form>
                     </div>
@@ -204,11 +219,11 @@
 
               {% if not add_state.has_available %}
                 <div class="empty-state">
-                <p class="partner-text">The public leaderboard is empty.</p>
+                  <p class="partner-text">The public leaderboard is empty.</p>
                   <p class="partner-meta">
-                      No available public users to add. Users already in your circle are shown below.
+                    No available public users to add. Users already in your circle are shown below.
                   </p>
-                  </div>
+                </div>
               {% endif %}
             </div>
           </article>
@@ -224,23 +239,23 @@
             <div class="partner-list">
               {% if partner_list %}
                 {% for partner in partner_list %}
+                  {% set mode = partner.current_challenge if partner.current_challenge else "Unknown" %}
+                  {% set mode_lower = mode | lower %}
+
+                  {% if mode_lower == "warrior" %}
+                    {% set icon_file = "img/icons/warrior.png" %}
+                  {% elif mode_lower == "sage" %}
+                    {% set icon_file = "img/icons/sage.png" %}
+                  {% elif mode_lower == "demon" %}
+                    {% set icon_file = "img/icons/demon.png" %}
+                  {% else %}
+                    {% set icon_file = "img/icons/Shadow.png" %}
+                  {% endif %}
+
                   <div class="partner-card">
                     <div class="partner-main">
-                      {% set mode = partner.current_challenge if partner.current_challenge else "Unknown" %}
-                      {% set mode_lower = mode | lower %}
-
-                      {% if mode_lower == "warrior" %}
-                        {% set icon_file = "img/icons/warrior.png" %}
-                      {% elif mode_lower == "sage" %}
-                        {% set icon_file = "img/icons/sage.png" %}
-                      {% elif mode_lower == "demon" %}
-                        {% set icon_file = "img/icons/demon.png" %}
-                      {% else %}
-                        {% set icon_file = "img/icons/Shadow.png" %}
-                      {% endif %}
-
                       <div class="avatar avatar-green">
-                        {% if mode_lower in ['warrior','sage','demon'] %}
+                        {% if mode_lower in ["warrior", "sage", "demon"] %}
                           <img class="avatar-img" src="{{ url_for('static', filename=icon_file) }}" alt="{{ mode }}">
                         {% else %}
                           {{ partner.username[0] | upper }}
@@ -249,7 +264,14 @@
 
                       <div class="partner-info">
                         <div class="name-row">
-                          <h4>{{ partner.username }} {% if partner.show_activity_status %}<span class="activity-dot online" title="Activity visible"></span>{% else %}<span class="activity-dot hidden" title="Hidden mode"></span>{% endif %}</h4>
+                          <h4>
+                            {{ partner.username }}
+                            {% if partner.show_activity_status %}
+                              <span class="activity-dot online" title="Activity visible"></span>
+                            {% else %}
+                              <span class="activity-dot hidden" title="Hidden mode"></span>
+                            {% endif %}
+                          </h4>
 
                           {% if partner.current_challenge %}
                             <span class="status-badge support">

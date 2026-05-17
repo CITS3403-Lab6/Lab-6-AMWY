@@ -354,7 +354,9 @@ def build_dashboard_data(user):
     weekly_progress = get_weekly_progress(user)
 
     character_stage = calculate_character_reveal_stage(progress.level)
-    character_reveal_percent = min(progress.level * 5, 100)
+
+    completed_task_equivalent = progress.xp // TASK_XP_REWARD
+    character_reveal_percent = min(25 + (completed_task_equivalent * 5), 100)
 
     return {
         # Flat keys used by current dashboard.html
@@ -552,6 +554,7 @@ def get_accountability_partner_cards(user):
                 "max_hp": progress.max_hp,
                 "current_challenge": current_challenge,
                 "difficulty": current_challenge or DEFAULT_MINDSET_TYPE,
+                "show_activity_status": bool(getattr(partner, "show_activity_status", True)),
             }
         )
 
