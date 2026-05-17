@@ -1,1 +1,0 @@
-{'cx': 101, 'cy': 921, 'hit_classes': None, 'hit_outer': None, 'hit_tag': None}
